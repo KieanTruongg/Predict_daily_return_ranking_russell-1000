@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quy Trình Chuẩn Khoa Học & Roadmap Chi Tiết - Predict Daily Return Rankings</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary: #8b5cf6;
+            --primary-light: #a78bfa;
+            --secondary: #3b82f6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #090d16;
+            --card-bg: rgba(17, 24, 39, 0.75);
+            --card-hover: rgba(31, 41, 55, 0.85);
+            --border: rgba(255, 255, 255, 0.12);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top center, #1e1b4b 0%, #090d16 60%);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Header / Hero */
+        .hero {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .badge-bar {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.25rem;
+        }
+
+        .badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--border);
+        }
+        .badge.purple { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border-color: rgba(139, 92, 246, 0.4); }
+        .badge.blue { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border-color: rgba(59, 130, 246, 0.4); }
+        .badge.green { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border-color: rgba(16, 185, 129, 0.4); }
+
+        /* Explanation Box */
+        .explain-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-left: 5px solid var(--secondary);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .explain-box h3 {
+            color: #60a5fa;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Section Cards */
+        .phase-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phase-card:hover {
+            transform: translateY(-4px);
+            background: var(--card-hover);
+            border-color: rgba(167, 139, 250, 0.3);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .phase-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-light);
+        }
+
+        .phase-number {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        /* Steps Timeline Inside Card */
+        .step-list {
+            list-style: none;
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .step-item {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .step-icon {
+            font-size: 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .step-content h4 {
+            font-size: 1.05rem;
+            color: var(--text-main);
+            margin-bottom: 0.35rem;
+        }
+
+        .step-content p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+
+        .step-code {
+            background: #090d16;
+            color: #34d399;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.35rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .phase-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <header class="hero">
+            <h1>Quy Trình Khoa Học & Roadmap Chi Tiết Toàn Dự Án</h1>
+            <p>Predicting Daily Ranking of Returns of Equities (US Russell 1000 - Long/Short Market-Neutral)</p>
+            <div class="badge-bar">
+                <span class="badge purple">1.403 Active Stocks</span>
+                <span class="badge blue">2.768 Days In-Sample</span>
+                <span class="badge green">686 Days Out-of-Sample (LOCKED)</span>
+            </div>
+        </header>
+
+        <!-- Explanation of 18.65% Null Ratio -->
+        <div class="explain-box">
+            <h3>💡 Giải Thích Rõ Về Tỷ Lệ 18.65% Null (NaN)</h3>
+            <p>
+                <strong>Tỷ lệ 18.65% Null KHÔNG PHẢI là thiếu 18.65% số cổ phiếu!</strong> Toàn bộ <strong>1.403 mã cổ phiếu</strong> đều có mặt đầy đủ trong dữ liệu.
+            </p>
+            <p style="margin-top: 0.5rem;">
+                Tỷ lệ 18.65% này xuất hiện trong ma trận 2D <code>[2.768 Ngày x 1.403 Cổ phiếu]</code> là vì <strong>tính chất thời gian thực tự nhiên của thị trường</strong>: Những cổ phiếu IPO muộn (ví dụ: Airbnb IPO năm 2020, Uber năm 2019) thì giai đoạn từ 2013 đến trước ngày IPO giá trị ô ma trận sẽ là <code>NaN</code>. Đây là hiện tượng chuẩn xác 100% trong dữ liệu tài chính định lượng Point-in-Time.
+            </p>
+        </div>
+
+        <!-- PHASE 1 -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <div class="phase-title">
+                    <div class="phase-number">1</div>
+                    Data Pipeline & Strict Partitioning
+                </div>
+                <span class="badge green">ĐÃ HOÀN THÀNH 100%</span>
+            </div>
+            <ul class="step-list">
+                <li class="step-item">
+                    <div class="step-icon">📂</div>
+                    <div class="step-content">
+                        <h4>Bước 1.1: Khai Thác Danh Mục Point-in-Time Russell 1000 (2000 - 2026)</h4>
+                        <p>Trích xuất 28 file lịch sử đại diện cho 22 năm Reconstitution, thu thập danh sách 3.518 mã cổ phiếu duy nhất.</p>
+                        <div class="step-code">File: data/raw/universe/russell1000_pit_by_year.json</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">📥</div>
+                    <div class="step-content">
+                        <h4>Bước 1.2: Nạp & Xử Lý 4.1 Triệu Dòng Dữ Liệu OHLCV Từ Stooq</h4>
+                        <p>Đọc 1.403 mã cổ phiếu US có dữ liệu liên tục từ 2013 đến 2026, chuẩn hóa Split-Adjusted giá và khối lượng.</p>
+                        <div class="step-code">Script: python scripts/01_build_universe.py</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">🔒</div>
+                    <div class="step-content">
+                        <h4>Bước 1.3: Phân Tách Nghiêm Ngặt In-Sample & Out-of-Sample Guard</h4>
+                        <p>In-Sample: 2.768 ngày (&lt; 2024-01-01) dùng train ML. Out-of-Sample: 686 ngày (&ge; 2024-01-01) KHÓA tuyệt đối.</p>
+                        <div class="step-code">Script: python scripts/02_download_data.py</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- PHASE 2 -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <div class="phase-title">
+                    <div class="phase-number">2</div>
+                    EDA & Feature Store Engineering (BƯỚC TIẾP THEO)
+                </div>
+                <span class="badge blue">ĐANG THỰC HIỆN</span>
+            </div>
+            <ul class="step-list">
+                <li class="step-item">
+                    <div class="step-icon">📊</div>
+                    <div class="step-content">
+                        <h4>Bước 2.1: Thống Kê Mô Tả & Phân Phối Tỷ Suất Sinh Lời (Descriptive Stats)</h4>
+                        <p>Phân tích Skewness, Kurtosis, Fat Tails của tỷ suất sinh lời ngày $r_t$. Kiểm tra tính ổn định qua các giai đoạn thị trường.</p>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">⚙️</div>
+                    <div class="step-content">
+                        <h4>Bước 2.2: Xây Dựng Feature Store (50+ Multi-Factor Features)</h4>
+                        <p>Trích xuất 6 nhóm đặc trưng: Returns (1d, 5d, 20d, 60d), Moving Averages (SMA/EMA ratios), Technical Indicators (RSI, Bollinger, MACD), Volume (Volume Ratio, VWAP Deviation), Volatility (Realized Vol 20d, ATR), và Cross-Sectional Ranks.</p>
+                        <div class="step-code">Module: src/features/feature_engineer.py</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">🔍</div>
+                    <div class="step-content">
+                        <h4>Bước 2.3: Sàng Lọc Tín Hiệu Đơn Biến (Univariate Rank IC Screening)</h4>
+                        <p>Tính hệ số tương quan Spearman (Rank IC) của từng feature với $r_{t+1}$. Loại bỏ các biến nhiễu (Rank IC &approx; 0), chỉ giữ lại các feature có Rank IC &gt; 0.02 và ICIR &gt; 0.5.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- PHASE 3 -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <div class="phase-title">
+                    <div class="phase-number">3</div>
+                    Machine Learning Model Training & Validation
+                </div>
+                <span class="badge purple">KẾ HOẠCH</span>
+            </div>
+            <ul class="step-list">
+                <li class="step-item">
+                    <div class="step-icon">🌲</div>
+                    <div class="step-content">
+                        <h4>Bước 3.1: Mô Hình XGBoost Regressor (Gradient Boosted Trees)</h4>
+                        <p>Huấn luyện XGBoost dự đoán điểm thứ hạng cổ phiếu. Áp dụng TimeSeriesPurgedKFold CV để ngăn chống rò rỉ dữ liệu.</p>
+                        <div class="step-code">Module: src/models/xgboost_model.py</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">🎯</div>
+                    <div class="step-content">
+                        <h4>Bước 3.2: Mô Hình LambdaMART (LightGBM Learning-to-Rank)</h4>
+                        <p>Huấn luyện LightGBM Ranker với objective <code>lambdarank</code> gom nhóm theo từng Date để tối ưu trực tiếp thứ hạng chéo.</p>
+                        <div class="step-code">Module: src/models/lambdamart_model.py</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">🧠</div>
+                    <div class="step-content">
+                        <h4>Bước 3.3: Mô Hình Deep Learning LSTM (Sequence Model)</h4>
+                        <p>Xây dựng mạng LSTM trên PyTorch xử lý chuỗi thời gian 10 ngày để nắm bắt tính tuần tự của dòng tiền.</p>
+                        <div class="step-code">Module: src/models/lstm_model.py</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">💡</div>
+                    <div class="step-content">
+                        <h4>Bước 3.4: Giải Thích Mô Hình Với SHAP (Explainable AI)</h4>
+                        <p>Phân tích SHAP Summary Plot để giải thích mô hình ML dựa trên những tính năng nào để đưa ra quyết định mua/bán.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- PHASE 4 -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <div class="phase-title">
+                    <div class="phase-number">4</div>
+                    Meta-Alpha Ensemble & Diversification
+                </div>
+                <span class="badge purple">KẾ HOẠCH</span>
+            </div>
+            <ul class="step-list">
+                <li class="step-item">
+                    <div class="step-icon">🤝</div>
+                    <div class="step-content">
+                        <h4>Bước 4.1: Tổng Hợp Đa Mô Hình (Equal Weight, Inv-Vol, Stacking)</h4>
+                        <p>Kết hợp 3 tín hiệu XGBoost, LambdaMART và LSTM thành 1 Meta-Alpha duy nhất để giảm phương sai và tối ưu Sharpe Ratio.</p>
+                        <div class="step-code">Module: src/ensemble/meta_ensemble.py</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">📈</div>
+                    <div class="step-content">
+                        <h4>Bước 4.2: Đánh Giá Tương Quan Giữa Các Tín Hiệu (Correlation Matrix)</h4>
+                        <p>Đảm bảo tương quan giữa 3 mô hình &lt; 0.7 để tận dụng tối đa lợi ích đa dạng hóa danh mục theo chuẩn Hedge Fund.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- PHASE 5 -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <div class="phase-title">
+                    <div class="phase-number">5</div>
+                    Position Engine & Long-Short Backtesting
+                </div>
+                <span class="badge purple">KẾ HOẠCH</span>
+            </div>
+            <ul class="step-list">
+                <li class="step-item">
+                    <div class="step-icon">⚖️</div>
+                    <div class="step-content">
+                        <h4>Bước 5.1: Khóa Đòn Bẩy & Dollar-Neutral Constraint ($\sum w_i = 0$)</h4>
+                        <p>Thực hiện Cross-Sectional Demean $\alpha_i \leftarrow \alpha_i - \bar{\alpha}$ và L1 Scaling đảm bảo Long 50% / Short 50%.</p>
+                        <div class="step-code">Module: src/portfolio/neutralizer.py</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">📊</div>
+                    <div class="step-content">
+                        <h4>Bước 5.2: Mô Phỏng PnL & Chi Phí Trượt Giá (Transaction Cost 5 bps)</h4>
+                        <p>Tính PnL Gross & Net, Sharpe Ratio, Max Drawdown (MDD), Turnover hàng ngày và hệ số Rank IC / ICIR.</p>
+                        <div class="step-code">Engine: src/backtest/engine.py</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- PHASE 6 - 8 -->
+        <div class="phase-card">
+            <div class="phase-header">
+                <div class="phase-title">
+                    <div class="phase-number">6-8</div>
+                    API Service, Web Dashboard & MLOps Monitoring
+                </div>
+                <span class="badge purple">KẾ HOẠCH</span>
+            </div>
+            <ul class="step-list">
+                <li class="step-item">
+                    <div class="step-icon">🌐</div>
+                    <div class="step-content">
+                        <h4>Phase 6: FastAPI REST Server & Database Storage</h4>
+                        <p>Cung cấp các Endpoints <code>/health</code>, <code>/predict</code> (xuất danh mục mua/bán hôm nay) và lưu SQLAlchemy ORM.</p>
+                        <div class="step-code">API: src/api/main.py | DB: src/db/models.py</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">🖥️</div>
+                    <div class="step-content">
+                        <h4>Phase 7: Streamlit Interactive Dashboard</h4>
+                        <p>Giao diện Web tương tác hiển thị Equity Curve, Drawdown Chart, SHAP Feature Importance và kết quả Backtest.</p>
+                        <div class="step-code">App: dashboard/app.py</div>
+                    </div>
+                </li>
+                <li class="step-item">
+                    <div class="step-icon">🕵️</div>
+                    <div class="step-content">
+                        <h4>Phase 8: Monitoring & Auto-Retraining (Data & Model Drift)</h4>
+                        <p>Giám sát biến động phân phối đầu vào và cảnh báo tự động Retrain khi Rank IC 30 ngày suy giảm.</p>
+                        <div class="step-code">Monitor: src/monitoring/drift_detector.py</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+</body>
+</html>

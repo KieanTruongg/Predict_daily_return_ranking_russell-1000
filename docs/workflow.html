@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow & Kiến Trúc Hệ Thống - Predicting Daily Ranking of Returns of Equities</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --primary: #a78bfa;
+            --primary-dark: #8b5cf6;
+            --secondary: #60a5fa;
+            --success: #34d399;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-color: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --bg-card-hover: rgba(30, 41, 59, 0.9);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            background-attachment: fixed;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+            padding: 2rem 1rem;
+            z-index: 100;
+        }
+
+        .sidebar h2 {
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(167, 139, 250, 0.1);
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 3rem 4rem;
+            max-width: 1200px;
+            width: calc(100% - 280px);
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6);
+            background: var(--bg-card-hover);
+        }
+
+        .card h2, .card h3 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card.highlight { border-top: 4px solid var(--secondary); }
+        .card.warn { border-top: 4px solid var(--warning); }
+        .card.danger { border-top: 4px solid var(--danger); }
+        .card.success { border-top: 4px solid var(--success); }
+
+        /* Code Blocks */
+        pre, code {
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .code-block {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        /* Architecture Diagram */
+        .architecture-diagram {
+            background: #0d1117;
+            padding: 2rem;
+            border-radius: 1rem;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #c9d1d9;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            white-space: pre;
+        }
+
+        .arch-node { color: var(--secondary); font-weight: bold; }
+        .arch-model { color: var(--primary); font-weight: bold; }
+        .arch-alpha { color: var(--warning); font-weight: bold; }
+        .arch-output { color: var(--success); font-weight: bold; }
+        .arch-monitor { color: var(--danger); font-weight: bold; }
+        .arch-arrow { color: #8b949e; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(167, 139, 250, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Timeline Lists */
+        ul.timeline {
+            list-style: none;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        ul.timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: var(--border);
+        }
+
+        ul.timeline li {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        ul.timeline li::before {
+            content: '';
+            position: absolute;
+            left: -1.85rem;
+            top: 0.25rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 2px solid var(--bg-card);
+        }
+
+        /* Scroll to Top */
+        #scrollTop {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            border: none;
+            z-index: 1000;
+        }
+
+        #scrollTop.visible {
+            opacity: 1;
+        }
+
+        #scrollTop:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        /* Tag labels */
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .tag.blue { background: rgba(96, 165, 250, 0.2); color: var(--secondary); }
+        .tag.purple { background: rgba(167, 139, 250, 0.2); color: var(--primary); }
+        .tag.green { background: rgba(52, 211, 153, 0.2); color: var(--success); }
+        .tag.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .tag.red { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; width: 100%; padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+        <h2>🚀 Mục Lục</h2>
+        <ul class="nav-list">
+            <li class="nav-item"><a href="#hero" class="nav-link">Trang chủ</a></li>
+            <li class="nav-item"><a href="#architecture" class="nav-link">Kiến trúc tổng quan</a></li>
+            <li class="nav-item"><a href="#phase1" class="nav-link">Phase 1: Data Pipeline</a></li>
+            <li class="nav-item"><a href="#phase2" class="nav-link">Phase 2: Feature Store</a></li>
+            <li class="nav-item"><a href="#phase3" class="nav-link">Phase 3: Model Training</a></li>
+            <li class="nav-item"><a href="#phase4" class="nav-link">Phase 4: Alpha Ensemble</a></li>
+            <li class="nav-item"><a href="#phase5" class="nav-link">Phase 5: Ranking & Backtest</a></li>
+            <li class="nav-item"><a href="#phase6" class="nav-link">Phase 6: REST API & DB</a></li>
+            <li class="nav-item"><a href="#phase7" class="nav-link">Phase 7: Dashboard</a></li>
+            <li class="nav-item"><a href="#phase8" class="nav-link">Phase 8: Monitoring</a></li>
+            <li class="nav-item"><a href="#tools" class="nav-link">Tổng hợp công cụ</a></li>
+            <li class="nav-item"><a href="#quickstart" class="nav-link">Quick Start</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Hero Section -->
+        <section id="hero" class="hero section">
+            <h1>Workflow & Kiến Trúc Hệ Thống</h1>
+            <p>Predicting Daily Ranking of Returns of Equities 📈</p>
+            <p style="font-size: 1rem; margin-top: 1rem; color: var(--primary);">Tài liệu hướng dẫn chi tiết từng bước xây dựng chiến lược Alpha giao dịch định lượng.</p>
+        </section>
+
+        <!-- Overview Architecture -->
+        <section id="architecture" class="section">
+            <div class="card highlight">
+                <h2>🏗️ Kiến Trúc Tổng Quan</h2>
+                <p>Hệ thống được thiết kế theo luồng dữ liệu (dataflow) chuyên nghiệp dành cho Quant Finance, từ khâu lấy dữ liệu đến khi triển khai hệ thống dự đoán và giám sát.</p>
+                <pre class="architecture-diagram">
+<span class="arch-node">Market Data</span> <span class="arch-arrow">→</span> <span class="arch-node">Data Pipeline</span> <span class="arch-arrow">→</span> <span class="arch-node">Feature Store</span> 
+                                  <span class="arch-arrow">│</span>
+                                  <span class="arch-arrow">▼</span>
+                      <span class="arch-arrow">┌───────────┴───────────┐</span>
+                      <span class="arch-arrow">│</span>                       <span class="arch-arrow">│</span>
+             <span class="arch-model">[XGBoost, LambdaMART, LSTM]</span>  <span class="arch-arrow">...</span> <span class="arch-model">(Models)</span>
+                      <span class="arch-arrow">│</span>                       <span class="arch-arrow">│</span>
+                      <span class="arch-arrow">▼</span>                       <span class="arch-arrow">▼</span>
+            <span class="arch-alpha">[Alpha 1, Alpha 2, Alpha 3]</span>   <span class="arch-arrow">...</span> <span class="arch-alpha">(Signals)</span>
+                      <span class="arch-arrow">│</span>                       <span class="arch-arrow">│</span>
+                      <span class="arch-arrow">└───────────┬───────────┘</span>
+                                  <span class="arch-arrow">▼</span>
+                           <span class="arch-alpha">Alpha Ensemble</span>
+                                  <span class="arch-arrow">│</span>
+                                  <span class="arch-arrow">▼</span>
+                         <span class="arch-output">Ranking Engine</span>
+                                  <span class="arch-arrow">│</span>
+                  <span class="arch-arrow">┌───────────────┴───────────────┐</span>
+                  <span class="arch-arrow">▼</span>                               <span class="arch-arrow">▼</span>
+        <span class="arch-output">[REST API, Database]</span>               <span class="arch-monitor">Dashboard</span>
+                  <span class="arch-arrow">│</span>                               <span class="arch-arrow">▲</span>
+                  <span class="arch-arrow">└───────────────┬───────────────┘</span>
+                                  <span class="arch-arrow">│</span>
+                                  <span class="arch-arrow">▼</span>
+                  <span class="arch-monitor">Monitoring [Data Drift, Model Drift]</span>
+                                  <span class="arch-arrow">│</span>
+                                  <span class="arch-arrow">▼</span>
+                            <span class="arch-node">Retraining</span>
+                </pre>
+            </div>
+        </section>
+
+        <!-- Phase 1 -->
+        <section id="phase1" class="section">
+            <div class="card">
+                <h2>📊 Phase 1: Data Pipeline (Tuần 1-2)</h2>
+                <div>
+                    <span class="tag blue">Python</span>
+                    <span class="tag blue">yfinance</span>
+                    <span class="tag blue">pandas</span>
+                </div>
+                <p>Xây dựng luồng thu thập và làm sạch dữ liệu thị trường cho rổ chỉ số Russell 1000.</p>
+                <ul class="timeline">
+                    <li><strong>Thu thập dữ liệu:</strong> Tải danh sách ticker của Russell 1000. Sử dụng Yahoo Finance để tải dữ liệu OHLCV (Open, High, Low, Close, Volume) trong ít nhất 10 năm qua.</li>
+                    <li><strong>Phân chia tập dữ liệu:</strong>
+                        <br>✅ <em>In-sample:</em> Dữ liệu trước <code>2024-01-01</code> (dành cho Training & Validation)
+                        <br>✅ <em>Out-of-sample:</em> Dữ liệu từ <code>2024-01-01</code> trở đi (dành cho Testing/Paper Trading)
+                    </li>
+                    <li><strong>Xử lý dữ liệu:</strong> Xử lý missing data (NaN), điều chỉnh giá (Adjusted Close) do stock splits (chia tách cổ phiếu) và corporate actions (cổ tức).</li>
+                    <li><strong>Lưu trữ:</strong> Xuất dữ liệu đã làm sạch ra định dạng CSV hoặc Parquet để đọc ghi nhanh gọn.</li>
+                </ul>
+                <div class="code-block">
+pip install yfinance pandas numpy
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 2 -->
+        <section id="phase2" class="section">
+            <div class="card">
+                <h2>🧮 Phase 2: Feature Store (Tuần 2-3)</h2>
+                <div>
+                    <span class="tag blue">pandas</span>
+                    <span class="tag blue">numpy</span>
+                    <span class="tag blue">ta</span>
+                </div>
+                <p>Khai phá và xây dựng ma trận đặc trưng (Feature Matrix). Cần tạo ít nhất 50+ features phân loại theo các nhóm:</p>
+                <ul class="timeline">
+                    <li><strong>Price-based:</strong> Tỷ suất sinh lời (Returns) các khung 1d, 5d, 20d, 60d; Tỷ lệ giá trị so với quá khứ.</li>
+                    <li><strong>Moving Averages:</strong> Các đường SMA (Simple Moving Average), EMA (Exponential) và tín hiệu giao cắt (crossovers).</li>
+                    <li><strong>Technical Indicators:</strong> Chỉ báo RSI, MACD, Bollinger Bands, ATR (Average True Range).</li>
+                    <li><strong>Volume-based:</strong> Volume ratio, OBV (On-Balance Volume), VWAP deviation.</li>
+                    <li><strong>Volatility:</strong> Biến động thực tế (Realized volatility), Volatility ratio, Max Drawdown.</li>
+                    <li><strong>Cross-sectional:</strong> Xếp hạng (Rank) của cổ phiếu trong cùng một Sector/Industry, Sức mạnh tương đối (Relative Strength).</li>
+                </ul>
+                <p><strong>Kết quả:</strong> Một DataFrame khổng lồ chứa dữ liệu chuỗi thời gian của tất cả các tickers với các cột features sẵn sàng cho bước ML.</p>
+                <div class="code-block">
+pip install ta
+                </div>
+            </div>
+        </section>
+
+        <!-- Phase 3 -->
+        <section id="phase3" class="section">
+            <div class="card warn">
+                <h2>🧠 Phase 3: Model Training (Tuần 3-5)</h2>
+                <div>
+                    <span class="tag purple">xgboost</span>
+                    <span class="tag purple">lightgbm</span>
+                    <span class="tag purple">pytorch</span>
+                    <span class="tag purple">scikit-learn</span>
+                </div>
+                <p>Huấn luyện các mô hình học máy với chiến lược Cross-validation đặc biệt cho Time-Series.</p>
+                
+                <h3>1. Mô hình XGBoost (Gradient Boosted Trees)</h3>
+                <p>Sử dụng thư viện <code>xgboost</code> và <code>scikit-learn</code>. Yêu cầu tune các hyperparameters quan trọng như <code>max_depth</code>, <code>learning_rate</code>, <code>subsample</code>.</p>
+                <div class="code-block">pip install xgboost</div>
+
+                <h3>2. Mô hình LambdaMART (Learning-to-Rank)</h3>
+                <p>Sử dụng <code>lightgbm</code> với objective là <code>'lambdarank'</code>. Trong Quant, bài toán Ranking thường hiệu quả hơn Regression (dự đoán giá trị tuyệt đối) vì ta chỉ quan tâm mã nào tăng mạnh hơn mã nào (Relative Performance).</p>
+                <div class="code-block">pip install lightgbm</div>
+
+                <h3>3. Mô hình LSTM (Deep Learning)</h3>
+                <p>Sử dụng <code>pytorch</code> để nắm bắt tính tuần tự của chuỗi thời gian. <em>Kiến trúc:</em> Input Sequence → Các lớp LSTM → Lớp Dense/Linear → Output dự đoán.</p>
+                <div class="code-block">pip install torch</div>
+
+                <hr style="border-color: var(--border); margin: 1.5rem 0;">
+
+                <h3>⚠️ Các lưu ý quan trọng:</h3>
+                <ul class="timeline">
+                    <li><strong>Cross-Validation:</strong> Bắt buộc dùng <code>TimeSeriesSplit</code> hoặc Purged K-Fold. TUYỆT ĐỐI KHÔNG dùng k-fold ngẫu nhiên (sẽ bị Data Leakage do nhìn thấy tương lai).</li>
+                    <li><strong>Regularization:</strong> Áp dụng L1/L2 penalty hoặc Dropout (cho LSTM) để tránh Overfitting - căn bệnh phổ biến nhất trong Quant.</li>
+                    <li><strong>Explainability:</strong> Dùng thư viện SHAP để phân tích tầm quan trọng của Features. Dùng Optuna để tối ưu siêu tham số.</li>
+                </ul>
+                <div class="code-block">pip install shap optuna</div>
+            </div>
+        </section>
+
+        <!-- Phase 4 -->
+        <section id="phase4" class="section">
+            <div class="card">
+                <h2>🤝 Phase 4: Alpha Ensemble (Tuần 5-7)</h2>
+                <div>
+                    <span class="tag purple">scikit-learn</span>
+                </div>
+                <p>Kết hợp 3 mô hình dự đoán (3 tín hiệu Alpha) thành một Meta-Alpha duy nhất nhằm tối ưu Sharpe Ratio.</p>
+                <ul class="timeline">
+                    <li><strong>Các phương pháp kết hợp (Ensemble Methods):</strong>
+                        <br>- <em>Equal weight:</em> Trung bình cộng đơn giản.
+                        <br>- <em>Inverse volatility:</em> Tỷ trọng nghịch đảo với độ biến động (phương sai) của từng Alpha.
+                        <br>- <em>ML-based (Stacking):</em> Huấn luyện một Meta-model (như Ridge Regression hoặc XGBoost) để học cách kết hợp 3 signals tốt nhất.
+                    </li>
+                    <li><strong>Đánh giá tương quan:</strong> Phân tích Correlation Matrix giữa các Alphas. Yêu cầu các mô hình có độ tương quan thấp để tạo ra lợi ích đa dạng hóa (Diversification benefit).</li>
+                    <li><strong>Mục tiêu:</strong> Meta Alpha thu được cần đạt Sharpe Ratio giả định > 1.0 trên tập Validation.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Phase 5 -->
+        <section id="phase5" class="section">
+            <div class="card success">
+                <h2>📈 Phase 5: Ranking Engine & Backtesting (Tuần 7-8)</h2>
+                <div>
+                    <span class="tag green">pandas</span>
+                    <span class="tag green">numpy</span>
+                    <span class="tag green">matplotlib</span>
+                    <span class="tag green">plotly</span>
+                </div>
+                <p>Chuyển đổi tín hiệu thành vị thế giao dịch và mô phỏng hiệu suất (Backtest).</p>
+                <ul class="timeline">
+                    <li><strong>Chuyển đổi Signal thành Positions:</strong> Mỗi ngày, tính Ranking của các cổ phiếu dựa trên Meta-Alpha. Thực hiện <em>Demean</em> (trừ đi trung bình) để tạo ra danh mục Market-Neutral (Long-Short balanced). Mua (Long) top % cao nhất và Bán khống (Short) top % thấp nhất.</li>
+                    <li><strong>Đo lường hiệu suất (Metrics):</strong>
+                        <br>- PnL (Profit & Loss) hàng ngày.
+                        <br>- Cumulative Return (Lợi nhuận tích lũy).
+                        <br>- Annualized Return (Lợi nhuận hằng năm).
+                        <br>- Sharpe Ratio (Lợi nhuận tinh chỉnh rủi ro).
+                        <br>- Max Drawdown.
+                    </li>
+                    <li><strong>Trực quan hóa:</strong> Vẽ biểu đồ đường cong vốn (Equity Curve) và biểu đồ Drawdown theo thời gian.</li>
+                </ul>
+                <div class="code-block">pip install matplotlib plotly</div>
+            </div>
+        </section>
+
+        <!-- Phase 6 -->
+        <section id="phase6" class="section">
+            <div class="card">
+                <h2>🌐 Phase 6: REST API & Database (Tuần 8-9)</h2>
+                <div>
+                    <span class="tag orange">FastAPI</span>
+                    <span class="tag orange">SQLAlchemy</span>
+                    <span class="tag orange">SQLite/PostgreSQL</span>
+                </div>
+                <p>Bọc hệ thống thành các API service để dễ dàng tích hợp.</p>
+                <ul class="timeline">
+                    <li><strong>Các Endpoints chính:</strong>
+                        <br><code>GET /health</code>: Kiểm tra trạng thái server.
+                        <br><code>POST /predict</code>: Gửi dữ liệu thị trường mới, nhận về danh sách Ranking cổ phiếu cần mua/bán hôm nay.
+                        <br><code>POST /backtest</code>: Chạy lại backtest với cấu hình tham số động.
+                    </li>
+                    <li><strong>Lưu trữ (Database):</strong> Sử dụng SQLAlchemy ORM lưu các kết quả dự đoán (Predictions), Metadata của Models và kết quả Backtest lịch sử vào SQLite (hoặc PostgreSQL).</li>
+                </ul>
+                <div class="code-block">pip install fastapi uvicorn sqlalchemy</div>
+            </div>
+        </section>
+
+        <!-- Phase 7 -->
+        <section id="phase7" class="section">
+            <div class="card">
+                <h2>🖥️ Phase 7: Dashboard (Tuần 9-10)</h2>
+                <div>
+                    <span class="tag green">streamlit</span>
+                    <span class="tag green">dash</span>
+                </div>
+                <p>Xây dựng giao diện Web tương tác trực quan hóa toàn bộ dự án.</p>
+                <ul class="timeline">
+                    <li><strong>Các trang (Pages) cần có:</strong>
+                        <br>- <em>Overview:</em> Tóm tắt hiệu suất chiến lược tổng thể.
+                        <br>- <em>Model Performance:</em> Xem chi tiết từng mô hình XGBoost, LambdaMART, LSTM.
+                        <br>- <em>Backtest Results:</em> Xem lại các metrics, biểu đồ Equity Curve, Drawdown tương tác.
+                        <br>- <em>Feature Importance:</em> Trực quan hóa giá trị SHAP, những tính năng nào quan trọng nhất cho dự đoán.
+                    </li>
+                </ul>
+                <div class="code-block">pip install streamlit</div>
+            </div>
+        </section>
+
+        <!-- Phase 8 -->
+        <section id="phase8" class="section">
+            <div class="card danger">
+                <h2>🕵️ Phase 8: Monitoring & Retraining (Tuần 10+)</h2>
+                <div>
+                    <span class="tag red">evidently</span>
+                </div>
+                <p>Giám sát mô hình khi đưa ra thực tế để tránh suy giảm hiệu suất.</p>
+                <ul class="timeline">
+                    <li><strong>Data Drift:</strong> Phát hiện khi phân phối của các biến đầu vào (features) bị lệch chuẩn so với lúc training (Ví dụ: Chế độ thị trường thay đổi từ Bull market sang Bear market).</li>
+                    <li><strong>Model Drift:</strong> Theo dõi sự suy giảm hiệu suất dự đoán thực tế.</li>
+                    <li><strong>Auto-retraining:</strong> Thiết lập cơ chế tự động trigger huấn luyện lại mô hình với dữ liệu mới khi độ lệch vượt quá ngưỡng cho phép (Threshold).</li>
+                </ul>
+                <div class="code-block">pip install evidently</div>
+            </div>
+        </section>
+
+        <!-- Tools Summary Table -->
+        <section id="tools" class="section">
+            <div class="card">
+                <h2>🛠️ Tổng Hợp Công Cụ & Thư Viện</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Thư viện</th>
+                            <th>Mục đích</th>
+                            <th>Phân loại</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>yfinance</code></td><td>Tải dữ liệu OHLCV từ Yahoo</td><td>Data</td></tr>
+                        <tr><td><code>pandas</code>, <code>numpy</code></td><td>Xử lý bảng và ma trận dữ liệu</td><td>Data</td></tr>
+                        <tr><td><code>ta</code></td><td>Tính toán các chỉ báo kỹ thuật (Technical Analysis)</td><td>Feature Eng</td></tr>
+                        <tr><td><code>xgboost</code></td><td>Mô hình Gradient Boosting Trees</td><td>ML Model</td></tr>
+                        <tr><td><code>lightgbm</code></td><td>Mô hình LambdaMART Learning-to-Rank</td><td>ML Model</td></tr>
+                        <tr><td><code>torch</code></td><td>Deep Learning Framework (LSTM)</td><td>DL Model</td></tr>
+                        <tr><td><code>scikit-learn</code></td><td>Cross-validation, Ensembling (Ridge/Lasso)</td><td>ML Utilities</td></tr>
+                        <tr><td><code>shap</code></td><td>Giải thích mô hình (Explainable AI)</td><td>Analysis</td></tr>
+                        <tr><td><code>optuna</code></td><td>Tối ưu hóa Hyperparameters</td><td>ML Utilities</td></tr>
+                        <tr><td><code>matplotlib</code>, <code>plotly</code></td><td>Vẽ biểu đồ tĩnh và tương tác (Backtest)</td><td>Visualization</td></tr>
+                        <tr><td><code>fastapi</code>, <code>uvicorn</code></td><td>Xây dựng RESTful API Server</td><td>Backend</td></tr>
+                        <tr><td><code>sqlalchemy</code></td><td>Giao tiếp CSDL (ORM)</td><td>Database</td></tr>
+                        <tr><td><code>streamlit</code></td><td>Xây dựng Web Dashboard nhanh</td><td>Frontend</td></tr>
+                        <tr><td><code>evidently</code></td><td>Giám sát Model & Data Drift</td><td>Monitoring</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Quick Start -->
+        <section id="quickstart" class="section">
+            <div class="card highlight">
+                <h2>⚡ Quick Start Installation</h2>
+                <p>Cài đặt toàn bộ môi trường và dependencies trong một lệnh duy nhất:</p>
+                <div class="code-block">
+pip install yfinance pandas numpy ta xgboost lightgbm torch scikit-learn shap optuna matplotlib plotly fastapi uvicorn sqlalchemy streamlit evidently
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollTop" title="Lên đầu trang">↑</button>
+
+    <script>
+        // Scroll to Top Logic
+        const scrollTopBtn = document.getElementById("scrollTop");
+        window.onscroll = function() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                scrollTopBtn.classList.add("visible");
+            } else {
+                scrollTopBtn.classList.remove("visible");
+            }
+            
+            // Active Link Highlighting
+            let current = "";
+            const sections = document.querySelectorAll(".section");
+            sections.forEach((section) => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 60) {
+                    current = section.getAttribute("id");
+                }
+            });
+
+            const navLinks = document.querySelectorAll(".nav-link");
+            navLinks.forEach((link) => {
+                link.classList.remove("active");
+                if (link.getAttribute("href").includes(current) && current !== "") {
+                    link.classList.add("active");
+                }
+            });
+        };
+
+        scrollTopBtn.onclick = function() {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        };
+
+        // Smooth Scroll for Sidebar Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

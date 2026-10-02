@@ -1,0 +1,46 @@
+# Master Configuration for Daily Return Rankings Project
+# Adhering to the hedge-fund research methodology
+# Updated: 2026-10-02 — v4 QuantConnect data (Point-In-Time with mappingResolveDate)
+
+universe:
+  name: "Russell_1000"
+  min_stocks: 500
+  target_stocks: 1000
+  universe_cache_path: "data/raw/universe/russell1000_constituents.csv"
+  pit_by_year_json: "data/raw/universe/russell1000_pit_by_year.json"
+
+data:
+  source: "quantconnect_parquet"  # v4 QuantConnect Lean Engine (SplitAdjusted)
+  history_years: 26
+  start_date: "2000-01-01"       # Full 27-year coverage (2000-2026)
+  # In-sample vs Out-of-sample split strictly per instructor instructions
+  split_date: "2024-01-01"       # All data >= 2024-01-01 is OUT-OF-SAMPLE (strictly locked)
+  end_date: null                 # Fetches latest date available
+  by_year_dir: "data/processed/by_year"
+  daily_ohlcv_path: "data/processed/daily_ohlcv/russell1000_daily_2000_2026.parquet"
+  in_sample_dir: "data/processed/in_sample"
+  out_sample_dir: "data/processed/out_sample"
+  price_field_for_return: "Close"  # SplitAdjusted, so Close == Adj Close
+  data_normalization: "SplitAdjusted"
+
+portfolio:
+  initial_capital: 10000000.0    # $10M book size
+  target_leverage: 1.0           # Sum of absolute weights = 1.0 (50% Long, 50% Short)
+  max_weight_per_stock: 0.05     # 5% max single stock exposure
+  dollar_neutral: true           # Sum of weights strictly = 0
+
+backtest:
+  rebalance_frequency: "daily"
+  transaction_cost_bps: 5.0      # 5 bps = 0.05% per side for US large cap
+  risk_free_rate: 0.0            # 0% for dollar-neutral long-short spread
+  annualization_factor: 252
+
+metrics:
+  target_metrics:
+    - "annualized_return"
+    - "annualized_volatility"
+    - "sharpe_ratio"
+    - "rank_ic"
+    - "max_drawdown"
+    - "turnover"
+    - "win_rate"

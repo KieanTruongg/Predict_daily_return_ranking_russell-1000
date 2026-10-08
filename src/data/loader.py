@@ -1,3 +1,9 @@
+# ⚠️ SCHEMA WARNING: This file uses OLD schema (capitalized columns: Close, Adj Close, Volume, High, Low).
+# v4 Pipeline (Phase 1/2) uses LOWERCASE schema: close, high, low, volume.
+# This file has NOT been updated to v4 and is NOT used in Phase 1/2 pipeline.
+# DO NOT use for feature engineering — use src/features/feature_engineer.py instead.
+# Reserved for potential Phase 3 refactoring. Last schema used: v3.
+
 """Data loader for Russell 1000 OHLCV dataset (QuantConnect v4 Parquet files).
 
 Primary data source: Pre-processed Parquet files in data/processed/by_year/

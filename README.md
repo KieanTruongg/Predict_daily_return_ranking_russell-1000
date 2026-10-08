@@ -1,217 +1,208 @@
-# 📈 Predict Daily Return Rankings (US Equity - Russell 1000 PIT)
+# 📈 Predict Daily Return Rankings — Russell 1000 PIT
 
-> **Hệ thống Nghiên cứu Định lượng & Machine Learning Alpha Strategy**  
-> **Dữ liệu**: Russell 1000 Point-In-Time Index (2000–2026, 27 Năm liên tục)  
-> **Mục tiêu**: Dự đoán thứ hạng tỷ suất sinh lời hàng ngày cổ phiếu (Cross-Sectional Daily Return Rankings) & Xây dựng Danh mục Long-Short Dollar-Neutral.  
-> **Phiên bản Dữ liệu**: Audit-Grade v4 (Point-In-Time Security Identity Resolution via `mappingResolveDate` — 99.42% Coverage)
-
----
-
-## 📌 Tổng Quan Dự Án
-
-Dự án phát triển một hệ thống định lượng (Quantitative Trading Framework) hoàn chỉnh theo chuẩn các Quỹ đầu tư định lượng (Hedge Funds / WorldQuant IQC), bao gồm 8 Phases xử lý toàn diện:
-
-1. **Phase 1: Point-In-Time Data Pipeline**: Trích xuất dữ liệu gốc PDF/CSV của FTSE Russell, tải dữ liệu OHLCV từ QuantConnect Lean Engine (`SplitAdjusted` với cơ chế mappingResolveDate), và kiểm toán tính toàn vẹn 27 năm (2000–2026, 6.6M dòng, 2,860 tickers, 99.42% match rate).
-2. **Phase 2: Alpha & Feature Store**: Tính toán 50+ đặc trưng kỹ thuật, biến động, khối lượng và các chỉ báo định lượng (Cross-Sectional Alphas, Reversal 5D, Momentum, Volatility).
-3. **Phase 3: Machine Learning & Ranking Models**: Huấn luyện các mô hình học máy chuyên biệt bài toán xếp hạng (XGBoost, LambdaMART, PyTorch LSTM).
-4. **Phase 4: Meta-Alpha Ensemble**: Tổng hợp tín hiệu đa mô hình (Equal-weight, Stacking, Inverse-Variance Ensemble).
-5. **Phase 5: Position Engine & Backtester**: Chuẩn hóa danh mục Long-Short Dollar-Neutral ($\sum w = 0, \sum |w| = 1$), chạy Backtest Vectorized đo lường Sharpe Ratio, Rank IC, Drawdown & PnL trên 2 tập phân chia nghiêm ngặt **In-Sample (<2024)** và **Out-of-Sample (>=2024)**.
-6. **Phase 6: Production REST API**: Cung cấp dịch vụ FastAPI dự đoán thứ hạng và chạy backtest thời gian thực.
-7. **Phase 7: Interactive Dashboard**: Giao diện Web tương tác Streamlit trực quan hóa hiệu năng chiến lược và đồ thị PnL.
-8. **Phase 8: Monitoring & Drift Detection**: Giám sát biến động dữ liệu (Data Drift) và suy giảm hiệu năng mô hình (Concept Drift).
+> **Dự án Nghiên cứu Định lượng — CO3101 HCMUT**  
+> **Mục tiêu**: Dự đoán xếp hạng lợi nhuận ngày T+1 (Cross-Sectional Daily Return Ranking) cho các cổ phiếu Russell 1000 bằng Machine Learning  
+> **Dữ liệu**: Russell 1000 Point-In-Time (2000–2026, 27 năm, 6.6M rows, 2,860 tickers)  
+> **Trạng thái**: ✅ Phase 1 + Phase 2 Hoàn tất | 🔄 Phase 3 ML Training — Tiếp theo
 
 ---
 
-## 🏗️ Cấu Trúc Thư Mục Dự Án (Complete Directory Architecture)
+## 📌 Tổng quan bài toán
+
+Thay vì dự báo giá hay lợi nhuận tuyệt đối, bài toán đặt ra là: **"Trong ngày giao dịch T+1, cổ phiếu nào sẽ outperform / underperform so với phần còn lại của Russell 1000?"**
+
+- **Input**: OHLCV lịch sử → 31 features (momentum, technical, volume, volatility)
+- **Target**: `target_return_rank` — percentile rank cross-sectional của forward return ngày T+1
+- **Model**: LightGBM LambdaMART (ranking objective) — Walk-Forward CV
+- **Universe**: Russell 1000 Point-In-Time (không survivorship bias)
+- **Training**: Kaggle T4 GPU | **Data**: QuantConnect Cloud
+
+---
+
+## 🗺️ Tiến độ dự án
+
+| Phase | Nội dung | Trạng thái |
+|:---:|:---|:---:|
+| **Phase 1** | Data Pipeline & Validation (9 tests) | ✅ Hoàn tất |
+| **Phase 2** | EDA, Sanity Checks, Feature Store, Alpha IC | ✅ Hoàn tất |
+| **Phase 3** | ML Model Training (LightGBM Walk-Forward CV) | 🔄 Tiếp theo |
+| Phase 4 | Backtest & Portfolio Construction | ⏳ Chưa bắt đầu |
+| Phase 5 | Final OOS Evaluation (2024–2026) | 🔒 LOCKED |
+
+---
+
+## 🏗️ Cấu trúc thư mục
 
 ```text
 Predict_daily_return_rankings/
-├── configs/                            # Cấu hình dự án & Tham số hệ thống
-│   └── base_config.yaml                # Cấu hình Universe, thời gian cutoff 2024-01-01, phí giao dịch
-├── dashboard/                          # Web Application tương tác (Phase 7)
-│   └── app.py                          # Ứng dụng Streamlit hiển thị Dashboard PnL, Rank IC, Alpha Performance
-├── data/                               # Quản lý Dữ liệu Định lượng (Phân cấp chi tiết)
-│   ├── raw/
-│   │   ├── universe/                   # Dữ liệu Universe gốc (PDF/CSV & JSON Point-In-Time từng năm)
-│   │   │   ├── by_year/                # russell1000_2000.json ... russell1000_2026.json (27 năm)
-│   │   │   ├── raw/                    # Tài liệu thô 2000.pdf ... 2026.xls
-│   │   │   ├── extraction_quality_report.csv
-│   │   │   ├── missing_ticker_analysis.csv
-│   │   │   ├── russell1000_constituents.csv
-│   │   │   └── russell1000_pit_by_year.json
-│   │   └── market_data/                # Raw ZIP archives giá OHLCV tải từ QuantConnect (2000–2026)
-│   └── processed/
-│       ├── by_year/                    # File Parquet SplitAdjusted OHLCV độc lập từng năm
-│       ├── audit/                      # Bản ghi kiểm toán CSV master và chi tiết theo năm
-│       │   ├── master_audit_2000_2026.csv
-│       │   └── by_year/                # audit_2000.csv ... audit_2026.csv
-│       ├── daily_ohlcv/                # Parquet tổng hợp dữ liệu giao dịch toàn bộ 27 năm (6.6M rows)
-│       │   └── russell1000_daily_2000_2026.parquet
-│       ├── in_sample/                  # Cửa sổ huấn luyện & validation (2000–2023 | 6,021 trading days)
-│       │   ├── close.parquet, returns.parquet, volume.parquet, ...
-│       └── out_sample/                 # Cửa sổ khóa dành cho Backtest (2024–2026 | 687 trading days) [LOCKED]
-│           ├── close.parquet, returns.parquet, volume.parquet, ...
-├── docs/                               # Tài liệu & Báo cáo Nghiên cứu Kiểm định Khoa học
-│   ├── Data report/
-│   │   ├── data_exploration_report.html # Báo cáo kiểm thử thẩm định dữ liệu trực quan (HTML)
-│   │   ├── data_exploration_report.md   # Báo cáo kiểm thử định dạng Markdown
-│   │   ├── data_market_value_validation_report.md # Báo cáo kiểm toán thanh khoản & vốn hóa
-│   │   └── *.png                       # Biểu đồ minh họa (Universe size, Coverage, Turnover)
-│   ├── Teacher Resource/               # Đề bài & Tài liệu tham khảo từ Giảng viên
-│   │   ├── Research_Directions.pdf
-│   │   └── Rusell.md
-│   ├── project_roadmap.html            # Lộ trình nghiên cứu dự án
-│   └── workflow.html                   # Sơ đồ quy trình kiến trúc 8 Phases
-├── notebooks/                          # Jupyter Notebooks thực nghiệm nghiên cứu
-│   └── 01_research_walkthrough.ipynb
-├── outputs/                            # Kết quả xuất ra từ hệ thống
-│   ├── figures/                        # Đồ thị PnL, biểu đồ kiểm định dữ liệu
-│   ├── logs/                           # Nhật ký hệ thống
-│   └── reports/                        # Báo cáo hiệu năng backtest
-├── scripts/                            # Thư viện Scripts thực thi (Tổ chức theo 4 module)
-│   ├── 01_pipeline/                    # Trích xuất dữ liệu, export QC cloud & Parquet conversion
-│   │   ├── 01_parse_all_universe.py
-│   │   ├── 02_quantconnect_export_by_year_v4_fixed.py
-│   │   ├── 03_process_qc_zips_by_year.py
-│   │   ├── 04_merge_all_years.py       # Gộp 27 năm by_year thành 1 file parquet tổng hợp
-│   │   └── 05_build_cross_sectional.py # Tạo Date x Ticker matrices & phân chia In/Out-of-Sample
-│   ├── 02_validation_universe/         # Bộ kiểm thử Russell 1000 Universe PIT (Test 1 - Test 8)
-│   │   ├── step1_check_universe.py
-│   │   ├── test1_universe_structure.py
-│   │   ├── test3_universe_pit_turnover.py
-│   │   ├── test4_security_identity.py
-│   │   ├── test5_historical_survivorship.py
-│   │   ├── test6_crosscheck_archive.py
-│   │   ├── test7_ticker_format_mapping.py
-│   │   └── test8_final_audit_mismatches.py
-│   ├── 03_validation_ohlcv/            # Bộ kiểm thử Market Data OHLCV (Test M1 - Test M6)
-│   │   ├── step2_check_market_data.py
-│   │   ├── test_m1_ohlcv_structure.py
-│   │   ├── test_m2_time_coverage.py
-│   │   ├── test_m3_corporate_actions.py
-│   │   ├── test_m4_russell_ohlcv_compatibility.py
-│   │   └── test_m5_m6_market_value.py
-│   └── 04_deep_audit/                  # Kiểm thử chuyên sâu Survivorship Bias & Identity Mapping
-│       ├── deep_audit_survivorship.py
-│       └── deep_audit_phase2.py
-├── src/                                # Mã nguồn chính dự án (Core Python Modules)
-│   ├── alphas/                         # Thư viện Alpha factors & Toán tử định lượng
-│   │   ├── base.py                     # Base class cho Alpha Factors
-│   │   ├── operators.py                # Toán tử Cross-Sectional (Rank, Z-score, Neutralize, Decay)
-│   │   ├── alpha_library.py            # Thư viện tập hợp các công thức Alpha
-│   │   └── reversal_5d.py              # Alpha mẫu: 5-Day Mean Reversal
-│   ├── api/                            # Production REST API Service (FastAPI)
-│   │   └── main.py                     # Endpoints (/health, /predict, /backtest, /metrics)
-│   ├── backtest/                       # Động cơ Backtest Cross-Sectional Vectorized
-│   │   └── engine.py                   # Tính toán PnL, Turnover, Phí giao dịch & Sụt giảm tài sản (Drawdown)
-│   ├── data/                           # Module Xử lý & Phân chia Dữ liệu (Cập nhật v4)
-│   │   ├── loader.py                   # Data loader đọc trực tiếp từ Parquet v4 (load_full_panel, load_by_year_range, etc.)
-│   │   ├── preprocessor.py             # Pivot ra Date x Ticker matrices, Winsorize, Z-score, summary()
-│   │   ├── split.py                    # Phân chia in_sample/out_sample với rào chắn chống Data Leakage
-│   │   └── universe.py                 # Lọc danh mục cổ phiếu thuộc chỉ số tại từng thời điểm
-│   ├── db/                             # Cơ sở dữ liệu lưu trữ vết dự đoán & Backtest
-│   │   └── models.py                   # SQLAlchemy ORM schemas
-│   ├── ensemble/                       # Kết hợp đa mô hình Meta-Alpha Ensemble
-│   │   └── meta_ensemble.py            # Equal-Weight, Inverse-Variance & Stacking Regressor
-│   ├── features/                       # Engine Tạo Đặc trưng (Feature Store)
-│   │   └── feature_engineer.py         # Trích xuất 50+ kỹ thuật, biến động, khối lượng & tương quan
-│   ├── metrics/                        # Đo lường Hiệu năng Định lượng
-│   │   ├── information.py              # Rank Information Coefficient (Rank IC, IC IR)
-│   │   └── performance.py              # Sharpe Ratio, Sortino, Max Drawdown, Win Rate, Annual Return
-│   ├── models/                         # Mô hình Học máy Chuyên bài toán Ranking
-│   │   ├── base_model.py               # Base interface cho ML models
-│   │   ├── xgboost_model.py            # Mô hình XGBoost Ranker / Regressor
-│   │   ├── lambdamart_model.py         # Mô hình LightGBM LambdaMART Listwise Ranking
-│   │   └── lstm_model.py               # PyTorch Deep Learning Sequence Model (LSTM)
-│   ├── monitoring/                     # Giám sát Trôi lệch Dữ liệu & Mô hình
-│   │   └── drift_detector.py           # Data Drift (PSI / KS-test) & Model Performance Drift
-│   └── portfolio/                      # Động cơ Tối ưu hóa & Quản lý Vị thế
-│       ├── neutralizer.py              # Chuẩn hóa Long-Short Dollar-Neutral ($\sum w = 0, \sum |w| = 1.0$)
-│       └── combiner.py                 # Kết hợp vị thế và áp hạn mức rủi ro (Risk Limits)
-├── tests/                              # Bộ kiểm thử tự động Unit Tests (PyTest)
-│   ├── run_tests.py                    # Test runner tổng hợp
-│   ├── test_metrics.py                 # Kiểm thử tính đúng đắn công thức Sharpe/Rank IC
-│   ├── test_neutralization.py          # Kiểm thử ràng buộc Dollar-Neutral
-│   └── test_operators.py               # Kiểm thử toán tử định lượng (Rank, Z-score)
-├── requirements.txt                    # Danh sách thư viện phụ thuộc Python
-└── README.md                           # Tài liệu tổng quan & hướng dẫn dự án
+├── configs/             # Cấu hình hệ thống (base_config.yaml)
+├── data/
+│   ├── raw/             # Universe PIT JSONs theo năm & QC raw ZIPs
+│   └── processed/       # Matrices in_sample/ (6,021×2,852), out_sample/ (LOCKED), features/ (5.8M rows)
+├── docs/Data report/    # Báo cáo HTML trực quan (project, phase1, phase2) & báo cáo chi tiết
+├── scripts/
+│   ├── 01_pipeline/            # Tải dữ liệu, trích xuất & tạo ma trận chéo (cross-sectional)
+│   ├── 02_validation_universe/ # Kiểm thử tính toàn vẹn Universe PIT (T1–T3)
+│   ├── 03_validation_ohlcv/    # Kiểm thử dữ liệu OHLCV, Corporate Actions (M1–M5)
+│   ├── 04_deep_audit/          # Kiểm toán Survivorship Bias chuyên sâu (T9)
+│   ├── 05_eda/                 # Sanity Checks (S1–S7) & Phân tích phân phối lợi nhuận
+│   ├── 06_features/            # Xây dựng 31-Feature Store (vectorized, 77.4s)
+│   └── 07_alpha_eval/          # Đánh giá Rank IC cho Alpha Benchmark & Features
+├── src/
+│   ├── alphas/          # Toán tử định lượng (cs_rank, cs_demean...) & Reversal 5D
+│   ├── features/        # FeatureEngineer v4 (vectorized matrix ops, winsorize)
+│   ├── metrics/         # Thước đo hiệu năng (Rank IC, ICIR, Sharpe...)
+│   └── data/            # Module legacy (v3 schema - giữ tham khảo)
+├── tests/               # Unit tests cho operators & metrics
+└── clear/               # Lưu trữ scripts/tài liệu cũ (không xóa hẳn)
 ```
 
 ---
 
-## 🧪 Bộ Kiểm Thử Chất Lượng Dữ Liệu (Data Validation Suite - Version 4)
+## 📊 Kết quả Phase 1 — Data Pipeline & Validation
 
-Báo cáo chi tiết kết quả thẩm định dữ liệu được ghi nhận minh bạch tại:
-- 📄 **Báo cáo HTML Trực quan**: [`docs/Data report/data_exploration_report.html`](file:///docs/Data%20report/data_exploration_report.html)
-- 📝 **Báo cáo Markdown**: [`docs/Data report/data_exploration_report.md`](file:///docs/Data%20report/data_exploration_report.md)
-- 📊 **Báo cáo Thẩm định Vốn hóa & Mapping**: [`docs/Data report/data_market_value_validation_report.md`](file:///docs/Data%20report/data_market_value_validation_report.md)
+**9 tests**, tất cả trên 6,601,516 rows OHLCV:
 
-### Tóm tắt Kết quả Thực nghiệm v4:
+| Test | Script | Kết quả | Status |
+|:---|:---|:---|:---:|
+| T1 Universe Structure | `test1_universe_structure.py` | 0 NULL/Dup/Empty / 26,919 tickers | ✅ PASS |
+| T2 PIT Turnover | `test3_universe_pit_turnover.py` | 8.84%/năm avg, 223 blue-chip liên tục | ✅ PASS |
+| T3 Security Identity | `test4_security_identity.py` | 198 mismatch (0.74%) — có giải thích | ⚠️ WARN |
+| M1 OHLCV Integrity | `test_m1_ohlcv_structure.py` | **0 violations / 6,601,516 rows** | ✅ PASS |
+| M2 Time Coverage | `test_m2_time_coverage.py` | 93.8% ≥ 240d, 248.4d/năm avg | ✅ PASS |
+| M3 Corporate Actions | `test_m3_corporate_actions.py` | 7/7 split events đúng (AAPL, TSLA, NVDA...) | ✅ PASS |
+| M4 Russell↔OHLCV | `test_m4_russell_ohlcv_compatibility.py` | **99.42% match**, 155 EMPTY, 0 extra | ✅ PASS |
+| M5/M6 Market Value | `test_m5_m6_market_value.py` | \$1,168T total, \$179.5M/stock/day | ✅ PASS |
+| T9 Survivorship Bias | `deep_audit_survivorship.py` | Gap **+0.4pp** (Survivor 99.6% vs Disappeared 99.2%) | ✅ PASS |
 
-| Nhóm bài test | Thư mục Script | Số bài test | Kết quả nổi bật | Trạng thái |
-|:---|:---|:---:|:---|:---:|
-| **Phần I: Universe PIT** | `scripts/02_validation_universe/` | 8 bài test | Khớp 100% Archive gốc, 0 Duplicate, 0 Null. Dynamic Turnover trung bình **8.84%/năm**. | ✅ **PASS** |
-| **Phần II: Market Data OHLCV** | `scripts/03_validation_ohlcv/` | 6 bài test | **6,601,516 dòng** SplitAdjusted OHLCV. Match rate đồng nhất **99.1%–99.9%** trên toàn bộ 27 năm. 0 Lỗi Null/Price bounds. | ✅ **PASS** |
-| **Deep Audit** | `scripts/04_deep_audit/` | 4 bước | Overall match rate **99.42%** (26,764 / 26,919 stock-years). Survivorship Gap chỉ **+0.4pp** (Gần như triệt tiêu hoàn toàn rủi ro Thiên vị sống sót). | ✅ **PASS** |
+> **Kết luận Phase 1**: Data đạt chuẩn **Audit-Grade**. 8/9 PASS, 1 WARNING (non-blocking), 0 FAIL.
 
 ---
 
-## ⚡ Hướng Dẫn Thực Thi (Quick Start)
+## 📈 Kết quả Phase 2 — EDA & Feature Engineering
 
-### 1. Cài Đặt Môi Trường
+### Sanity Checks (S1–S7) — `scripts/05_eda/sanity_check_in_sample.py`
+
+| Check | Kết quả | Quyết định |
+|:---|:---|:---|
+| S1 Cross-layer | 155 OOS tickers trong matrix | Filter ≥95% NaN → 589 tickers bị loại |
+| S2 Return calc | Max diff = **0.000000** (5 tickers) | Không cần sửa |
+| S3 Look-ahead bias | `fwd_return[t] = return[t+1]` exact | Target sạch ✅ |
+| S4 NaN profile | **65.5% NaN**, phân bổ đều 64–66%/năm | Bình thường — expected |
+| S5 Volume = 0 | AWH: 67d, ARD: 60d zero-vol streak | `volume.replace(0, NaN)` trong Feature Store |
+| S6 Price cross-check | 10 tickers × 3 ngày — khớp **100%** | Pipeline merge đúng ✅ |
+| S7 adj_close vs close | `adj_close ≡ close` (SplitAdj mode) | Chỉ dùng `close`, bỏ `adj_close` |
+
+### Feature Store (T4) — `scripts/06_features/build_feature_store.py`
+
+| Chỉ tiêu | Giá trị |
+|:---|:---|
+| Tickers sau filter | 2,263 (−589 OOS) |
+| Long-format rows | **5,820,358** |
+| Features | **31** (momentum, technical, volume, volatility, CS rank, target) |
+| NaN rate | 10.8% |
+| Build time | 77.4 giây (vectorized matrix ops) |
+| File size | 1,103 MB (`feature_store_long.parquet`) |
+| Target mean | 0.5005 (≈0.5 — unbiased ✅) |
+| Winsorize | P1%/P99% = −7.30% / +7.69% cross-sectional per day |
+
+### Alpha IC Benchmark (T5) — `scripts/07_alpha_eval/eval_benchmark_alpha.py`
+
+Top features theo Rank IC (Spearman, cross-sectional daily):
+
+| Feature | Mean IC | ICIR | p-value |
+|:---|:---:|:---:|:---:|
+| `close_to_high` | **+0.01887** | +0.169 | <0.001 *** |
+| `ret_252d` | +0.00994 | +0.048 | <0.001 *** |
+| `Reversal_5D` (baseline thầy) | +0.00736 | +0.055 | 0.000020 *** |
+| `vol_zscore_20` | +0.00701 | +0.108 | <0.001 *** |
+| `ret_1d` | **−0.01444** | −0.093 | <0.001 *** |
+| `amihud_20d` | −0.00010 | −0.001 | 0.948 — bỏ |
+
+> **Lưu ý**: `ret_1d`, `ret_2d`, `ret_5d` có IC âm → **phải đảo dấu** khi dùng làm feature.  
+> `amihud_20d` không có predictive power trên large-cap (p=0.948) → **bỏ khỏi ML model**.
+
+---
+
+## 📄 Báo cáo
+
+| File | Nội dung |
+|:---|:---|
+| [`docs/Data report/project_report.html`](docs/Data%20report/project_report.html) | Overview tổng hợp Phase 1+2 (offline HTML) |
+| [`docs/Data report/phase1_report.html`](docs/Data%20report/phase1_report.html) | Chi tiết Phase 1 — 9 tests (mục đích, code, kết quả, kết luận) |
+| [`docs/Data report/phase2_report.html`](docs/Data%20report/phase2_report.html) | Chi tiết Phase 2 — S1–S7, EDA, Feature Store, Alpha IC |
+
+---
+
+## ⚡ Quick Start
+
+### 1. Cài đặt
 ```bash
-# Cài đặt toàn bộ các thư viện phụ thuộc
 pip install -r requirements.txt
 ```
 
-### 2. Kiểm Thử Unit Tests (Toán Học & Logic Chiến Lược)
+### 2. Chạy Pipeline (nếu cần rebuild)
 ```bash
-# Chạy bộ test tự động kiểm tra hàm Neutralizer, Rank IC và Operators
-python tests/run_tests.py
-```
-
-### 3. Pipeline Xử Lý & Chuẩn Bị Dữ Liệu v4
-```bash
-# 1. Merge 27 file by_year parquet thành file tổng hợp
+# Merge 27 parquets → consolidated
 python scripts/01_pipeline/04_merge_all_years.py
 
-# 2. Pivot tạo Date x Ticker matrices & phân chia In-Sample (<2024) / Out-of-Sample (>=2024)
+# Build in_sample / out_sample matrices
 python scripts/01_pipeline/05_build_cross_sectional.py
 ```
 
-### 4. Kiểm Định Chất Lượng Dữ Liệu (Data Validation Suite)
+### 3. Data Validation
 ```bash
-# 1. Kiểm tra Universe PIT
-python scripts/02_validation_universe/step1_check_universe.py
+# Phase 1 tests
 python scripts/02_validation_universe/test1_universe_structure.py
-
-# 2. Kiểm tra Market Data OHLCV & Tương thích
-python scripts/03_validation_ohlcv/step2_check_market_data.py
 python scripts/03_validation_ohlcv/test_m1_ohlcv_structure.py
-python scripts/03_validation_ohlcv/test_m4_russell_ohlcv_compatibility.py
-python scripts/03_validation_ohlcv/test_m5_m6_market_value.py
-
-# 3. Chạy Deep Audit Survivorship Bias
 python scripts/04_deep_audit/deep_audit_survivorship.py
+
+# Phase 2 sanity + EDA
+python scripts/05_eda/sanity_check_in_sample.py
+python scripts/05_eda/eda_01_return_distribution.py
+python scripts/05_eda/eda_02_nan_universe_dynamics.py
 ```
 
-### 5. Khởi Chạy Production REST API (Phase 6)
+### 4. Build Feature Store
 ```bash
-uvicorn src.api.main:app --reload
+python scripts/06_features/build_feature_store.py
+# Output: data/processed/features/ (~2.6 GB, 77.4 giây)
 ```
-- Tài liệu API tương tác Swagger UI: `http://127.0.0.1:8000/docs`
 
-### 6. Khởi Chạy Web Dashboard Trực Quan (Phase 7)
+### 5. Evaluate Alpha IC
 ```bash
-streamlit run dashboard/app.py
+python scripts/07_alpha_eval/eval_benchmark_alpha.py
+# Output: docs/Data report/phase2/figures/t5_alpha_benchmark_ic.png
 ```
-- Giao diện Dashboard tự động mở tại: `http://localhost:8501`
 
 ---
 
-## 🏆 Khuyến Nghị Dữ Liệu Cho Machine Learning
+## 🔑 Key Facts
 
-1. **Toàn bộ Giai đoạn Huấn luyện & Kiểm thử (2000 – 2026)**:
-   - Nhờ bản nâng cấp `v4`, **toàn bộ 27 năm (2000–2026) đều đạt độ phủ 97.8% đến 99.9%** (trung bình **99.42%**).
-   - Survivorship Gap siêu nhỏ (**+0.4pp**), loại bỏ rủi ro thiên vị sống sót.
-   - Chuỗi thời gian 27 năm bao quát trọn vẹn cả 2 chu kỳ khủng hoảng lớn (Bong bóng Dot-com 2000–2002 và Khủng hoảng tài chính toàn cầu GFC 2008), mang lại sức mạnh vượt trội cho mô hình Machine Learning Alpha.
+| Fact | Giá trị |
+|:---|:---|
+| Data source | QuantConnect Cloud (SplitAdjusted mode, không chạy local) |
+| Training platform | Kaggle T4 GPU |
+| adj_close vs close | `adj_close ≡ close` — QC bakes dividends into close |
+| In-sample period | 2000-01-03 → 2023-12-29 (6,021 trading days) |
+| Out-sample (LOCKED) | 2024-01-02 → 2026-09-30 (687 trading days) |
+| OOS filter | Tickers với ≥95% NaN in-sample → loại (589 tickers) |
+| Winsorize | P1%/P99% = −7.30% / +7.69% cross-sectional |
+| Min valid days | ≥252 ngày non-NaN trong lookback window |
+
+---
+
+## 🗓️ Roadmap Phase 3
+
+| Bước | Nội dung |
+|:---:|:---|
+| P3.1 | Feature prep: negate `ret_1d/2d/5d`, drop `amihud_20d` |
+| P3.2 | Walk-Forward CV: 5yr train / 1yr val, 2005→2023 |
+| P3.3 | LightGBM LambdaMART baseline |
+| P3.4 | Hyperparameter tuning (Optuna) |
+| P3.5 | Evaluate: Mean IC, NDCG@50/100 trên validation folds |
+| P3.6 | Final backtest trên out_sample 🔒 |
+
+---
+
+*CO3101 — Đồ án tổng hợp — TTNT · HCMUT · 10/2026*

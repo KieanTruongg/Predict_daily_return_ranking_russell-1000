@@ -1,3 +1,7 @@
+# ⚠️ SCHEMA WARNING: This file uses OLD schema (capitalized columns: Close, Adj Close, Volume).
+# v4 Pipeline (Phase 1/2) uses LOWERCASE schema. NOT used in current pipeline.
+# Reserved for Phase 3. Use src/features/feature_engineer.py for current feature work.
+
 """Cross-sectional matrix transformation and alignment for fast alpha computation.
 
 Supports both schema formats:

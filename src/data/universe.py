@@ -1,3 +1,6 @@
+# ⚠️ NOT used in Phase 1/2 pipeline. Universe loading is handled by
+# scripts/01_pipeline/01_parse_all_universe.py + raw/universe/by_year/ JSONs. Reserved for Phase 3.
+
 """Universe management for Russell 1000 Point-in-Time constituents (2000-2026)."""
 import os
 import glob

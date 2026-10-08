@@ -19,9 +19,12 @@ dist/
 *-checkpoint.ipynb
 
 # Data files (keep raw large files and downloaded parquet out of git)
+*.zip
+data/*.zip
+data/raw/*.zip
 data/raw/market_data/*
 data/raw/universe/raw/
-data/raw/universe/raw.zip
+data/raw/universe/raw_universe/
 data/raw/universe/*.csv
 data/processed/
 clear/*.zip

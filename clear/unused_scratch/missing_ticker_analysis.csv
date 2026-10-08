@@ -1,0 +1,405 @@
+ticker,category,reason,pit_years,n_pit_years
+-,PDF_NOISE,Matches noise pattern '^[^A-Z]+$',"2023, 2024",2
+1,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+10,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+11,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+12,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+13,PDF_NOISE,Matches noise pattern '^\d+$',"2021, 2022",2
+2,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+2016,PDF_NOISE,Matches noise pattern '^\d+$',2016,1
+2017,PDF_NOISE,Matches noise pattern '^\d+$',2017,1
+3,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+4,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+5,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+6,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+7,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+8,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+9,PDF_NOISE,Matches noise pattern '^\d+$',"2016, 2017, 2018, 2020, 2021, 2022",6
+ABI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008",8
+ACT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2013, 2014",2
+ACV,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010",10
+ADCT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008",9
+ADLAC,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+ADOBE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+ADRX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+AECOM,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2016, 2017, 2018, 2020, 2021, 2022",6
+AETH,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+AFC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2004, 2005",5
+AFLAC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+AFM,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+AGC,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+AGE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007",8
+AGIL,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+AH,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007",2
+AHC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+AHG,VALID_MISSING,Ticker looks valid but absent from QC dataset,2003,1
+AHL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018",10
+AHP,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+ALD,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008",8
+AMCOR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2020, 2021, 2022",3
+AMR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011",11
+ANV,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2011, 2012",2
+APC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019",20
+APPX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004, 2005, 2008",4
+ARCP,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2014, 2015",2
+ARI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005",5
+ARIA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2012, 2013",2
+ARM,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003",2
+ARNC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2017, 2018, 2019",3
+ASD,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007",8
+ASIA,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+ASO,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006",7
+AT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007",8
+ATHM,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+ATHN,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2014, 2015, 2016, 2017, 2018",5
+ATHR,VALID_MISSING,Ticker looks valid but absent from QC dataset,2010,1
+ATLS,VALID_MISSING,Ticker looks valid but absent from QC dataset,2010,1
+ATON,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+AV,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007",7
+AVCT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004",2
+AVID,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2004, 2005",2
+AVIR,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+AVNET,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+AVX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014",15
+AWAY,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2012, 2013, 2014, 2015",4
+BBC,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+BBRC,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+BCC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+BEAM,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2012, 2013",2
+BEBE,VALID_MISSING,Ticker looks valid but absent from QC dataset,2005,1
+BEC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011",12
+BF-B,FORMAT_MISMATCH,QC has 'BFB' (dash removed),2008,1
+BFO,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+BGC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2007, 2008, 2009, 2010, 2011, 2012",6
+BIGT,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+BKC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007, 2008, 2009, 2010",5
+BLI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004",4
+BMR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2012, 2013, 2014, 2015",4
+BNK,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004, 2005, 2006",4
+BOT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007",2
+BOW,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+BRR,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+BUD,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008",9
+BUNGE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+BWC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2011, 2012, 2013, 2014, 2015",5
+CA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018",19
+CAM,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015",16
+CBH,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007",7
+CCB,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+CCN,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+CCR,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2001, 2002",3
+CD,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006",7
+CDL,VALID_MISSING,Ticker looks valid but absent from QC dataset,2004,1
+CDX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005",5
+CEI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+CEM,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007, 2008",3
+CEN,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007",8
+CEY,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003, 2004, 2005",4
+CFC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004, 2005, 2006, 2007, 2008",6
+CHAP,VALID_MISSING,Ticker looks valid but absent from QC dataset,2007,1
+CHEGG,VALID_MISSING,Ticker looks valid but absent from QC dataset,2021,1
+CHIR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+CHV,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+CIENA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+CMLS,HISTORICAL_DELIST,"Only in PIT years 2002-2002, pre-QC era",2002,1
+CMRC,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+CNET,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+CNF,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005",5
+CNS,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+CNXT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2004",4
+COCO,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004",2
+COMS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+CORR,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+CORV,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+CPG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004",2
+CPL,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+CPS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008",9
+CPST,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+CRA,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+CRC,VALID_MISSING,Ticker looks valid but absent from QC dataset,2015,1
+CRE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2005, 2006",6
+CSRA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2016, 2017",2
+CTV,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2007, 2008, 2009, 2010",5
+CTX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009",9
+CWENA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2023, 2024, 2025",3
+CWH,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2011, 2012, 2013, 2014",4
+CYN,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015",16
+CYT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015",12
+DBD,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014",15
+DEX,VALID_MISSING,Ticker looks valid but absent from QC dataset,2005,1
+DL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003",2
+DOL,HISTORICAL_DELIST,"Only in PIT years 2002-2002, pre-QC era",2002,1
+DS,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+DSL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003, 2005",3
+DSS,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+DTV,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015",12
+DYN,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009",10
+EAC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2008, 2009",2
+EC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+EFU,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+ELAB,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004, 2005",3
+ELON,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+EMC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016",17
+EP,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011",10
+EQ,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007, 2008, 2009",4
+ESA,HISTORICAL_DELIST,"Only in PIT years 2001-2002, pre-QC era","2001, 2002",2
+ESU4,VALID_MISSING,Ticker looks valid but absent from QC dataset,2024,1
+ESU5,VALID_MISSING,Ticker looks valid but absent from QC dataset,2025,1
+ESU9,VALID_MISSING,Ticker looks valid but absent from QC dataset,2019,1
+ESZ3,VALID_MISSING,Ticker looks valid but absent from QC dataset,2023,1
+ESZ6,VALID_MISSING,Ticker looks valid but absent from QC dataset,2026,1
+EV,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020",20
+EVG,VALID_MISSING,Ticker looks valid but absent from QC dataset,2004,1
+EYE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2005, 2006, 2007, 2008",4
+FAU4,VALID_MISSING,Ticker looks valid but absent from QC dataset,2024,1
+FAU5,VALID_MISSING,Ticker looks valid but absent from QC dataset,2025,1
+FAU9,VALID_MISSING,Ticker looks valid but absent from QC dataset,2019,1
+FAZ3,VALID_MISSING,Ticker looks valid but absent from QC dataset,2023,1
+FAZ6,VALID_MISSING,Ticker looks valid but absent from QC dataset,2026,1
+FB,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021",10
+FBR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004, 2005",3
+FCE-A,VALID_MISSING,Ticker looks valid but absent from QC dataset,2008,1
+FCL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007, 2008, 2009",4
+FCOM,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+FIVE9,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+FLC,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+FMKT,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+FPL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009",10
+FRX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014",15
+FSA,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+FSCO,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+FSR,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+FST,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2005, 2006, 2007, 2008, 2009, 2010, 2011",9
+GBBK,HISTORICAL_DELIST,"Only in PIT years 2002-2002, pre-QC era",2002,1
+GDT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+GEG,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+GETY,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2002",2
+GLBL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2006, 2007, 2008",5
+GLG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2008, 2009, 2010",3
+GLIBA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2018, 2019, 2020",3
+GPOR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2013, 2014, 2015, 2016, 2017",5
+GPT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+GSB,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2001, 2002",3
+GSF,VALID_MISSING,Ticker looks valid but absent from QC dataset,2007,1
+GTE,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+GTI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2011, 2012",2
+GTS,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+HCC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015",15
+HCR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007",7
+HELX,VALID_MISSING,Ticker looks valid but absent from QC dataset,2006,1
+HERO,VALID_MISSING,Ticker looks valid but absent from QC dataset,2008,1
+HF,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+HLTH,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009",10
+HMA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013",14
+HRD,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+HRZ,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+HUB,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+HUB-B,FORMAT_MISMATCH,QC has 'HUBB' (dash removed),2008,1
+IBI,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+IBP,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+ICGE,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+ICN,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003",4
+IFIN,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007",7
+IMA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2008, 2009, 2010",3
+INET,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003",3
+INF,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+INFO,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2017, 2018, 2019, 2020, 2021",5
+INKT,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+INOV,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2015, 2016",2
+INT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2012, 2013, 2014, 2015, 2016, 2017",6
+ISG,VALID_MISSING,Ticker looks valid but absent from QC dataset,2004,1
+ITG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2006, 2007, 2008, 2009",6
+ITWO,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2001, 2002",3
+JABIL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+JAVA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2008, 2009",2
+JP,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+JW-A,VALID_MISSING,Ticker looks valid but absent from QC dataset,2008,1
+JWA,VALID_MISSING,Ticker looks valid but absent from QC dataset,2019,1
+KEG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2008",2
+KEM,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2001, 2002",3
+KFT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012",11
+KG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010",11
+LAB,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003",3
+LAUR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2004, 2005, 2006, 2007",4
+LB,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021",8
+LBRT,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+LEAP,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007, 2008, 2009, 2010",5
+LGFA,VALID_MISSING,Ticker looks valid but absent from QC dataset,2019,1
+LGFB,VALID_MISSING,Ticker looks valid but absent from QC dataset,2019,1
+LI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2005, 2006, 2007",3
+LIFE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2009, 2010, 2011, 2012, 2013",5
+LIT,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+LMG,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+LU,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006",7
+LZ,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011",11
+MACYS,VALID_MISSING,Ticker looks valid but absent from QC dataset,2022,1
+MANU,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+MBG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+MCLD,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+MCN,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+ME,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2008, 2009, 2010",3
+MEA,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+MEDI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006",7
+MEDX,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+MEG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003, 2004",3
+MF,VALID_MISSING,Ticker looks valid but absent from QC dataset,2008,1
+MGG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+MI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011",12
+MIR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2006, 2007, 2008, 2009, 2010",8
+MMI,VALID_MISSING,Ticker looks valid but absent from QC dataset,2011,1
+MND,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+MNK,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2013, 2014, 2015, 2016, 2017",5
+MNMD,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+MNY,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003",4
+MON,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017",17
+MRBK,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006",7
+MRX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004",4
+MTP,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+MUSE,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+MXT,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+MYG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+NA,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+NAP,HISTORICAL_DELIST,"Only in PIT years 2002-2002, pre-QC era",2002,1
+NCBC,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+NCINO,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+NFX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018",19
+NHP,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2008, 2009, 2010, 2011",4
+NIS,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+NITE,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+NSR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013",8
+NVLS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011",12
+NWS-A,FORMAT_MISMATCH,QC has 'NWSA' (dash removed),2008,1
+NXL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006",6
+NXTP,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2003, 2004, 2005",5
+NXTV,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+NYX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013",8
+OAS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2013, 2014",2
+OB,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2007, 2008, 2009, 2010",4
+OCA,HISTORICAL_DELIST,"Only in PIT years 2001-2002, pre-QC era","2001, 2002",2
+OEI,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2001, 2002",3
+ORN,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+OSG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2005, 2006, 2007, 2008, 2009",5
+OSI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006",7
+PCL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015",16
+PCLN,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017",11
+PCO,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003, 2004, 2005",4
+PCS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2007, 2008, 2009, 2010, 2011, 2012",10
+PCX,VALID_MISSING,Ticker looks valid but absent from QC dataset,2008,1
+PDX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2006, 2007, 2008",3
+PEB,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+PER,HISTORICAL_DELIST,"Only in PIT years 2002-2002, pre-QC era",2002,1
+PGN,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012",12
+PHA,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2001, 2002",3
+PINC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024",11
+PLL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015",16
+PLT,VALID_MISSING,Ticker looks valid but absent from QC dataset,2004,1
+PMI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007",8
+PPP,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007",7
+PRE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015",9
+PRGN,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+PRM,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+PS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2019, 2020",2
+PSC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003",2
+PSIX,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+PWER,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+PWJ,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+PX,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018",19
+PZB,HISTORICAL_DELIST,"Only in PIT years 2002-2002, pre-QC era",2002,1
+RA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2004, 2005, 2006",4
+RBAK,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+RDA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003",4
+REI,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2001, 2002",3
+RESP,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004, 2005, 2006, 2007",5
+RGC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017",16
+RICE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2014, 2015, 2016, 2017",4
+RMG,HISTORICAL_DELIST,"Only in PIT years 2001-2002, pre-QC era","2001, 2002",2
+RNA,HISTORICAL_DELIST,"Only in PIT years 2002-2002, pre-QC era",2002,1
+ROC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2011, 2012, 2013, 2014",4
+RRI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010",10
+RSE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+RSTN,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+SAF,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2007, 2008",2
+SAI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2008, 2009, 2010, 2011, 2012, 2013",6
+SAWS,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+SBC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+SCNT,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+SCZ,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+SD,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2008, 2009, 2010, 2011, 2012, 2013, 2014",7
+SDRL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2013, 2014, 2015",3
+SDS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+SE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2004, 2005, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016",12
+SEG,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+SERV,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2015, 2016, 2017, 2018, 2019, 2020",6
+SFS,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+SGAFT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2024, 2025",2
+SGP,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009",10
+SHLD,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015",11
+SII,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010",11
+SIR,VALID_MISSING,Ticker looks valid but absent from QC dataset,2004,1
+SLE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012",13
+SMS,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+SNC,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+SOI,HISTORICAL_DELIST,"Only in PIT years 2001-2001, pre-QC era",2001,1
+SPC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2005",5
+SPK,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+SPLS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017",18
+SPWR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2007, 2008, 2014, 2015, 2016",5
+SRV,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2003, 2004",3
+SSS,VALID_MISSING,Ticker looks valid but absent from QC dataset,2016,1
+SSTI,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+STARZ,VALID_MISSING,Ticker looks valid but absent from QC dataset,2016,1
+STI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019",20
+STK,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005",5
+STR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016",17
+SUB,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+SUNW,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007",8
+SV,HISTORICAL_DELIST,"Only in PIT years 2001-2002, pre-QC era","2001, 2002",2
+SVM,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007",8
+SVRN,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+SY,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2004, 2005, 2009, 2010",6
+TE,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016",17
+TEK,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007",8
+TERN,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+TESLA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+TGH,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2001, 2002",3
+TGN,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004",2
+TGP,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+THOR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2010, 2011, 2012",3
+THRX,VALID_MISSING,Ticker looks valid but absent from QC dataset,2013,1
+TOAST,VALID_MISSING,Ticker looks valid but absent from QC dataset,2022,1
+TOS,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+TPCS,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+TSG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006",7
+TX,HISTORICAL_DELIST,"Only in PIT years 2000-2001, pre-QC era","2000, 2001",2
+UBFUT,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2019, 2023, 2026",3
+UCL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+UDI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004, 2005",3
+UK,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+ULTI,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2015, 2016, 2017, 2018",4
+UPC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+UPL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2010, 2011, 2012, 2013, 2014",5
+USAI,HISTORICAL_DELIST,"Only in PIT years 2000-2002, pre-QC era","2000, 2001, 2002",3
+USG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2005, 2006, 2007, 2008, 2009, 2010, 2014, 2015, 2016, 2017, 2018",12
+UST,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008",9
+VAL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016",16
+VIA-B,FORMAT_MISMATCH,QC has 'VIAB' (dash removed),2008,1
+VIMEO,VALID_MISSING,Ticker looks valid but absent from QC dataset,2021,1
+VISA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2021, 2022",2
+VR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018",10
+VRC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004",5
+VRIO,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+VRM,VALID_MISSING,Ticker looks valid but absent from QC dataset,2021,1
+VROOM,VALID_MISSING,Ticker looks valid but absent from QC dataset,2021,1
+VRTA,HISTORICAL_DELIST,"Only in PIT years 2000-2000, pre-QC era",2000,1
+VRTS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005",6
+WB,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008",9
+WES,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2004, 2005",2
+WMG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2005, 2006, 2007, 2008, 2009",5
+WPS,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2003, 2004, 2005, 2006",4
+WR,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2004, 2005, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017",12
+WSTC,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2001, 2002, 2003, 2004, 2005, 2006",6
+XL,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018",12
+XOG,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2017, 2018",2
+XTSLA,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2019, 2023, 2024, 2025, 2026",5
+YB,VALID_MISSING,Ticker looks valid but absent from QC dataset,"2020, 2021, 2022",3
+ZYNGA,VALID_MISSING,Ticker looks valid but absent from QC dataset,2021,1

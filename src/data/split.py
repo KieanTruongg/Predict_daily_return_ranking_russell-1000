@@ -1,3 +1,6 @@
+# ⚠️ SCHEMA WARNING: NOT used in Phase 1/2 pipeline. Split logic is handled by
+# scripts/01_pipeline/05_build_cross_sectional.py. Reserved for Phase 3.
+
 """In-sample and Out-of-sample data splitting with leakage prevention guard.
 
 Default split: everything before 2024-01-01 is IN-SAMPLE,

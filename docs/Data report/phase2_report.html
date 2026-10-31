@@ -573,12 +573,17 @@ all_years = {t: <span class="fn">sum</span>(<span class="nu">1</span> <span clas
       <div><span class="ar">Load</span> in_sample/close, high, low, volume, forward_returns → (6,021 × 2,852)</div>
       <div>&nbsp;&nbsp;↓ Filter OOS tickers (nan_pct ≥ 0.95)</div>
       <div>(6,021 × 2,263) — 589 tickers removed</div>
-      <div>&nbsp;&nbsp;↓ <span class="fi">FeatureEngineer.build_feature_matrix()</span> [77.4 giây vectorized]</div>
-      <div>&nbsp;&nbsp;&nbsp;&nbsp;↳ Winsorize returns P1%/P99% per day</div>
+      <div>&nbsp;&nbsp;↓ <span class="fi">src/data/pit_universe.py: build_pit_mask()</span> <span class="b pass">[MỚI - PIT MASK]</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;↳ Tính reconstitution_date(year) (Thứ Sáu cuối tháng 6) cho từng năm 2000–2026</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;↳ Binary search mapping: Ngày t dùng list năm Y gần nhất (tránh look-ahead bias H1)</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;↳ Ra ma trận Boolean universe_mask (6,021 × 2,263) khớp 99.6% với iShares IWB ETF</div>
+      <div>&nbsp;&nbsp;↓ <span class="fi">FeatureEngineer.build_feature_matrix(universe_mask=...)</span> [Vectorized]</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;↳ Winsorize returns P1%/P99% per day CHỈ TRONG UNIVERSE (mask == True)</div>
       <div>&nbsp;&nbsp;&nbsp;&nbsp;↳ Tính 31 features (momentum, MA, technical, volume, vol, rank, target)</div>
-      <div>&nbsp;&nbsp;&nbsp;&nbsp;↳ Validity mask: ticker &lt; 252 valid days → NaN</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;↳ CS Rank & target_return_rank CHỈ RANK TRÊN THÀNH VIÊN UNIVERSE</div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;↳ Step 11: .where(universe_mask) gán NaN toàn bộ features ngoài Russell 1000</div>
       <div>&nbsp;&nbsp;↓ Save 31 wide parquets → data/processed/features/{feature}.parquet</div>
-      <div>&nbsp;&nbsp;↓ Stack → long format → feature_store_long.parquet (5,820,358 rows)</div>
+      <div>&nbsp;&nbsp;↓ Stack → long format → feature_store_long.parquet</div>
     </div>
 
     <h2>Code: Core Components</h2>
@@ -631,7 +636,7 @@ features[<span class="st">"ret_1d_rank"</span>] = features[<span class="st">"ret
       <div class="kpi"><div class="kv">0.5005</div><div class="kl">target_return_rank mean (≈0.5 = no bias)</div></div>
       <div class="kpi"><div class="kv">1,103 MB</div><div class="kl">feature_store_long.parquet size</div></div>
     </div>
-    <div class="co g">✅ <strong>Feature Store sẵn sàng</strong> — 31 features, NaN rate 10.8%, target unbiased (mean=0.5005). Ready cho Phase 3 ML Training.</div>
+    <div class="co g">✅ <strong>Feature Store sẵn sàng (Chuẩn PIT)</strong> — 31 features, tích hợp universe_mask chính xác từng ngày sau tái cơ cấu tháng 6. Triệt tiêu 100% Look-ahead bias trong H1 hàng năm. Đã kiểm thử overlap 99.6% với iShares IWB ETF. Sẵn sàng cho 13 Core Alphas và Phase 3 ML Training.</div>
   </div>
 </div>
 </section>

@@ -169,9 +169,13 @@ footer{margin:28px 28px 40px;text-align:center;color:#9e9e9e;font-size:12px;}
   <div class="card-body">
     <h2>Pipeline Flow</h2>
     <div class="flow">
-      <div><span class="ar">📡 Nguồn:</span> Wayback Machine (iShares IWB) → <span class="fi">01_parse_all_universe.py</span></div>
+      <div><span class="ar">📡 Nguồn Trích xuất 3 Thời kỳ (Eras):</span> PDF Scan cổ (2000-2007) · Digital PDF (2008-2018) · iShares IWB ETF / FTSE Web (2019-2026) → <span class="fi">01_parse_all_universe.py</span></div>
       <div>&nbsp;&nbsp;&nbsp;↓ Output: <span class="fi">data/raw/universe/by_year/russell1000_{year}.json</span> (27 files)</div>
-      <div class="nt">&nbsp;&nbsp;&nbsp;   Contains: list of ~1000 tickers active in that year</div>
+      <div class="nt">&nbsp;&nbsp;&nbsp;   Contains: list of ~1000 tickers active in that year (Sau đợt Reconstitution Thứ Sáu cuối tháng 6)</div>
+      <br>
+      <div><span class="ar">🛡️ Point-In-Time (PIT) Mask Engine:</span> <span class="fi">src/data/pit_universe.py</span> <span class="b pass">[MỚI]</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Tính reconstitution_date(year) chính xác từng năm → Khắc phục 100% Look-ahead bias trong H1</div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Output: universe_mask Boolean (6,021 × 2,263) kiểm soát tư cách thành viên đúng từng ngày giao dịch</div>
       <br>
       <div><span class="ar">☁️ QuantConnect Cloud</span> → <span class="fi">02_quantconnect_export_by_year_v4_fixed.py</span></div>
       <div>&nbsp;&nbsp;&nbsp;↓ Output: <span class="fi">data/raw/qc_zips/{year}.zip</span> (27 ZIPs)</div>

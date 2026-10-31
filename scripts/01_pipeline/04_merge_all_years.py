@@ -100,6 +100,12 @@ def merge_all_years():
     # Sort by date, then ticker
     combined = combined.sort_values(["date", "ticker"]).reset_index(drop=True)
 
+    # Export v5 lấy cửa sổ recon(Y) - lookback → recon(Y+1), nên các năm chồng lấn nhau:
+    # cùng (date, ticker) có thể xuất hiện ở nhiều file năm → giữ 1 dòng (pivot yêu cầu unique).
+    n_before = len(combined)
+    combined = combined.drop_duplicates(subset=["date", "ticker"], keep="last").reset_index(drop=True)
+    print(f"  Dedup (date, ticker): bỏ {n_before - len(combined):,} dòng trùng do cửa sổ chồng lấn")
+
     # Final validation
     print("\n" + "=" * 80)
     print("📊 VALIDATION SUMMARY")

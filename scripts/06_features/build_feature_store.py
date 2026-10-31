@@ -29,8 +29,10 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 sys.path.insert(0, PROJECT_ROOT)
 
 from src.features.feature_engineer import FeatureEngineer
+from src.data.pit_universe import build_pit_mask, mask_coverage_report
 
 IN_SAMPLE_DIR  = os.path.join(PROJECT_ROOT, "data", "processed", "in_sample")
+BY_YEAR_DIR    = os.path.join(PROJECT_ROOT, "data", "raw", "universe", "by_year")
 FEATURES_DIR   = os.path.join(PROJECT_ROOT, "data", "processed", "features")
 os.makedirs(FEATURES_DIR, exist_ok=True)
 
@@ -97,6 +99,13 @@ def main():
 
     print(f"\n  Matrix shape sau filter: {close.shape[0]:,} days × {close.shape[1]:,} tickers")
 
+    # ── 2b. PIT universe mask (list năm Y hiệu lực sau reconstitution cuối tháng 6) ─
+    section("2b. BUILDING PIT UNIVERSE MASK")
+    universe_mask = build_pit_mask(close.index, close.columns, by_year_dir=BY_YEAR_DIR)
+    print(f"  Members/ngày (trung bình): {universe_mask.sum(axis=1).mean():,.1f}")
+    print("  Coverage giá theo nửa năm (H1 thấp hơn H2 → thiếu giá của mã bị loại ở recon):")
+    print(mask_coverage_report(universe_mask, close).to_string())
+
     # ── 3. Build features ─────────────────────────────────────────────────────
     section("3. COMPUTING FEATURES (VECTORIZED)")
     print("  Khởi tạo FeatureEngineer (winsorize=1%, min_valid_days=252)...")
@@ -115,6 +124,7 @@ def main():
         low=low,
         volume=volume,
         forward_returns=forward_returns,
+        universe_mask=universe_mask,
     )
     elapsed = time.time() - t_feat
     print(f"  ✓ Hoàn tất tính features trong {elapsed:.1f}s")

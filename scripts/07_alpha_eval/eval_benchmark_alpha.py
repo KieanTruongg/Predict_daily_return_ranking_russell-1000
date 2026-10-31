@@ -30,8 +30,10 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 sys.path.insert(0, PROJECT_ROOT)
 
 from src.metrics.information import compute_daily_ic_series, calculate_ic_summary
+from src.data.pit_universe import build_pit_mask
 
 IN_SAMPLE_DIR = os.path.join(PROJECT_ROOT, "data", "processed", "in_sample")
+BY_YEAR_DIR   = os.path.join(PROJECT_ROOT, "data", "raw", "universe", "by_year")
 FEATURES_DIR  = os.path.join(PROJECT_ROOT, "data", "processed", "features")
 OUT_DIR       = os.path.join(PROJECT_ROOT, "docs", "Data report", "eda_figures")
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -130,6 +132,11 @@ def main():
     fwd     = fwd[keep]
     print(f"  ✓ Sau filter OOS: {close.shape[1]} tickers")
 
+    # PIT mask: IC chỉ tính trong universe Russell 1000 đang hiệu lực tại mỗi ngày
+    universe_mask = build_pit_mask(close.index, close.columns, by_year_dir=BY_YEAR_DIR)
+    fwd = fwd.where(universe_mask)
+    print(f"  ✓ PIT mask: {universe_mask.sum(axis=1).mean():,.1f} members/ngày (trung bình)")
+
     # ── 2. Reversal 5D Alpha ──────────────────────────────────────────────────
     section("2. REVERSAL 5D ALPHA — CÔNG THỨC THẦY")
     print("""
@@ -141,7 +148,7 @@ def main():
     p_t5  = close.shift(5)   # P_{t-5}
     p_t1  = close.shift(1)   # P_{t-1}
     raw   = (p_t5 - p_t1) / 5.0
-    alpha = cs_demean(raw)    # dollar-neutral
+    alpha = cs_demean(raw.where(universe_mask))    # dollar-neutral trong universe PIT
 
     print("  Tính Rank IC series (vectorized)...")
     ic_rev5 = compute_ic_vectorized(alpha, fwd, method="spearman")

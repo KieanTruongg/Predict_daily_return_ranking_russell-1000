@@ -25,15 +25,21 @@ import pandas as pd
 # ──────────────────────────────────────────────────────────────────────────────
 # Helper: winsorize a DataFrame row-wise (cross-sectional per day)
 # ──────────────────────────────────────────────────────────────────────────────
-def _cs_winsorize(df: pd.DataFrame, lo: float = 0.01, hi: float = 0.99) -> pd.DataFrame:
-    """Clip each row at [lo, hi] quantile cross-sectionally (per trading day)."""
-    q_lo = df.quantile(lo, axis=1)
-    q_hi = df.quantile(hi, axis=1)
+def _cs_winsorize(df: pd.DataFrame, lo: float = 0.01, hi: float = 0.99,
+                  mask: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    """Clip each row at [lo, hi] quantile cross-sectionally (per trading day).
+    Nếu có `mask`, quantile chỉ tính trên các mã thuộc universe ngày đó (nhưng vẫn clip toàn bộ)."""
+    ref = df if mask is None else df.where(mask)
+    q_lo = ref.quantile(lo, axis=1)
+    q_hi = ref.quantile(hi, axis=1)
     return df.clip(lower=q_lo, upper=q_hi, axis=0)
 
 
-def _cs_rank(df: pd.DataFrame) -> pd.DataFrame:
-    """Cross-sectional percentile rank per day, result in [0, 1]."""
+def _cs_rank(df: pd.DataFrame, mask: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    """Cross-sectional percentile rank per day, result in [0, 1].
+    Nếu có `mask`, chỉ xếp hạng trong các mã thuộc universe ngày đó (ngoài universe → NaN)."""
+    if mask is not None:
+        df = df.where(mask)
     return df.rank(axis=1, pct=True, na_option="keep")
 
 
@@ -83,6 +89,7 @@ class FeatureEngineer:
         low: pd.DataFrame,
         volume: pd.DataFrame,
         forward_returns: pd.DataFrame,
+        universe_mask: Optional[pd.DataFrame] = None,
     ) -> Dict[str, pd.DataFrame]:
         """
         Vectorized feature computation on Date×Ticker matrices.
@@ -91,6 +98,11 @@ class FeatureEngineer:
         ----------
         close, high, low, volume, forward_returns : pd.DataFrame
             Date×Ticker matrices (index=date, columns=ticker), v4 schema (lowercase).
+        universe_mask : pd.DataFrame (bool), optional
+            PIT membership mask (src/data/pit_universe.build_pit_mask). Nếu có:
+            winsorize/CS rank/target chỉ tính trong universe, và output ngoài universe = NaN.
+            Time-series features vẫn dùng lịch sử giá trước khi mã vào universe
+            (thông tin đã biết tại thời điểm đó → không look-ahead).
 
         Returns
         -------
@@ -98,13 +110,17 @@ class FeatureEngineer:
             {feature_name: Date×Ticker matrix}
         """
         features: Dict[str, pd.DataFrame] = {}
+        if universe_mask is not None:
+            universe_mask = universe_mask.reindex(
+                index=close.index, columns=close.columns, fill_value=False
+            ).astype(bool)
 
         # ── 0. Preprocessing ─────────────────────────────────────────────────
         # Tính daily return từ close (v4: close = SplitAdjusted)
         ret = close.pct_change()
 
         # Winsorize cross-sectionally per day
-        ret_w = _cs_winsorize(ret, self.winsorize_pct, 1 - self.winsorize_pct)
+        ret_w = _cs_winsorize(ret, self.winsorize_pct, 1 - self.winsorize_pct, mask=universe_mask)
 
         # Mask volume = 0 → NaN (cho Amihud / VWAP)
         vol_clean = volume.replace(0, np.nan)
@@ -176,17 +192,22 @@ class FeatureEngineer:
         # ── 8. Cross-sectional rank features (per day) ────────────────────────
         for fname in ["ret_1d", "ret_5d", "ret_20d", "rsi_14", "realized_vol_20d", "amihud_20d"]:
             if fname in features:
-                features[f"{fname}_rank"] = _cs_rank(features[fname])
+                features[f"{fname}_rank"] = _cs_rank(features[fname], mask=universe_mask)
 
         # ── 9. Target ─────────────────────────────────────────────────────────
         features["target_forward_return"] = forward_returns
-        features["target_return_rank"]    = _cs_rank(forward_returns)
+        features["target_return_rank"]    = _cs_rank(forward_returns, mask=universe_mask)
 
         # ── 10. Ticker validity mask (≥ min_valid_days non-NaN in rolling window) ─
         valid_mask = close.notna().rolling(self.min_valid_days, min_periods=1).sum() >= self.min_valid_days
         for k in list(features.keys()):
             if k not in ("target_forward_return", "target_return_rank"):
                 features[k] = features[k].where(valid_mask)
+
+        # ── 11. PIT universe mask: chỉ giữ (ngày, mã) thuộc Russell 1000 tại ngày đó ─
+        if universe_mask is not None:
+            for k in list(features.keys()):
+                features[k] = features[k].where(universe_mask)
 
         return features
 

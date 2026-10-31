@@ -15,7 +15,7 @@ import json
 import zipfile
 import os
 import gc
-from datetime import datetime
+from datetime import datetime, timedelta
 from IPython.display import HTML, display
 from AlgorithmImports import *
 
@@ -48,10 +48,19 @@ def get_zip_download_html(zip_filename, year, success_cnt, partial_cnt, empty_cn
 
 print("🚀 BẮT ĐẦU TIẾN TRÌNH XUẤT DỮ LIỆU AUDIT-GRADE RUSSELL 1000 (2000 - 2026)...")
 
+def reconstitution_date(y):
+    # Thứ Sáu cuối cùng của tháng 6 (khớp src/data/pit_universe.reconstitution_date)
+    d = datetime(y, 6, 30)
+    return d - timedelta(days=(d.weekday() - 4) % 7)
+
+# List năm Y có hiệu lực từ sau recon(Y) đến recon(Y+1) → cần giá của khoảng đó,
+# cộng thêm lịch sử LOOKBACK_DAYS ngày lịch để tính features (ret_252d, SMA200...) cho mã mới vào.
+LOOKBACK_DAYS = 400
+
 for year_str, tickers in pit_universe.items():
     year = int(year_str)
-    start_date = datetime(year, 1, 1)
-    end_date = datetime(2026, 10, 1) if year == 2026 else datetime(year, 12, 31)
+    start_date = reconstitution_date(year) - timedelta(days=LOOKBACK_DAYS)
+    end_date = datetime(2026, 10, 1) if year == 2026 else reconstitution_date(year + 1) + timedelta(days=7)
 
     # Annual convention for resolving the historical security identity.
     # Replace with the exact Russell effective date if your source provides one.

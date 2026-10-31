@@ -109,6 +109,7 @@ footer{margin:28px 28px 40px;text-align:center;color:#9e9e9e;font-size:12px;}
     <div class="lbl">Feature Engineering</div>
     <a href="#t4">T4 Feature Store</a>
     <a href="#t5">T5 Alpha Benchmark IC</a>
+    <a href="#t6">T6 Correlation & Alpha Selection</a>
     <div class="lbl">Kết luận</div>
     <a href="#conclude">📋 Tổng kết Phase 2</a>
   </nav>
@@ -126,7 +127,7 @@ footer{margin:28px 28px 40px;text-align:center;color:#9e9e9e;font-size:12px;}
     <div class="qb"><div class="v">5.8M</div><div class="l">Feature Store Rows</div></div>
     <div class="qb"><div class="v">10.8%</div><div class="l">NaN Rate</div></div>
     <div class="qb"><div class="v">+0.019</div><div class="l">Best Feature IC</div></div>
-    <div class="qb"><div class="v">77.4s</div><div class="l">Build Time</div></div>
+    <div class="qb"><div class="v">13</div><div class="l">Core Alphas Chọn lọc</div></div>
   </div>
 </div>
 
@@ -784,6 +785,194 @@ alpha = raw.<span class="fn">sub</span>(raw.<span class="fn">mean</span>(axis=<s
     </table>
 
     <div class="co p">📋 <strong>Kết luận Phase 2:</strong> EDA xác nhận data non-normal (cần rank-based ML), 589 OOS tickers đã loại, Feature Store 5.8M rows sạch sẵn sàng. Best features: <ic>close_to_high</ic> (IC=+0.019), <ic>−ret_1d</ic> (IC equiv +0.014), <ic>vol_zscore_20</ic> (IC=+0.007). Alpha Benchmark IC = +0.007 (thấp nhưng có ý nghĩa). <strong>Tất cả quyết định đã implement. Sẵn sàng cho Phase 3 ML Training.</strong></div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════ T6 ═══════════════════════════════════ -->
+<section id="t6">
+<div class="card">
+  <div class="card-hdr green">🔬 T6 — Feature Correlation Analysis & Alpha Selection (Core Alpha Pool)</div>
+  <div class="card-body">
+
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/06_features/analyze_feature_correlation.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/processed/features/feature_store_long.parquet (5.8M rows)</div>
+      <div class="meta-item"><strong>Output:</strong> docs/Data report/phase2/figures/feature_correlation_heatmap.png</div>
+      <div class="meta-item"><strong>Ngày chạy:</strong> 10/2026</div>
+    </div>
+
+    <h2>1. Mục đích</h2>
+    <p>Sau khi có 24 features và IC của từng features, bước tiếp theo trong quy trình nghiên cứu định lượng là <strong>Feature Selection (Chọn lọc tín hiệu)</strong>. Câu hỏi đặt ra là: <em>"Nếu ta nhét tất cả 24 features vào mô hình ML, liệu có tốt hơn không?"</em></p>
+    <div class="co o">⚠️ <strong>Không nhất thiết!</strong> Đây là hiện tượng gọi là <strong>"Factor Zoo"</strong> và <strong>"Curse of Dimensionality"</strong> (Lời nguyền số chiều): Nếu nhiều features thực chất đang đo cùng một thứ (đa cộng tuyến — Multicollinearity), chúng sẽ khuếch đại nhiễu và khiến mô hình học vẹt những biến động ngẫu nhiên thay vì học được pattern thật sự.</div>
+    <p>Mục tiêu của bước T6 là:</p>
+    <ol>
+      <li>Tính <strong>ma trận tương quan Spearman chéo</strong> (Cross-Sectional) trung bình theo thời gian giữa tất cả 24 features.</li>
+      <li>Xác định các cặp features <strong>bị trùng lặp thông tin cao</strong> (|corr| ≥ 0.60).</li>
+      <li>Chọn ra tập <strong>Core Alpha Pool ≥ 10 features tinh hoa</strong>: Đa dạng theo 5 nhóm kinh tế, IC có ý nghĩa thống kê, tương quan chéo thấp với nhau.</li>
+    </ol>
+
+    <h2>2. Logic & Phương pháp</h2>
+    <h3>2.1 Tại sao dùng Spearman (Rank Correlation) thay Pearson?</h3>
+    <p>Phân phối lợi nhuận cổ phiếu có <strong>đuôi dày cực đoan</strong> (Skew = +41, Kurt = 16,433 — đã phát hiện ở EDA T1). Hệ số tương quan Pearson bị méo mó bởi các outlier này. Spearman Rank Correlation dựa trên <strong>thứ hạng tương đối</strong> thay vì giá trị tuyệt đối, nên hoàn toàn không bị ảnh hưởng bởi outlier cực đoan.</p>
+    <h3>2.2 Cách tính Cross-Sectional Correlation</h3>
+    <p>Với mỗi ngày giao dịch <em>t</em>:</p>
+    <ol>
+      <li>Lấy ma trận <em>(N cổ phiếu × 24 features)</em> cho ngày <em>t</em>.</li>
+      <li>Xếp hạng percentile từng feature theo chiều ngang (Cross-Sectional Rank).</li>
+      <li>Tính ma trận tương quan Pearson trên bộ ranks → cho kết quả Spearman.</li>
+    </ol>
+    <p>Lặp lại cho <strong>1,205 ngày mẫu</strong> (mỗi 5 ngày giao dịch để đại diện toàn bộ 24 năm), sau đó lấy <strong>trung bình theo thời gian</strong> → ma trận tương quan ổn định và đại diện cho toàn bộ in-sample period.</p>
+
+    <h3>2.3 Code thực hiện</h3>
+    <pre><code><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Lấy mẫu 1 ngày mỗi 5 ngày giao dịch</span>
+sample_dates = unique_dates[<span class="nu">::5</span>]  <span class="cm"># 1,205 ngày trên 6,021 ngày tổng</span>
+
+daily_corrs = []
+<span class="kw">for</span> d <span class="kw">in</span> sample_dates:
+    sub = df[df[<span class="st">'date'</span>] == d][valid_features].dropna(how=<span class="st">'all'</span>)
+    <span class="kw">if</span> len(sub) >= <span class="nu">50</span>:  <span class="cm"># Đủ ít nhất 50 cổ phiếu trong ngày</span>
+        ranked_sub = sub.rank(pct=<span class="kw">True</span>)  <span class="cm"># Cross-sectional rank</span>
+        corr_matrix = ranked_sub.corr(method=<span class="st">'pearson'</span>)
+        daily_corrs.append(corr_matrix)
+
+<span class="cm"># Trung bình theo thời gian → Spearman ổn định</span>
+mean_corr = pd.concat(
+    [d.stack(future_stack=<span class="kw">True</span>) <span class="kw">for</span> d <span class="kw">in</span> daily_corrs], axis=<span class="nu">1</span>
+).mean(axis=<span class="nu">1</span>).unstack()</code></pre>
+
+    <h2>3. Kết quả — Ma trận tương quan</h2>
+    <p>Tìm thấy <strong>40 cặp features có |corr| ≥ 0.60</strong> — tức là đang bị trùng lặp thông tin đáng kể:</p>
+    <div class="img-w">
+      <img src="phase2/figures/feature_correlation_heatmap.png" alt="Feature Correlation Heatmap">
+      <div class="img-cap">Ma trận tương quan Spearman Cross-Sectional trung bình (In-Sample 2000–2023). Màu đỏ = tương quan dương cao, màu xanh = tương quan âm cao. Ô trống/trắng = tương quan thấp (độc lập).</div>
+    </div>
+
+    <h3>Top 10 cặp bị trùng lặp thông tin cao nhất (ĐA CỘNG TUYẾN)</h3>
+    <table>
+      <tr><th>Hạng</th><th>Feature A</th><th>Feature B</th><th>Tương quan</th><th>Giải thích</th></tr>
+      <tr><td>1</td><td><code>bb_pct_b</code></td><td><code>close_to_sma_20</code></td><td style="color:#c62828"><strong>+0.893</strong></td><td>Cả 2 đều đo khoảng cách giá so với trung bình 20 ngày → trùng lặp 89%</td></tr>
+      <tr><td>2</td><td><code>ret_10d</code></td><td><code>close_to_sma_20</code></td><td style="color:#c62828"><strong>+0.880</strong></td><td>Lợi nhuận 10 ngày ≈ khoảng cách tới SMA-20 về bản chất</td></tr>
+      <tr><td>3</td><td><code>rsi_14</code></td><td><code>close_to_sma_20</code></td><td style="color:#c62828"><strong>+0.877</strong></td><td>RSI-14 và SMA-20 cùng phản ánh "giá tăng hay giảm 2–3 tuần gần đây"</td></tr>
+      <tr><td>4</td><td><code>realized_vol_60d</code></td><td><code>realized_vol_20d</code></td><td style="color:#c62828"><strong>+0.870</strong></td><td>Biến động 20 ngày và 60 ngày của cùng 1 cổ phiếu → gần như giống nhau</td></tr>
+      <tr><td>5</td><td><code>ret_2d</code></td><td><code>close_to_vwap_5</code></td><td style="color:#c62828"><strong>+0.848</strong></td><td>Lợi nhuận 2 ngày ≈ độ lệch giá so với VWAP 5 ngày</td></tr>
+      <tr><td>6</td><td><code>rsi_14</code></td><td><code>bb_pct_b</code></td><td style="color:#c62828"><strong>+0.830</strong></td><td>RSI và Bollinger Band % B đều là oscillator đo quá mua/quá bán</td></tr>
+      <tr><td>7</td><td><code>close_to_sma_50</code></td><td><code>ret_20d</code></td><td style="color:#c62828"><strong>+0.821</strong></td><td>Lợi nhuận 1 tháng ≈ khoảng cách tới SMA-50</td></tr>
+      <tr><td>8</td><td><code>ret_5d</code></td><td><code>close_to_vwap_5</code></td><td style="color:#c62828"><strong>+0.795</strong></td><td>Lợi nhuận 5 ngày và VWAP 5 ngày — cùng cửa sổ thời gian</td></tr>
+      <tr><td>9</td><td><code>ret_10d</code></td><td><code>macd_hist_norm</code></td><td style="color:#c62828"><strong>+0.788</strong></td><td>MACD Histogram thực chất là đạo hàm của lợi nhuận ngắn hạn</td></tr>
+      <tr><td>10</td><td><code>close_to_sma_50</code></td><td><code>close_to_sma_20</code></td><td style="color:#c62828"><strong>+0.775</strong></td><td>SMA-50 và SMA-20 cùng phản ánh xu hướng giá trung hạn</td></tr>
+    </table>
+    <div class="co o">⚠️ <strong>Insight quan trọng:</strong> 4 features <code>bb_pct_b</code>, <code>close_to_sma_20</code>, <code>rsi_14</code>, <code>ret_10d</code> có tương quan chéo với nhau lên tới <strong>0.76 – 0.89</strong>. Nếu nhét tất cả vào mô hình ML, chúng sẽ gây nhiễu loạn quá trình học và làm giảm hiệu năng. Cần giữ lại đúng <strong>1 đại diện tốt nhất</strong> cho mỗi nhóm.</div>
+
+    <h2>4. Nguyên tắc chọn Core Alpha Pool</h2>
+    <p>Để chọn ra bộ >10 Alphas tinh hoa, cậu áp dụng đồng thời <strong>3 tiêu chí sau</strong>:</p>
+    <table>
+      <tr><th>Tiêu chí</th><th>Điều kiện</th><th>Lý do khoa học</th></tr>
+      <tr><td>✅ Ý nghĩa thống kê</td><td>p-value &lt; 0.05 (tốt nhất &lt; 0.001)</td><td>IC phải khác 0 một cách có ý nghĩa, không phải do may mắn</td></tr>
+      <tr><td>✅ Ý nghĩa kinh tế</td><td>Có thể giải thích được hiện tượng tài chính đứng sau</td><td>Tránh <em>data mining</em> — tìm thấy pattern ngẫu nhiên trong quá khứ nhưng không có lý do để tiếp tục trong tương lai</td></tr>
+      <tr><td>✅ Tính độc lập</td><td>Tương quan chéo với các alpha khác &lt; 0.60</td><td>Mỗi alpha mang thêm <em>thông tin mới</em> chứ không trùng lặp thông tin đã có</td></tr>
+    </table>
+
+    <h3>Khái niệm cần biết: Feature vs Alpha</h3>
+    <div class="co b">💡 <strong>Feature</strong> = bất kỳ biến số đầu vào nào của mô hình ML. <strong>Alpha (Quant)</strong> = feature <em>có khả năng dự báo chiều giá</em> được chứng minh thống kê (IC có ý nghĩa, p &lt; 0.05). Mọi Alpha đều là Feature, nhưng không phải Feature nào cũng là Alpha. Ví dụ: <code>amihud_20d</code> là Feature nhưng không phải Alpha vì p = 0.95 (như tung đồng xu ngẫu nhiên).</div>
+
+    <h2>5. Bộ 13 Core Alphas Được Chọn (Core Alpha Pool)</h2>
+    <p>Từ 24 features ban đầu, sau khi lọc qua 3 tiêu chí trên, chọn ra <strong>13 Alphas tinh hoa</strong> đại diện đầy đủ cho <strong>5 nhóm tín hiệu kinh tế</strong> khác nhau:</p>
+
+    <table>
+      <tr><th>#</th><th>Alpha</th><th>Nhóm tín hiệu</th><th>Mean IC</th><th>p-value</th><th>Ý nghĩa tài chính</th><th>Ghi chú</th></tr>
+      <tr style="background:#e8f5e9">
+        <td><strong>1</strong></td><td><code>close_to_high</code></td><td>Intraday Reversal</td>
+        <td style="color:#2e7d32"><strong>+0.0189</strong></td><td>&lt;0.001 ***</td>
+        <td>Vị trí đóng cửa trong cây nến ngày: Bị ép bán sát đáy nến → hôm sau bật tăng</td><td>Giữ nguyên</td>
+      </tr>
+      <tr style="background:#e8f5e9">
+        <td><strong>2</strong></td><td><code>neg_ret_1d</code> (= −ret_1d)</td><td>Daily Reversal</td>
+        <td style="color:#2e7d32"><strong>+0.0144</strong></td><td>&lt;0.001 ***</td>
+        <td>Đảo chiều 1 ngày: Cổ phiếu giảm mạnh nhất hôm nay xác suất bật lại ngày mai cao nhất</td><td>Phải đảo dấu ret_1d</td>
+      </tr>
+      <tr style="background:#e8f5e9">
+        <td><strong>3</strong></td><td><code>neg_vwap_5</code> (= −close_to_vwap_5)</td><td>Institutional Flow</td>
+        <td style="color:#2e7d32"><strong>+0.0136</strong></td><td>&lt;0.001 ***</td>
+        <td>Độ lệch giá đóng cửa so với VWAP 5 ngày — tín hiệu dòng tiền tổ chức</td><td>Phải đảo dấu</td>
+      </tr>
+      <tr>
+        <td><strong>4</strong></td><td><code>Reversal_5D</code></td><td>Weekly Reversal</td>
+        <td style="color:#2e7d32"><strong>+0.0074</strong></td><td>0.000020 ***</td>
+        <td>Alpha bài tập của thầy: Đảo chiều lợi nhuận 5 ngày (1 tuần giao dịch)</td><td>Giữ nguyên</td>
+      </tr>
+      <tr>
+        <td><strong>5</strong></td><td><code>ret_252d</code></td><td>Annual Momentum</td>
+        <td style="color:#2e7d32"><strong>+0.0099</strong></td><td>&lt;0.001 ***</td>
+        <td>Đà tăng 1 năm: Quỹ duy trì nắm giữ cổ phiếu tốt trong 1 năm qua</td><td>Giữ nguyên</td>
+      </tr>
+      <tr>
+        <td><strong>6</strong></td><td><code>vol_zscore_20</code></td><td>Volume Spike</td>
+        <td style="color:#2e7d32"><strong>+0.0070</strong></td><td>&lt;0.001 ***</td>
+        <td>Đột biến khối lượng so với 20 ngày TB: Dòng tiền lớn đang gom hàng</td><td>Giữ nguyên</td>
+      </tr>
+      <tr>
+        <td><strong>7</strong></td><td><code>vol_ratio_5_20</code></td><td>Volume Trend</td>
+        <td style="color:#2e7d32"><strong>+0.0033</strong></td><td>&lt;0.001 ***</td>
+        <td>Tỷ lệ khối lượng ngắn/trung hạn: Gia tốc dòng tiền</td><td>Giữ nguyên</td>
+      </tr>
+      <tr>
+        <td><strong>8</strong></td><td><code>neg_ret_20d</code> (= −ret_20d)</td><td>Monthly Reversal</td>
+        <td style="color:#2e7d32"><strong>+0.0064</strong></td><td>0.004 **</td>
+        <td>Điều chỉnh sau 1 tháng tăng giá: Chốt lời tổ chức sau chu kỳ báo cáo</td><td>Phải đảo dấu ret_20d</td>
+      </tr>
+      <tr>
+        <td><strong>9</strong></td><td><code>close_to_sma_200</code></td><td>Macro Trend Bias</td>
+        <td style="color:#2e7d32"><strong>+0.0052</strong></td><td>0.043 *</td>
+        <td>Khoảng cách tới đường MA200: Định vị chu kỳ thị trường lớn (Bull/Bear)</td><td>Giữ nguyên</td>
+      </tr>
+      <tr>
+        <td><strong>10</strong></td><td><code>neg_macd_norm</code></td><td>Trend Exhaustion</td>
+        <td style="color:#2e7d32"><strong>+0.0089</strong></td><td>&lt;0.001 ***</td>
+        <td>Phân kỳ MACD Histogram: Báo hiệu nhịp điều chỉnh đang cạn dần</td><td>Phải đảo dấu macd_hist_norm</td>
+      </tr>
+      <tr>
+        <td><strong>11</strong></td><td><code>neg_rsi_14</code></td><td>Oscillator (Quá bán)</td>
+        <td style="color:#2e7d32"><strong>+0.0052</strong></td><td>0.006 **</td>
+        <td>RSI về vùng quá bán (&lt;0.3): Xác suất bật tăng kỹ thuật cao</td><td>Phải đảo dấu rsi_14</td>
+      </tr>
+      <tr>
+        <td><strong>12</strong></td><td><code>neg_realized_vol_20d</code></td><td>Volatility Risk</td>
+        <td style="color:#2e7d32"><strong>+0.0101</strong></td><td>0.002 **</td>
+        <td>Biến động thấp → ổn định → xác suất duy trì hoặc tăng cao hơn (Low Vol Anomaly)</td><td>Phải đảo dấu realized_vol_20d</td>
+      </tr>
+      <tr>
+        <td><strong>13</strong></td><td><code>neg_hl_spread</code></td><td>Intraday Uncertainty</td>
+        <td style="color:#2e7d32"><strong>+0.0094</strong></td><td>&lt;0.001 ***</td>
+        <td>Biên độ High–Low thấp → biến động trong ngày yên tĩnh → ít rủi ro lệnh bị trượt giá</td><td>Phải đảo dấu hl_spread</td>
+      </tr>
+    </table>
+
+    <h3>Features loại bỏ và lý do</h3>
+    <table>
+      <tr><th>Feature bị loại</th><th>Lý do</th><th>Thay thế bởi</th></tr>
+      <tr><td><code>amihud_20d</code></td><td>p = 0.95 → Không có predictive power trên large-cap R1000</td><td>—</td></tr>
+      <tr><td><code>ret_2d</code></td><td>Tương quan 0.848 với <code>close_to_vwap_5</code> → trùng lặp</td><td><code>neg_vwap_5</code></td></tr>
+      <tr><td><code>ret_5d</code></td><td>Tương quan 0.795 với <code>close_to_vwap_5</code> → trùng lặp</td><td><code>neg_vwap_5</code></td></tr>
+      <tr><td><code>ret_10d</code></td><td>Tương quan 0.880 với <code>close_to_sma_20</code> → trùng lặp</td><td><code>neg_macd_norm</code></td></tr>
+      <tr><td><code>close_to_sma_20</code></td><td>Tương quan 0.893 với <code>bb_pct_b</code> → trùng lặp nặng nhất</td><td><code>Reversal_5D</code></td></tr>
+      <tr><td><code>bb_pct_b</code></td><td>Tương quan 0.830 với <code>rsi_14</code> và 0.893 với <code>close_to_sma_20</code></td><td><code>neg_rsi_14</code></td></tr>
+      <tr><td><code>close_to_sma_50</code></td><td>Tương quan 0.821 với <code>ret_20d</code>, 0.639 với <code>close_to_sma_200</code></td><td><code>close_to_sma_200</code></td></tr>
+      <tr><td><code>realized_vol_60d</code></td><td>Tương quan 0.870 với <code>realized_vol_20d</code> → trùng lặp</td><td><code>neg_realized_vol_20d</code></td></tr>
+      <tr><td><code>bb_bandwidth</code></td><td>Tương quan 0.708 với <code>realized_vol_20d</code> → trùng lặp</td><td><code>neg_realized_vol_20d</code></td></tr>
+      <tr><td><code>ret_60d</code></td><td>Tương quan 0.738 với <code>close_to_sma_200</code> → trùng lặp</td><td><code>close_to_sma_200</code></td></tr>
+      <tr><td><code>realized_vol_5d</code></td><td>Tương quan 0.695 với <code>realized_vol_20d</code> → trùng lặp</td><td><code>neg_realized_vol_20d</code></td></tr>
+    </table>
+
+    <h2>6. Kết luận T6</h2>
+    <div class="co g">✅ <strong>Từ 24 features → 13 Core Alphas tinh hoa</strong>, vượt yêu cầu đề bài &gt;10 alpha, đại diện đầy đủ 5 nhóm tín hiệu kinh tế độc lập:<br>
+    <strong>Intraday Reversal</strong> · <strong>Short-term Reversal</strong> · <strong>Medium-term Momentum</strong> · <strong>Volume/Liquidity</strong> · <strong>Volatility Risk</strong>.<br><br>
+    4 features phải <strong>đảo dấu trước khi đưa vào mô hình</strong>: <code>ret_1d</code>, <code>ret_20d</code>, <code>close_to_vwap_5</code>, <code>macd_hist_norm</code>, <code>rsi_14</code>, <code>realized_vol_20d</code>, <code>hl_spread</code>.<br>
+    Đây là <strong>bộ features chính thức</strong> sẽ được dùng trong Phase 3 để huấn luyện mô hình LightGBM LambdaMART.</div>
+
   </div>
 </div>
 </section>

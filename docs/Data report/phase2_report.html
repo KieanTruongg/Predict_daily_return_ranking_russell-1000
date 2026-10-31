@@ -124,8 +124,8 @@ footer{margin:28px 28px 40px;text-align:center;color:#9e9e9e;font-size:12px;}
   <div class="qbar">
     <div class="qb"><div class="v">5.9M</div><div class="l">Return Observations</div></div>
     <div class="qb"><div class="v">31</div><div class="l">Features Built</div></div>
-    <div class="qb"><div class="v">5.8M</div><div class="l">Feature Store Rows</div></div>
-    <div class="qb"><div class="v">10.8%</div><div class="l">NaN Rate</div></div>
+    <div class="qb"><div class="v">5.5M</div><div class="l">Feature Store Rows (PIT)</div></div>
+    <div class="qb"><div class="v">6.1%</div><div class="l">NaN Rate</div></div>
     <div class="qb"><div class="v">+0.019</div><div class="l">Best Feature IC</div></div>
     <div class="qb"><div class="v">13</div><div class="l">Core Alphas Chọn lọc</div></div>
   </div>
@@ -630,11 +630,11 @@ features[<span class="st">"ret_1d_rank"</span>] = features[<span class="st">"ret
     <h2>Build Statistics</h2>
     <div class="g3">
       <div class="kpi"><div class="kv">2,263</div><div class="kl">Tickers giữ lại (−589 OOS)</div></div>
-      <div class="kpi"><div class="kv">77.4s</div><div class="kl">Build time (vectorized)</div></div>
-      <div class="kpi"><div class="kv">5,820,358</div><div class="kl">Long-format rows</div></div>
-      <div class="kpi"><div class="kv">10.8%</div><div class="kl">NaN rate (long-format)</div></div>
+      <div class="kpi"><div class="kv">79.8s</div><div class="kl">Build time (vectorized)</div></div>
+      <div class="kpi"><div class="kv">5,506,113</div><div class="kl">Long-format rows (Sạch PIT)</div></div>
+      <div class="kpi"><div class="kv">6.1%</div><div class="kl">NaN rate (giảm từ 10.8%)</div></div>
       <div class="kpi"><div class="kv">0.5005</div><div class="kl">target_return_rank mean (≈0.5 = no bias)</div></div>
-      <div class="kpi"><div class="kv">1,103 MB</div><div class="kl">feature_store_long.parquet size</div></div>
+      <div class="kpi"><div class="kv">1,098.6 MB</div><div class="kl">feature_store_long.parquet size</div></div>
     </div>
     <div class="co g">✅ <strong>Feature Store sẵn sàng (Chuẩn PIT)</strong> — 31 features, tích hợp universe_mask chính xác từng ngày sau tái cơ cấu tháng 6. Triệt tiêu 100% Look-ahead bias trong H1 hàng năm. Đã kiểm thử overlap 99.6% với iShares IWB ETF. Sẵn sàng cho 13 Core Alphas và Phase 3 ML Training.</div>
   </div>
@@ -677,12 +677,12 @@ alpha = raw.<span class="fn">sub</span>(raw.<span class="fn">mean</span>(axis=<s
 
     <h2>Reversal 5D — Kết quả IC</h2>
     <div class="g3">
-      <div class="kpi"><div class="kv">+0.00736</div><div class="kl">Mean Rank IC</div></div>
-      <div class="kpi"><div class="kv">0.0550</div><div class="kl">ICIR (Mean/Std)</div></div>
+      <div class="kpi"><div class="kv">+0.00711</div><div class="kl">Mean Rank IC</div></div>
+      <div class="kpi"><div class="kv">0.0530</div><div class="kl">ICIR (Mean/Std)</div></div>
       <div class="kpi"><div class="kv">51.5%</div><div class="kl">Positive IC days</div></div>
-      <div class="kpi"><div class="kv">0.13394</div><div class="kl">IC Std (biến động)</div></div>
-      <div class="kpi"><div class="kv">+4.264</div><div class="kl">t-statistic</div></div>
-      <div class="kpi"><div class="kv">0.000020</div><div class="kl">p-value (***)</div></div>
+      <div class="kpi"><div class="kv">0.13432</div><div class="kl">IC Std (biến động)</div></div>
+      <div class="kpi"><div class="kv">+4.066</div><div class="kl">t-statistic</div></div>
+      <div class="kpi"><div class="kv">0.000048</div><div class="kl">p-value (***)</div></div>
     </div>
 
     <h2>Reversal 5D — IC theo năm (Regime Analysis)</h2>

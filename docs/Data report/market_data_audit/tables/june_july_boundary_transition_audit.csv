@@ -1,0 +1,27 @@
+transition,boundary_date,constituents_prior,constituents_after,staying_constituents,exiting_constituents,entering_constituents,entering_with_warmup_ge_20d,warmup_readiness_pct,churn_rate_pct
+2000 Reconstitution -> 2001 Reconstitution,2001-06-30 / 2001-07-01,996,989,784,212,205,192,93.66,21.01
+2001 Reconstitution -> 2002 Reconstitution,2002-06-30 / 2002-07-01,989,988,811,178,177,165,93.22,17.96
+2002 Reconstitution -> 2003 Reconstitution,2003-06-30 / 2003-07-01,988,988,871,117,117,109,93.16,11.84
+2003 Reconstitution -> 2004 Reconstitution,2004-06-30 / 2004-07-01,988,990,894,94,96,93,96.88,9.61
+2004 Reconstitution -> 2005 Reconstitution,2005-06-30 / 2005-07-01,990,987,877,113,110,104,94.55,11.28
+2005 Reconstitution -> 2006 Reconstitution,2006-06-30 / 2006-07-01,987,982,862,125,120,113,94.17,12.44
+2006 Reconstitution -> 2007 Reconstitution,2007-06-30 / 2007-07-01,982,1013,919,63,94,88,93.62,7.87
+2007 Reconstitution -> 2008 Reconstitution,2008-06-30 / 2008-07-01,1013,1002,917,96,85,81,95.29,8.98
+2008 Reconstitution -> 2009 Reconstitution,2009-06-30 / 2009-07-01,1002,967,906,96,61,58,95.08,7.97
+2009 Reconstitution -> 2010 Reconstitution,2010-06-30 / 2010-07-01,967,981,915,52,66,61,92.42,6.06
+2010 Reconstitution -> 2011 Reconstitution,2011-06-30 / 2011-07-01,981,982,912,69,70,68,97.14,7.08
+2011 Reconstitution -> 2012 Reconstitution,2012-06-30 / 2012-07-01,982,987,911,71,76,74,97.37,7.47
+2012 Reconstitution -> 2013 Reconstitution,2013-06-30 / 2013-07-01,987,1000,935,52,65,63,96.92,5.89
+2013 Reconstitution -> 2014 Reconstitution,2014-06-30 / 2014-07-01,1000,1023,951,49,72,70,97.22,5.98
+2014 Reconstitution -> 2015 Reconstitution,2015-06-30 / 2015-07-01,1023,1026,947,76,79,72,91.14,7.56
+2015 Reconstitution -> 2016 Reconstitution,2016-06-30 / 2016-07-01,1026,991,925,101,66,64,96.97,8.28
+2016 Reconstitution -> 2017 Reconstitution,2017-06-30 / 2017-07-01,991,980,914,77,66,63,95.45,7.26
+2017 Reconstitution -> 2018 Reconstitution,2018-06-30 / 2018-07-01,980,976,897,83,79,75,94.94,8.28
+2018 Reconstitution -> 2019 Reconstitution,2019-06-30 / 2019-07-01,976,1001,920,56,81,67,82.72,6.93
+2019 Reconstitution -> 2020 Reconstitution,2020-06-30 / 2020-07-01,1001,994,913,88,81,79,97.53,8.47
+2020 Reconstitution -> 2021 Reconstitution,2021-06-30 / 2021-07-01,994,1017,925,69,92,89,96.74,8.01
+2021 Reconstitution -> 2022 Reconstitution,2022-06-30 / 2022-07-01,1017,1013,937,80,76,72,94.74,7.68
+2022 Reconstitution -> 2023 Reconstitution,2023-06-30 / 2023-07-01,1013,1011,939,74,72,52,72.22,7.21
+2023 Reconstitution -> 2024 Reconstitution,2024-06-30 / 2024-07-01,1011,1010,961,50,49,45,91.84,4.9
+2024 Reconstitution -> 2025 Reconstitution,2025-06-30 / 2025-07-01,1010,1014,960,50,54,51,94.44,5.14
+2025 Reconstitution -> 2026 Reconstitution,2026-06-30 / 2026-07-01,1014,1011,924,90,87,77,88.51,8.74

@@ -1,142 +1,193 @@
-# ⚠️ NOT used in Phase 1/2 pipeline. Universe loading is handled by
-# scripts/01_pipeline/01_parse_all_universe.py + raw/universe/by_year/ JSONs. Reserved for Phase 3.
+"""
+src.data.universe
+=================
+Point-In-Time Universe querying, Security Identifier (SID) resolution,
+and ticker-to-canonical-SID mapping utilities.
+"""
 
-"""Universe management for Russell 1000 Point-in-Time constituents (2000-2026)."""
-import os
-import glob
+from __future__ import annotations
 import json
-import re
-import io
-import requests
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 import pandas as pd
-from typing import List, Dict, Optional
 
-DEFAULT_UNIVERSE_CSV = os.path.join("data", "raw", "universe", "russell1000_constituents.csv")
-RAW_ARCHIVE_DIR = os.path.join("data", "raw", "universe", "raw")
+from src.data.matrix_loader import load_matrix
+from src.quality.quality_window import OOSFreezeViolationError
+from src.utils.config import Config, get_project_root, load_config
 
 
-def parse_pit_universe_archive(archive_dir: str = RAW_ARCHIVE_DIR) -> Dict[str, List[str]]:
+def load_canonical_security_mapping(config: Optional[Config] = None) -> pd.DataFrame:
     """
-    Parses annual Point-in-Time Russell 1000 reconstitution archive (2000 to 2026)
-    located in `data/raw/universe/raw/`.
+    Loads the official canonical security mapping table:
+    docs/Data report/market_data_audit/tables/canonical_security_mapping.csv
+    """
+    cfg = config or load_config()
+    table_path = cfg.project_root / "docs" / "Data report" / "market_data_audit" / "tables" / "canonical_security_mapping.csv"
+    if not table_path.exists():
+        raise FileNotFoundError(f"Canonical security mapping table not found: {table_path}")
+    return pd.read_csv(table_path)
+
+
+def load_temporal_mapping(config: Optional[Config] = None) -> pd.DataFrame:
+    """
+    Loads the official temporal constituent mapping table:
+    docs/Data report/market_data_audit/tables/universe_constituent_temporal_mapping.csv
+    """
+    cfg = config or load_config()
+    table_path = cfg.project_root / "docs" / "Data report" / "market_data_audit" / "tables" / "universe_constituent_temporal_mapping.csv"
+    if not table_path.exists():
+        raise FileNotFoundError(f"Temporal mapping table not found: {table_path}")
+    return pd.read_csv(table_path, encoding="utf-8")
+
+
+def load_pit_by_year_json(config: Optional[Config] = None) -> Dict[str, List[str]]:
+    """
+    Loads raw universe constituents by year (2000 to 2026) from JSON.
+    """
+    cfg = config or load_config()
+    json_path = cfg.get_pit_by_year_json_path()
+    if not json_path.exists():
+        raise FileNotFoundError(f"Universe PIT JSON not found: {json_path}")
+    with open(json_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def ticker_to_canonical_sids(
+    ticker: str,
+    as_of_date: Optional[Union[str, pd.Timestamp]] = None,
+    config: Optional[Config] = None,
+) -> List[str]:
+    """
+    Maps a ticker symbol to canonical SID(s).
     
-    Returns a dictionary mapping Year (str) -> List of Tickers (List[str]).
+    If as_of_date is provided:
+        Resolves Point-In-Time identity based strictly on the active date range [min_date, max_date].
+        If no mapping is active on as_of_date, returns an empty list [] (unresolved/inactive).
+        Does NOT silently fall back to historical SIDs.
+    If as_of_date is None:
+        Returns all canonical SIDs ever associated with this ticker across history.
     """
-    if not os.path.exists(archive_dir):
-        return {}
+    df = load_canonical_security_mapping(config=config)
+    matches = df[df["original_ticker"].str.upper() == ticker.upper()]
 
-    files = glob.glob(os.path.join(archive_dir, "*"))
-    yearly_tickers: Dict[str, List[str]] = {}
+    if matches.empty:
+        return []
 
-    for fpath in sorted(files):
-        fname = os.path.basename(fpath)
-        year = fname.split(".")[0]
-        if not year.isdigit():
-            continue
+    if as_of_date is not None:
+        dt = pd.Timestamp(as_of_date).strftime("%Y-%m-%d")
+        dt_matches = matches[(matches["min_date"] <= dt) & (matches["max_date"] >= dt)]
+        if not dt_matches.empty:
+            return dt_matches["canonical_sid"].unique().tolist()
+        return []  # Strict PIT semantics: no active SID on as_of_date -> return empty
 
-        found_tickers = set()
-
-        if fname.endswith(".json"):
-            try:
-                with open(fpath, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    for row in data:
-                        if isinstance(row, list) and len(row) > 0 and isinstance(row[0], str):
-                            t = row[0].strip().replace(".", "-")
-                            if t and len(t) <= 6:
-                                found_tickers.add(t)
-            except Exception:
-                pass
-
-        elif fname.endswith(".csv"):
-            try:
-                df = pd.read_csv(fpath)
-                col = "Ticker" if "Ticker" in df.columns else df.columns[0]
-                for t in df[col].dropna():
-                    t = str(t).strip().replace(".", "-")
-                    if t and len(t) <= 6:
-                        found_tickers.add(t)
-            except Exception:
-                pass
-
-        elif fname.endswith(".xls") or fname.endswith(".xlsx"):
-            try:
-                with open(fpath, "r", encoding="utf-8", errors="ignore") as f:
-                    text = f.read()
-                cells = re.findall(r"<Cell[^>]*>\s*<Data[^>]*>([A-Z0-9\.\-]{1,6})</Data>\s*</Cell>", text)
-                for t in cells:
-                    t = t.strip().replace(".", "-")
-                    if t not in ["TICKER", "NAME", "USD", "ISIN", "CUSIP", "EQUITY"]:
-                        found_tickers.add(t)
-            except Exception:
-                pass
-
-        elif fname.endswith(".pdf"):
-            try:
-                import pypdf
-                reader = pypdf.PdfReader(fpath)
-                text = " ".join([page.extract_text() for page in reader.pages])
-                tokens = re.findall(r"\b[A-Z]{1,5}\b", text)
-                for t in tokens:
-                    if t not in ["THE", "AND", "FOR", "INC", "CORP", "CO", "LTD", "PLC", "CLASS", "INDEX", "RUSSELL", "FTSE", "HOLDINGS", "GROUP"]:
-                        found_tickers.add(t)
-            except Exception:
-                pass
-
-        if found_tickers:
-            yearly_tickers[year] = sorted(list(found_tickers))
-
-    return yearly_tickers
+    return matches["canonical_sid"].unique().tolist()
 
 
-def build_or_load_universe(output_csv: str = DEFAULT_UNIVERSE_CSV, min_stocks: int = 500) -> List[str]:
+def canonical_sid_to_ticker(
+    canonical_sid: str,
+    as_of_date: Optional[Union[str, pd.Timestamp]] = None,
+    config: Optional[Config] = None,
+) -> Optional[str]:
     """
-    Loads existing universe or builds it from local annual PIT archive or fallback sources.
-    Ensures at least `min_stocks` tickers are available.
+    Returns the primary ticker symbol associated with a canonical SID.
+    
+    If as_of_date is provided:
+        Returns the ticker valid as of that specific trading date.
+        If the SID was inactive on as_of_date, returns None.
+    If as_of_date is None:
+        Returns the primary representative ticker from the canonical mapping table.
     """
-    # 1. Try local annual PIT archive in data/raw/universe/raw/
-    pit_dict = parse_pit_universe_archive()
-    if pit_dict:
-        all_unique_tickers = set()
-        for year, tickers in pit_dict.items():
-            all_unique_tickers.update(tickers)
+    df = load_canonical_security_mapping(config=config)
+    matches = df[df["canonical_sid"] == canonical_sid]
 
-        if len(all_unique_tickers) >= min_stocks:
-            sorted_tickers = sorted(list(all_unique_tickers))
-            df = pd.DataFrame({"Ticker": sorted_tickers, "Name": sorted_tickers, "Source": "PIT_Russell_Archive"})
-            os.makedirs(os.path.dirname(output_csv), exist_ok=True)
-            df.to_csv(output_csv, index=False)
+    if matches.empty:
+        # Fallback to string extraction only if as_of_date is None
+        if as_of_date is None:
+            parts = canonical_sid.split()
+            return parts[0] if parts else None
+        return None
 
-            # Also save yearly PIT mapping JSON for dynamic backtesting
-            json_path = os.path.join(os.path.dirname(output_csv), "russell1000_pit_by_year.json")
-            with open(json_path, "w", encoding="utf-8") as f:
-                json.dump(pit_dict, f, indent=4)
+    if as_of_date is not None:
+        dt = pd.Timestamp(as_of_date).strftime("%Y-%m-%d")
+        dt_matches = matches[(matches["min_date"] <= dt) & (matches["max_date"] >= dt)]
+        if not dt_matches.empty:
+            return str(dt_matches["original_ticker"].iloc[0])
+        
+        # Check temporal mapping as secondary PIT source
+        try:
+            t_df = load_temporal_mapping(config=config)
+            t_matches = t_df[
+                (t_df["assigned_canonical_sid"] == canonical_sid)
+                & (t_df["period_start"] <= dt)
+                & (t_df["period_end"] >= dt)
+            ]
+            if not t_matches.empty:
+                return str(t_matches["source_ticker"].iloc[0])
+        except Exception:
+            pass
+        return None
 
-            print(f"[Success] Loaded Point-in-Time Russell 1000 archive ({len(sorted_tickers)} unique tickers across {len(pit_dict)} years).")
-            print(f"[Saved] Master ticker list -> '{output_csv}'")
-            print(f"[Saved] Yearly Point-in-Time JSON mapping -> '{json_path}'")
-            return sorted_tickers
+    return str(matches["original_ticker"].iloc[0])
 
-    # 2. Check existing CSV
-    if os.path.exists(output_csv):
-        df = pd.read_csv(output_csv)
-        if len(df) >= min_stocks:
-            tickers = df["Ticker"].dropna().unique().tolist()
-            return sorted(tickers)
 
-    # 3. Fallback to S&P 500 / Large-Cap list
-    print(f"Building Russell 1000 universe proxy (target >= {min_stocks} stocks)...")
-    fallback_url = "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/master/data/constituents.csv"
-    try:
-        df = pd.read_csv(fallback_url)
-        if "Symbol" in df.columns:
-            df = df.rename(columns={"Symbol": "Ticker"})
-        df["Ticker"] = df["Ticker"].str.replace(".", "-", regex=False)
-        df.to_csv(output_csv, index=False)
-        tickers = df["Ticker"].dropna().unique().tolist()
-        return sorted(tickers)
-    except Exception:
-        seed_tickers = ["AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "BRK-B", "TSLA", "UNH", "JNJ"]
-        df = pd.DataFrame({"Ticker": seed_tickers})
-        df.to_csv(output_csv, index=False)
-        return seed_tickers
+def get_reconstitution_year(date: Union[str, pd.Timestamp]) -> int:
+    """
+    Calculates the reconstitution cycle year for a given date according to
+    the institutional convention [01/07/Y to 30/06/Y+1].
+
+    Examples:
+      - 2005-08-15 -> 2005
+      - 2006-03-20 -> 2005
+      - 2006-07-01 -> 2006
+    """
+    ts = pd.Timestamp(date)
+    if ts.month >= 7:
+        return ts.year
+    else:
+        return ts.year - 1
+
+
+def get_active_constituents(
+    date: Union[str, pd.Timestamp],
+    strict: bool = True,
+    allow_oos: bool = False,
+    config: Optional[Config] = None,
+) -> List[str]:
+    """
+    Queries canonical SIDs active in the Russell 1000 on a specific trading date
+    from the 2D membership mask matrix.
+
+    Handles OOS boundary cleanly:
+    - If date is in the development period (date < oos_start_date), loads only the
+      development/warmup slice, eliminating false-positive OOS freeze violations.
+    - If date is in the OOS period (date >= oos_start_date) and allow_oos is False,
+      raises OOSFreezeViolationError.
+    """
+    cfg = config or load_config()
+    ts = pd.Timestamp(date)
+    oos_threshold = pd.Timestamp(cfg.oos_start_date)
+
+    if ts >= oos_threshold:
+        if cfg.oos_strictly_frozen and not allow_oos:
+            raise OOSFreezeViolationError(
+                f"OOS FREEZE VIOLATION: Query for active constituents on {ts.strftime('%Y-%m-%d')} "
+                f"falls in the strictly frozen Out-of-Sample window (starting {cfg.oos_start_date}). "
+                f"Set allow_oos=True only during authorized post-development evaluations."
+            )
+        # Explicitly allowed OOS access
+        matrix_name = "strict_membership_mask" if strict else "membership_mask"
+        mask_df = load_matrix(matrix_name, dev_only=False, allow_oos=True, config=cfg)
+    else:
+        # Development query: load dev + warmup window safely without triggering OOS check
+        matrix_name = "strict_membership_mask" if strict else "membership_mask"
+        mask_df = load_matrix(matrix_name, dev_only=True, include_warmup=True, allow_oos=False, config=cfg)
+
+    if ts not in mask_df.index:
+        # Find nearest previous trading day
+        valid_dates = mask_df.index[mask_df.index <= ts]
+        if len(valid_dates) == 0:
+            raise KeyError(f"Date {ts.strftime('%Y-%m-%d')} precedes all available trading dates.")
+        ts = valid_dates[-1]
+
+    row = mask_df.loc[ts]
+    return row.index[row.astype(bool)].tolist()

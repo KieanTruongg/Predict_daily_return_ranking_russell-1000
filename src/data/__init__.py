@@ -1,31 +1,49 @@
-"""Russell 1000 data loading, preprocessing, and splitting utilities."""
-from src.data.universe import build_or_load_universe
-from src.data.loader import (
-    load_full_panel,
-    load_by_year_range,
-    load_single_year,
-    load_ticker_history,
-    get_data_summary,
+"""
+src.data
+========
+High-performance 2D matrix ingestion, PIT masks, and universe management.
+"""
+
+from src.data.matrix_loader import (
+    load_matrix,
+    load_matrices,
+    load_masked_matrix,
+    load_dates_index,
+    load_columns_sids,
+    get_matrix_path,
 )
-from src.data.preprocessor import CrossSectionalDataContainer, pivot_panel_to_matrices
-from src.data.split import (
-    split_and_persist_data,
-    split_container,
-    load_in_sample_data,
-    load_out_sample_data,
+from src.data.masks import (
+    load_layer1_mask,
+    load_layer2_mask,
+    load_layer3_mask,
+    combine_masks,
+    verify_mask_hierarchy,
+)
+from src.data.universe import (
+    load_canonical_security_mapping,
+    load_temporal_mapping,
+    ticker_to_canonical_sids,
+    canonical_sid_to_ticker,
+    get_active_constituents,
+    get_reconstitution_year,
 )
 
 __all__ = [
-    "build_or_load_universe",
-    "load_full_panel",
-    "load_by_year_range",
-    "load_single_year",
-    "load_ticker_history",
-    "get_data_summary",
-    "CrossSectionalDataContainer",
-    "pivot_panel_to_matrices",
-    "split_and_persist_data",
-    "split_container",
-    "load_in_sample_data",
-    "load_out_sample_data",
+    "load_matrix",
+    "load_matrices",
+    "load_masked_matrix",
+    "load_dates_index",
+    "load_columns_sids",
+    "get_matrix_path",
+    "load_layer1_mask",
+    "load_layer2_mask",
+    "load_layer3_mask",
+    "combine_masks",
+    "verify_mask_hierarchy",
+    "load_canonical_security_mapping",
+    "load_temporal_mapping",
+    "ticker_to_canonical_sids",
+    "canonical_sid_to_ticker",
+    "get_active_constituents",
+    "get_reconstitution_year",
 ]

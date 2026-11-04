@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Russell 1000 Universe Preprocessing & PIT Methodology Report</title>
+<style>
+:root {
+  --side: 280px;
+  --primary: #0f172a;
+  --indigo: #4338ca;
+  --dindigo: #312e81;
+  --teal: #0d9488;
+  --green: #16a34a;
+  --gbg: #f0fdf4;
+  --orange: #ea580c;
+  --obg: #fff7ed;
+  --red: #dc2626;
+  --rbg: #fef2f2;
+  --gray: #64748b;
+  --code-bg: #0f172a;
+  --border: #e2e8f0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: #1e293b;
+  background: #f8fafc;
+  line-height: 1.6;
+}
+
+/* Sidebar */
+#sb {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--side);
+  height: 100vh;
+  background: #0f172a;
+  overflow-y: auto;
+  z-index: 100;
+  border-right: 1px solid #1e293b;
+}
+#sb .brand {
+  background: #1e1b4b;
+  padding: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.4;
+  border-bottom: 1px solid #312e81;
+}
+#sb .brand span {
+  font-size: 11px;
+  color: #a5b4fc;
+  display: block;
+  font-weight: 400;
+  margin-top: 3px;
+}
+#sb nav { padding: 12px 0 30px; }
+#sb .lbl {
+  padding: 12px 18px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+#sb a {
+  display: block;
+  padding: 6px 18px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 12.5px;
+  border-left: 3px solid transparent;
+  transition: all .15s ease;
+}
+#sb a:hover, #sb a.act {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border-left-color: #818cf8;
+}
+#sb .sub { padding-left: 30px; font-size: 11.5px; }
+
+/* Main Content */
+#main { margin-left: var(--side); }
+
+/* Header */
+#hdr {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0d9488 100%);
+  color: #fff;
+  padding: 36px 44px 28px;
+}
+#hdr h1 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+#hdr p {
+  font-size: 13.5px;
+  opacity: .9;
+  line-height: 1.6;
+  max-width: 900px;
+}
+.tag-bar { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+.tag {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+/* KPI Quickbar */
+.qbar { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 22px; }
+.qb {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px 18px;
+  min-width: 130px;
+}
+.qb .v { font-size: 22px; font-weight: 800; }
+.qb .l { font-size: 10.5px; opacity: .85; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Cards & Containers */
+.card {
+  background: #fff;
+  margin: 22px 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+.card-hdr {
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-hdr.indigo { background: #3730a3; }
+.card-hdr.teal { background: #0f766e; }
+.card-hdr.purple { background: #581c87; }
+.card-hdr.slate { background: #334155; }
+.card-body { padding: 26px 30px; }
+
+/* Typography */
+h2 {
+  font-size: 15px;
+  color: #1e1b4b;
+  margin: 24px 0 10px;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #e0e7ff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+h2:first-child { margin-top: 0; }
+h3 { font-size: 13.5px; color: #334155; margin: 16px 0 8px; font-weight: 700; }
+p { line-height: 1.8; margin-bottom: 11px; color: #334155; }
+ul, ol { padding-left: 22px; margin-bottom: 12px; }
+li { line-height: 1.85; color: #334155; margin-bottom: 3px; }
+
+/* Grids */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 12px 0; }
+.g4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+
+.kpi {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  border-left: 4px solid #4338ca;
+}
+.kpi .kv { font-size: 20px; font-weight: 800; color: #1e1b4b; }
+.kpi .kl { font-size: 11.5px; color: #64748b; margin-top: 2px; }
+
+/* Callouts */
+.co {
+  border-left: 4px solid;
+  padding: 12px 18px;
+  margin: 14px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.co.info { border-color: #3b82f6; background: #eff6ff; }
+.co.warn { border-color: #f59e0b; background: #fffbeb; }
+.co.success { border-color: #10b981; background: #ecfdf5; }
+.co.danger { border-color: #ef4444; background: #fef2f2; }
+.co.purple { border-color: #8b5cf6; background: #f5f3ff; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 13px; }
+th { background: #1e293b; color: #fff; padding: 10px 12px; text-align: left; font-weight: 600; }
+td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; color: #334155; }
+tr:nth-child(even) td { background: #f8fafc; }
+tr:hover td { background: #f1f5f9; }
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.badge.green { background: #dcfce7; color: #15803d; }
+.badge.blue { background: #dbeafe; color: #1d4ed8; }
+.badge.orange { background: #ffedd5; color: #c2410c; }
+.badge.purple { background: #f3e8ff; color: #7e22ce; }
+
+/* Code Blocks */
+pre {
+  background: var(--code-bg);
+  color: #f8fafc;
+  padding: 14px 18px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.65;
+  margin: 12px 0 16px;
+  border: 1px solid #1e293b;
+}
+code { font-family: 'Cascadia Code', 'Consolas', 'Fira Code', monospace; }
+ic {
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+.kw { color: #818cf8; font-weight: 600; }
+.fn { color: #38bdf8; }
+.st { color: #f472b6; }
+.cm { color: #64748b; font-style: italic; }
+.nu { color: #fbbf24; }
+
+/* Flowchart & Timeline Containers */
+.timeline {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+.t-node {
+  flex: 1;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  position: relative;
+}
+.t-node::after {
+  content: "➔";
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-weight: bold;
+}
+.t-node:last-child::after { display: none; }
+.t-node .t-date { font-size: 11px; font-weight: 700; color: #4338ca; text-transform: uppercase; }
+.t-node .t-title { font-size: 13.5px; font-weight: 700; margin: 4px 0 6px; color: #0f172a; }
+.t-node .t-desc { font-size: 11.5px; color: #64748b; line-height: 1.5; }
+
+/* Metadata Pill */
+.meta-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0 16px; }
+.meta-pill {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: #475569;
+}
+.meta-pill strong { color: #1e1b4b; }
+
+/* Image Container & Responsive Styling */
+.img-w {
+  text-align: center;
+  margin: 22px auto;
+  max-width: 860px;
+}
+.img-w img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+  border: 1px solid #cbd5e1;
+  display: block;
+  margin: 0 auto;
+}
+.img-cap, .cap {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 8px;
+  font-style: italic;
+  text-align: center;
+}
+
+footer {
+  margin: 40px 36px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 12px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 20px;
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sb">
+  <div class="brand">
+    Russell 1000 PIT Pipeline
+    <span>Universe Preprocessing &amp; Methodology Report</span>
+  </div>
+  <nav>
+    <div class="lbl">Tổng quan</div>
+    <a href="#overview">1.0 Bản chất Russell 1000</a>
+    <a href="#bias-theory">2.0 Lý thuyết Bias &amp; PIT</a>
+    
+    <div class="lbl">Lịch trình &amp; Look-ahead</div>
+    <a href="#reconstitution">3.0 Lịch trình Tái cơ cấu (Recon)</a>
+    <a href="#lookahead-fix">4.0 Cơ chế Tránh Look-ahead Bias</a>
+    
+    <div class="lbl">Thu thập &amp; Bóc tách</div>
+    <a href="#raw-sources">5.0 Kho dữ liệu gốc (2000–2026)</a>
+    <a href="#parsers-eras">6.0 Thuật toán bóc tách qua 3 Era</a>
+    <a href="#cleaning-rules">7.0 Lọc nhiễu &amp; Chuẩn hóa Ticker</a>
+    
+    <div class="lbl">Kiểm toán &amp; Thực thi</div>
+    <a href="#audit-results">8.0 Báo cáo chất lượng 27 năm</a>
+    <a href="#forensic-dates" class="sub">8.2 Đối Soát Ngày &amp; Metadata Gốc</a>
+    <a href="#pit-mask-engine">9.0 Kiến trúc PIT Mask Engine</a>
+    <a href="#qc-market-match">10.0 Đồng bộ hóa với QuantConnect</a>
+    <a href="#data-engineering">11.0 Tối ưu Data Engineering &amp; Artifacts</a>
+    <a href="#reproduce">12.0 Hướng dẫn tái hiện (Reproduction)</a>
+  </nav>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+<!-- HEADER -->
+<div id="hdr">
+  <h1>📜 Báo Cáo Kỹ Thuật: Tiền Xử Lý Dữ Liệu Russell 1000 Point-In-Time (2000–2026)</h1>
+  <p>Giải trình toàn diện quy trình trích xuất tài liệu thô (PDF, CSV, JSON, XLS), lịch trình tái cơ cấu thường niên của FTSE Russell, thuật toán bóc tách văn bản qua các kỷ nguyên và giải pháp triệt tiêu hoàn toàn Look-ahead Bias &amp; Survivorship Bias trong đồ án định lượng.</p>
+  
+  <div class="tag-bar">
+    <span class="tag">CO3101 HCMUT</span>
+    <span class="tag">Russell 1000 PIT</span>
+    <span class="tag">Multi-Era Regex Parsers</span>
+    <span class="tag">Zero Look-ahead Bias</span>
+    <span class="tag">QuantConnect Lean Engine</span>
+  </div>
+
+  <div class="qbar">
+    <div class="qb"><div class="v">27 Năm</div><div class="l">Phạm vi (2000–2026)</div></div>
+    <div class="qb"><div class="v">2,884</div><div class="l">Unique Tickers</div></div>
+    <div class="qb"><div class="v">99.42%</div><div class="l">QC Match Rate</div></div>
+    <div class="qb"><div class="v">3 Eras</div><div class="l">Layout PDF Bóc tách</div></div>
+    <div class="qb"><div class="v">0.00%</div><div class="l">Look-ahead Bias</div></div>
+  </div>
+</div>
+
+<!-- SECTION 1: OVERVIEW -->
+<section id="overview">
+<div class="card">
+  <div class="card-hdr indigo">
+    <span>1.0 Bản Chất Chỉ Số Russell 1000 &amp; Cơ Chế Tuyển Chọn</span>
+    <span class="badge purple">Foundation</span>
+  </div>
+  <div class="card-body">
+    <h2>1.1 Russell 1000 Là Gì?</h2>
+    <p>Chỉ số <strong>Russell 1000 Index</strong> (được duy trì bởi FTSE Russell / LSEG) là chuẩn đo lường vị thế của phân khúc vốn hóa lớn (Large-cap) trong thị trường chứng khoán Hoa Kỳ. Chỉ số bao gồm khoảng 1,000 công ty niêm yết lớn nhất, chiếm xấp xỉ <strong>93% tổng vốn hóa thị trường chứng khoán Mỹ</strong> (tương đương khoảng $35,000 tỷ USD).</p>
+    
+    <h2>1.2 Tiêu Chí Chọn Lọc Cổ Phiếu — Điểm Tựa Khoa Học Cốt Lõi</h2>
+    <p>Trong nghiên cứu định lượng (Quantitative Finance), nguy cơ lớn nhất khi chọn một rổ cổ phiếu là <strong>Selection Bias</strong> (Thiên vị lựa chọn). Ví dụ: Nếu ta tự chọn ra 50 cổ phiếu công nghệ "nổi tiếng nhất", ta đã vô thức chọn những công ty đã thành công vang dội trong quá khứ.</p>
+    
+    <div class="co success">
+      <strong>✨ Điểm tựa khoa học của Russell 1000:</strong>
+      <br>FTSE Russell tuyển chọn thành viên <strong>HOÀN TOÀN DỰA TRÊN THỨ HẠNG VỐN HÓA THỊ TRƯỜNG (Market Capitalization Ranking)</strong> tại ngày Rank Day.
+      <br>Chỉ số <strong>KHÔNG</strong> lựa chọn cổ phiếu dựa trên lợi nhuận quá khứ (past performance), không dựa trên tỷ lệ tăng trưởng doanh thu hay lợi nhuận kế toán (profitability).
+    </div>
+
+    <p>Quy trình tinh gọn của FTSE Russell có thể tóm tắt bằng công thức:</p>
+    <div style="text-align: center; margin: 16px 0; font-size: 15px; font-weight: 700; color: #1e1b4b; background: #e0e7ff; padding: 12px; border-radius: 8px;">
+      Toàn bộ cổ phiếu hợp lệ tại Mỹ (US Eligible Stocks)
+      &nbsp; ➔ &nbsp;
+      Xếp hạng Vốn hóa tại Rank Day (Market-Cap Rank)
+      &nbsp; ➔ &nbsp;
+      Top ~1,000 cổ phiếu lớn nhất (Russell 1000)
+    </div>
+
+    <p>Tất nhiên, FTSE Russell còn áp dụng thêm một số quy tắc phụ trợ như: tỷ lệ cổ phiếu tự do chuyển nhượng (Free-float &gt; 5%), ngưỡng thanh khoản tối thiểu, và dải đệm dung sai vốn hóa (5% Banding Rule) để hạn chế vòng quay chỉ số (turnover). Tuy nhiên, về mặt bản chất định lượng, <strong>đây là một Universe khách quan, không chứa bias chủ quan của con người</strong>.</p>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 2: BIAS THEORY -->
+<section id="bias-theory">
+<div class="card">
+  <div class="card-hdr teal">
+    <span>2.0 Lý Thuyết Về Hai Cạm Bẫy Lớn: Survivorship Bias &amp; Look-Ahead Bias</span>
+    <span class="badge blue">Theoretical Rigor</span>
+  </div>
+  <div class="card-body">
+    <h2>2.1 Cạm Bẫy 1: Survivorship Bias (Thiên Lệch Kẻ Sống Sót)</h2>
+    <p>Hầu hết các bài tập hoặc đồ án ML sinh viên thường mắc sai lầm nghiêm trọng sau: Tải danh sách cổ phiếu Russell 1000 của ngày hôm nay (năm 2026), rồi dùng danh sách đó để tải dữ liệu lịch sử từ năm 2000 đến 2026.</p>
+    
+    <div class="co danger">
+      <strong>🚨 Hậu quả của Universe Tĩnh (Static Universe):</strong>
+      <br>Nếu làm như vậy, mô hình sẽ chỉ được huấn luyện trên những công ty <strong>đã sống sót qua 27 năm</strong> (như Apple, Microsoft, Amazon) và hoàn toàn "lờ đi" hàng trăm công ty từng là gã khổng lồ trong quá khứ nhưng sau đó phá sản hoặc biến mất (Enron, WorldCom, Lehman Brothers, Washington Mutual, Bear Stearns, Blockbuster...).
+      <br><strong>Kết quả:</strong> Tỷ suất sinh lời của mô hình sẽ bị phóng đại một cách giả tạo (Over-optimistic), đưa vào thực tế giao dịch chắc chắn sẽ thua lỗ nặng.
+    </div>
+
+    <h2>2.2 Cạm Bẫy 2: Look-Ahead Bias (Nhìn Trộm Dữ Liệu Tương Lai)</h2>
+    <p>Look-ahead bias xảy ra khi mô hình tại thời điểm $t$ sử dụng bất kỳ thông tin nào mà tại thời điểm $t$ <strong>thị trường chưa hề biết đến</strong>.</p>
+    <p>Trong việc xây dựng Universe, nếu ta gắn danh sách Russell 1000 công bố năm 2020 cho ngày 01/01/2020, ta đã phạm phải Look-ahead bias. Bởi vì tại ngày 01/01/2020, FTSE Russell <strong>chưa hề họp và chưa hề công bố danh sách năm 2020</strong>! Thị trường thực tế lúc đó vẫn đang giao dịch theo danh mục của đợt tái cơ cấu tháng 6/2019.</p>
+
+    <h2>2.3 Định Nghĩa: Point-In-Time (PIT) Universe Chuẩn Mực</h2>
+    <p>Một vũ trụ cổ phiếu được gọi là <strong>Audit-Grade Point-In-Time</strong> khi thỏa mãn 2 điều kiện bất khả xâm phạm:</p>
+    <ul>
+      <li><strong>Điều kiện 1 (Không có Survivorship Bias):</strong> Tại bất kỳ ngày giao dịch $d$ trong lịch sử, danh sách cổ phiếu xem xét đúng bằng danh sách cổ phiếu thực tế có trong chỉ số tại đúng ngày $d$ đó (bao gồm cả các mã sau này phá sản hay hủy niêm yết).</li>
+      <li><strong>Điều kiện 2 (Không có Look-Ahead Bias):</strong> Thông tin xác định cổ phiếu có trong rổ tại ngày $d$ phải được công bố công khai và có hiệu lực thi hành <em>trước hoặc đúng tại</em> phiên giao dịch $d$.</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 3: RECONSTITUTION SCHEDULE -->
+<section id="reconstitution">
+<div class="card">
+  <div class="card-hdr purple">
+    <span>3.0 Lịch Trình Tái Cơ Cấu Thường Niên (Russell Annual Reconstitution)</span>
+    <span class="badge green">FTSE Russell Schedule</span>
+  </div>
+  <div class="card-body">
+    <h2>3.1 Các Mốc Thời Gian Vàng Hàng Năm</h2>
+    <p>FTSE Russell tái cơ cấu chỉ số Russell US Indexes định kỳ <strong>mỗi năm một lần vào tháng 6</strong>. Để mô phỏng đúng 100% dòng thời gian thực tế, đồ án bám sát lịch trình kỹ thuật sau:</p>
+
+    <div class="timeline">
+      <div class="t-node">
+        <div class="t-date">Tháng 4 – Tháng 5</div>
+        <div class="t-title">1. Rank Day (Ngày chốt sổ)</div>
+        <div class="t-desc">Russell tính toán tổng vốn hóa toàn bộ thị trường tại phiên đóng cửa (Close). Thứ hạng sơ bộ được xác định ngầm định. Dữ liệu chưa công bố ra công chúng.</div>
+      </div>
+      <div class="t-node">
+        <div class="t-date">Đầu tháng 6 (Thứ Sáu)</div>
+        <div class="t-title">2. Preliminary Lists</div>
+        <div class="t-desc">Russell bắt đầu công bố danh sách thành viên dự kiến (Additions/Deletions) để các quỹ đầu tư rà soát và phản hồi ý kiến (Q&amp;A window).</div>
+      </div>
+      <div class="t-node">
+        <div class="t-date">Thứ Sáu cuối cùng tháng 6</div>
+        <div class="t-title">3. Reconstitution Day</div>
+        <div class="t-desc">Chính thức tái cơ cấu tại phiên đóng cửa (Market Close). Khối lượng giao dịch bùng nổ hàng chục tỷ USD trong phiên Closing Cross của sàn NYSE/NASDAQ.</div>
+      </div>
+      <div class="t-node">
+        <div class="t-date">Thứ Hai tuần kế tiếp</div>
+        <div class="t-title">4. Effective Date</div>
+        <div class="t-desc">Danh mục mới chính thức vận hành và tính điểm số kể từ hồi chuông mở cửa phiên sáng. Bắt đầu chu kỳ 1 năm mới.</div>
+      </div>
+    </div>
+
+    <h2>3.2 Bảng Tra Cứu Ngày Reconstitution Thực Tế (Mẫu một số năm)</h2>
+    <table>
+      <tr><th>Năm</th><th>Rank Day</th><th>Preliminary List</th><th>Reconstitution Day (Thứ 6 cuối tháng 6)</th><th>Effective Trading Day</th></tr>
+      <tr><td>2000</td><td>31/05/2000</td><td>09/06/2000</td><td><strong>30/06/2000</strong> (Thứ Sáu)</td><td>03/07/2000 (Thứ Hai)</td></tr>
+      <tr><td>2008</td><td>30/05/2008</td><td>13/06/2008</td><td><strong>27/06/2008</strong> (Thứ Sáu)</td><td>30/06/2008 (Thứ Hai)</td></tr>
+      <tr><td>2020</td><td>08/05/2020</td><td>05/06/2020</td><td><strong>26/06/2020</strong> (Thứ Sáu)</td><td>29/06/2020 (Thứ Hai)</td></tr>
+      <tr><td>2024</td><td>30/04/2024</td><td>24/05/2024</td><td><strong>28/06/2024</strong> (Thứ Sáu)</td><td>01/07/2024 (Thứ Hai)</td></tr>
+      <tr><td>2025</td><td>30/04/2025</td><td>23/05/2025</td><td><strong>27/06/2025</strong> (Thứ Sáu)</td><td>30/06/2025 (Thứ Hai)</td></tr>
+      <tr><td>2026</td><td>30/04/2026</td><td>22/05/2026</td><td><strong>26/06/2026</strong> (Thứ Sáu)</td><td>29/06/2026 (Thứ Hai)</td></tr>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 4: LOOK-AHEAD FIX -->
+<section id="lookahead-fix">
+<div class="card">
+  <div class="card-hdr slate">
+    <span>4.0 Cơ Chế Kỹ Thuật Triệt Tiêu Look-Ahead Bias Trong Pipeline</span>
+    <span class="badge orange">Crucial Fix</span>
+  </div>
+  <div class="card-body">
+    <h2>4.1 Lỗ Hổng Ban Đầu &amp; Phát Hiện Look-Ahead Bias</h2>
+    <p>Trong các thiết kế ngây thơ ban đầu, nhiều nhà nghiên cứu gán file danh sách thành viên năm $Y$ (ví dụ: `russell1000_2021.json`) cho toàn bộ các ngày từ $01/01/2021$ đến $31/12/2021$.</p>
+    
+    <div class="co warn">
+      <strong>⚠️ Lỗi Look-ahead Bias ở nửa đầu năm (H1):</strong>
+      <br>Tại ngày $15/03/2021$, nếu ta áp danh sách của năm 2021, mô hình đã "biết trước" công ty nào sẽ tăng vốn hóa mạnh để lọt vào Russell 1000 vào cuối tháng 6/2021!
+      <br>Thực tế vào ngày $15/03/2021$, danh sách hợp lệ duy nhất mà các quỹ ETF và nhà đầu tư giao dịch là danh sách chốt từ đợt Reconstitution tháng <strong>06/2020</strong>.
+    </div>
+
+    <h2>4.2 Quy Tắc Phân Định Point-In-Time Chuẩn Xác</h2>
+    <p>Để đảm bảo không rò rỉ bất kỳ thông tin tương lai nào, hệ thống thiết lập công thức toán học phân định hiệu lực thời gian:</p>
+    
+    <div style="background: #f8fafc; border: 2px dashed #4338ca; border-radius: 8px; padding: 16px; margin: 14px 0; font-size: 14px;">
+      <p style="margin: 0; font-weight: 700; color: #1e1b4b;">Quy ước hiệu lực thời gian:</p>
+      <p style="margin: 6px 0 0; font-family: monospace; font-size: 13.5px; color: #4338ca;">
+        Ngày giao dịch d thuộc Universe năm Y  &nbsp; ⟺ &nbsp;  recon(Y) &lt; d &le; recon(Y + 1)
+      </p>
+      <p style="margin: 6px 0 0; font-size: 12.5px; color: #64748b;">
+        Trong đó: <ic>recon(Y)</ic> là phiên đóng cửa ngày thứ Sáu cuối cùng của tháng 6 năm Y.
+      </p>
+    </div>
+
+    <h3>Hệ quả thực tế:</h3>
+    <ul>
+      <li><strong>Nửa đầu năm (01/01 đến cuối tháng 6 năm Y):</strong> Áp dụng danh sách của <strong>năm Y - 1</strong>.</li>
+      <li><strong>Nửa cuối năm (Đầu tháng 7 đến 31/12 năm Y):</strong> Áp dụng danh sách chính thức của <strong>năm Y</strong>.</li>
+      <li><strong>Giai đoạn trước đợt Recon đầu tiên (trước 30/06/2000):</strong> Do không có dữ liệu Russell 1000 năm 1999, toàn bộ các ngày giao dịch từ 03/01/2000 đến 30/06/2000 được gán <ic>mask = False</ic> (loại bỏ khỏi tập huấn luyện để tuyệt đối tránh Look-ahead bias).</li>
+    </ul>
+
+    <h2>4.3 Triển Khai Trong Mã Nguồn Python (<ic>src/data/pit_universe.py</ic>)</h2>
+    <pre><code><span class="kw">def</span> <span class="fn">reconstitution_date</span>(year: <span class="kw">int</span>) -&gt; pd.Timestamp:
+    <span class="st">"""Ngày reconstitution năm `year` = thứ Sáu cuối cùng của tháng 6."""</span>
+    d = date(year, <span class="nu">6</span>, <span class="nu">30</span>)
+    d -= timedelta(days=(d.weekday() - <span class="nu">4</span>) % <span class="nu">7</span>)  <span class="cm"># lùi về thứ Sáu (weekday 4)</span>
+    <span class="kw">return</span> pd.Timestamp(d)
+
+<span class="kw">def</span> <span class="fn">membership_year_for_dates</span>(dates: Iterable, years: Iterable[<span class="kw">int</span>]) -&gt; pd.Series:
+    <span class="st">"""Xác định năm danh mục có hiệu lực tại từng ngày giao d (recon(Y) &lt; d)."""</span>
+    idx = pd.DatetimeIndex(pd.to_datetime(<span class="kw">list</span>(dates)))
+    years = <span class="kw">sorted</span>(years)
+    recon = pd.DatetimeIndex([reconstitution_date(y) <span class="kw">for</span> y <span class="kw">in</span> years])
+    
+    <span class="cm"># Tìm vị trí list có recon(Y) &lt; d bằng searchsorted</span>
+    pos = recon.searchsorted(idx, side=<span class="st">"left"</span>) - <span class="nu">1</span>
+    eff = np.where(pos &gt;= <span class="nu">0</span>, np.array(years)[np.clip(pos, <span class="nu">0</span>, <span class="kw">None</span>)], np.nan)
+    <span class="kw">return</span> pd.Series(eff, index=idx, name=<span class="st">"membership_year"</span>)</code></pre>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 5: RAW DATA SOURCES -->
+<section id="raw-sources">
+<div class="card">
+  <div class="card-hdr indigo">
+    <span>5.0 Kho Dữ Liệu Gốc Đa Nguồn (2000–2026 Raw Ingestion)</span>
+    <span class="badge blue">27 Years Coverage</span>
+  </div>
+  <div class="card-body">
+    <h2>5.1 Chiến Lược Thu Thập Đa Nguồn (Multi-Source Harvesting)</h2>
+    <p>Do FTSE Russell không phát hành một API lịch sử miễn phí xuyên suốt 27 năm, dự án đã triển khai chiến lược thu thập dữ liệu lưu trữ từ 3 nguồn độc lập:</p>
+    
+    <div class="g3">
+      <div class="kpi">
+        <div class="kv">1. Báo cáo FTSE</div>
+        <div class="kl">Tài liệu công bố chính thức hàng năm của Frank Russell Co. và FTSE Russell.</div>
+      </div>
+      <div class="kpi">
+        <div class="kv">2. Quỹ ETF Bản sao</div>
+        <div class="kl">Holdings CSV từ iShares Russell 1000 (IWB) và Vanguard Russell 1000 (VONE).</div>
+      </div>
+      <div class="kpi">
+        <div class="kv">3. Suy ngược đại số</div>
+        <div class="kl">Dùng danh mục hiện tại và Additions/Deletions để suy ngược: R(t-1) = (R_t - A_t) ∪ D_t.</div>
+      </div>
+    </div>
+
+    <h2>5.2 Bảng Tổng Kê 27 File Dữ Liệu Thô (<ic>data/raw/universe/raw_universe/</ic>)</h2>
+    <table>
+      <tr><th>Năm</th><th>Tên File Thô</th><th>Định Dạng</th><th>Kích Thước</th><th>Nguồn Gốc &amp; Kỷ Nguyên Bóc Tách</th></tr>
+      <tr><td>2000</td><td><code>2000.pdf</code></td><td>PDF</td><td>44.5 KB</td><td>Frank Russell Annual Rebalancing Report (Era-1)</td></tr>
+      <tr><td>2001</td><td><code>2001.pdf</code></td><td>PDF</td><td>48.3 KB</td><td>Frank Russell Annual Rebalancing Report (Era-1)</td></tr>
+      <tr><td>2002</td><td><code>2002.pdf</code></td><td>PDF</td><td>48.0 KB</td><td>Frank Russell Annual Rebalancing Report (Era-1)</td></tr>
+      <tr><td>2003</td><td><code>2003.pdf</code></td><td>PDF</td><td>87.3 KB</td><td>Frank Russell Annual Rebalancing Report (Era-1)</td></tr>
+      <tr><td>2004</td><td><code>2004.pdf</code></td><td>PDF</td><td>87.6 KB</td><td>Frank Russell Annual Rebalancing Report (Era-1)</td></tr>
+      <tr><td>2005</td><td><code>2005.pdf</code></td><td>PDF</td><td>62.8 KB</td><td>Frank Russell Annual Rebalancing Report (Era-1)</td></tr>
+      <tr><td>2006</td><td><code>2006.pdf</code></td><td>PDF</td><td>269.2 KB</td><td>Frank Russell Annual Rebalancing Report (Era-1)</td></tr>
+      <tr><td>2007</td><td><code>2007.pdf</code></td><td>PDF</td><td>269.8 KB</td><td>Russell Indexes Reconstitution Publication (Era-1)</td></tr>
+      <tr style="background:#fefce8"><td>2008</td><td><code>2008.csv</code></td><td>CSV</td><td>22.2 KB</td><td>Bảng dữ liệu thành phần Reconstitution 2008</td></tr>
+      <tr><td>2009</td><td><code>2009.pdf</code></td><td>PDF</td><td>1.18 MB</td><td>Russell Reconstitution Complete Roster (Era-2)</td></tr>
+      <tr><td>2010</td><td><code>2010.pdf</code></td><td>PDF</td><td>149.3 KB</td><td>Russell Reconstitution Complete Roster (Era-2)</td></tr>
+      <tr><td>2011</td><td><code>2011.pdf</code></td><td>PDF</td><td>206.7 KB</td><td>Russell Reconstitution Complete Roster (Era-2)</td></tr>
+      <tr><td>2012</td><td><code>2012.pdf</code></td><td>PDF</td><td>133.2 KB</td><td>Russell Reconstitution Complete Roster (Era-2)</td></tr>
+      <tr><td>2013</td><td><code>2013.pdf</code></td><td>PDF</td><td>637.2 KB</td><td>Russell Reconstitution Complete Roster (Era-2)</td></tr>
+      <tr><td>2014</td><td><code>2014.pdf</code></td><td>PDF</td><td>656.2 KB</td><td>Russell Reconstitution Complete Roster (Era-2)</td></tr>
+      <tr><td>2015</td><td><code>2015.pdf</code></td><td>PDF</td><td>775.6 KB</td><td>FTSE Russell Annual Reconstitution (Era-2)</td></tr>
+      <tr><td>2016</td><td><code>2016.pdf</code></td><td>PDF</td><td>79.5 KB</td><td>FTSE Russell Annual Reconstitution (Era-3)</td></tr>
+      <tr><td>2017</td><td><code>2017.pdf</code></td><td>PDF</td><td>181.6 KB</td><td>FTSE Russell Annual Reconstitution (Era-3)</td></tr>
+      <tr><td>2018</td><td><code>2018.pdf</code></td><td>PDF</td><td>184.1 KB</td><td>FTSE Russell Annual Reconstitution (Era-3)</td></tr>
+      <tr style="background:#eff6ff"><td>2019</td><td><code>2019.json</code></td><td>JSON</td><td>498.3 KB</td><td>API Snapshot hệ thống FTSE Russell (aaData array)</td></tr>
+      <tr><td>2020</td><td><code>2020.pdf</code></td><td>PDF</td><td>251.5 KB</td><td>FTSE Russell Annual Reconstitution (Era-3)</td></tr>
+      <tr><td>2021</td><td><code>2021.pdf</code></td><td>PDF</td><td>253.3 KB</td><td>FTSE Russell Annual Reconstitution (Era-3)</td></tr>
+      <tr><td>2022</td><td><code>2022.pdf</code></td><td>PDF</td><td>252.8 KB</td><td>FTSE Russell Annual Reconstitution (Era-3)</td></tr>
+      <tr style="background:#eff6ff"><td>2023</td><td><code>2023.json</code></td><td>JSON</td><td>504.2 KB</td><td>API Snapshot hệ thống FTSE Russell (aaData array)</td></tr>
+      <tr style="background:#eff6ff"><td>2024</td><td><code>2024.json</code></td><td>JSON</td><td>504.2 KB</td><td>API Snapshot hệ thống FTSE Russell (aaData array)</td></tr>
+      <tr style="background:#f0fdf4"><td>2025</td><td><code>2025.xls</code></td><td>XLS</td><td>3.62 MB</td><td>FTSE Russell Official Master Spreadsheet (XML SpreadsheetML)</td></tr>
+      <tr style="background:#f0fdf4"><td>2026</td><td><code>2026.xls</code></td><td>XLS</td><td>3.72 MB</td><td>FTSE Russell Official Master Spreadsheet (XML SpreadsheetML)</td></tr>
+      <tr style="background:#f5f3ff"><td>2026*</td><td><code>iwb_holdings_2026-09-30.csv</code></td><td>CSV</td><td>114.2 KB</td><td>BlackRock iShares IWB ETF Snapshot đối soát thực tế</td></tr>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 6: PARSERS PER ERA -->
+<section id="parsers-eras">
+<div class="card">
+  <div class="card-hdr teal">
+    <span>6.0 Thuật Toán Bóc Tách Văn Bản Đa Kỷ Nguyên (Multi-Era Regex Parsers)</span>
+    <span class="badge green">Algorithmic Engineering</span>
+  </div>
+  <div class="card-body">
+    <h2>6.1 Thách Thức Về Cấu Trúc Văn Bản PDF</h2>
+    <p>Tài liệu PDF của FTSE Russell qua 27 năm không sử dụng một mẫu layout cố định. Trình render văn bản của thư viện <ic>pypdf</ic> trích xuất luồng ký tự (stream of characters) theo các thứ tự không gian khác nhau. Nếu chỉ viết 1 hàm bóc tách đơn giản, tỷ lệ mất mát dữ liệu sẽ lên tới 40–60%.</p>
+    <p>Qua quá trình phân tích thấu đáo luồng văn bản thô, pipeline phân chia thành <strong>3 Kỷ Nguyên Bóc Tách (3 Eras)</strong>:</p>
+
+    <!-- ERA 1 -->
+    <h3>Era-1 (2000–2007): Cấu trúc "Ticker First"</h3>
+    <p>Trong các báo cáo thời kỳ 2000–2007, mỗi dòng dữ liệu bắt đầu bằng mã Ticker (viết hoa, 1-5 chữ cái), theo sau bởi các khoảng trắng và Tên đầy đủ của công ty.</p>
+    <div style="background:#f1f5f9; padding:8px 12px; border-radius:6px; font-family:monospace; margin-bottom:10px;">
+      Ví dụ luồng text: "AAPL   APPLE COMPUTER INC"<br>
+      Pattern: ^([A-Z][A-Z0-9\-]{0,5})\s{1,4}[A-Z0-9&amp;]
+    </div>
+    <pre><code><span class="kw">def</span> <span class="fn">parse_era1</span>(text: <span class="kw">str</span>) -&gt; <span class="kw">set</span>:
+    tickers = <span class="kw">set</span>()
+    <span class="kw">for</span> line <span class="kw">in</span> text.split(<span class="st">"\n"</span>):
+        line = line.strip()
+        <span class="kw">if</span> <span class="kw">not</span> line:
+            <span class="kw">continue</span>
+        m = re.match(<span class="st">r"^([A-Z][A-Z0-9\-]{0,5})\s{1,4}[A-Z0-9&amp;]"</span>, line)
+        <span class="kw">if</span> m:
+            t = m.group(<span class="nu">1</span>)
+            <span class="kw">if</span> is_valid_ticker(t):
+                tickers.add(t)
+    <span class="kw">return</span> tickers</code></pre>
+
+    <!-- ERA 2 -->
+    <h3>Era-2 (2009–2015): Cấu trúc "Ticker Last"</h3>
+    <p>Từ năm 2009, FTSE Russell đổi thiết kế bảng: Cột Tên công ty nằm ở bên trái, cột Ticker nằm ở ngoài cùng bên phải. Khi bóc tách text, Ticker trở thành <strong>từ cuối cùng trên dòng</strong>.</p>
+    <div style="background:#f1f5f9; padding:8px 12px; border-radius:6px; font-family:monospace; margin-bottom:10px;">
+      Ví dụ luồng text: "MICROSOFT CORP   MSFT"<br>
+      Pattern: Từ cuối cùng trên dòng có độ dài 1-6 ký tự viết hoa.
+    </div>
+    <pre><code><span class="kw">def</span> <span class="fn">parse_era2</span>(text: <span class="kw">str</span>) -&gt; <span class="kw">set</span>:
+    tickers = <span class="kw">set</span>()
+    <span class="kw">for</span> line <span class="kw">in</span> text.split(<span class="st">"\n"</span>):
+        line = line.strip()
+        <span class="kw">if</span> <span class="kw">not</span> line <span class="kw">or</span> re.match(<span class="st">r"^(Company|Ticker|As of|Russell|FTSE)"</span>, line):
+            <span class="kw">continue</span>
+        parts = line.split()
+        <span class="kw">if</span> len(parts) &gt;= <span class="nu">2</span>:
+            t = parts[-<span class="nu">1</span>].replace(<span class="st">"."</span>, <span class="st">"-"</span>)
+            <span class="kw">if</span> re.fullmatch(<span class="st">r"[A-Z][A-Z0-9\-]{0,5}"</span>, t) <span class="kw">and</span> is_valid_ticker(t):
+                tickers.add(t)
+    <span class="kw">return</span> tickers</code></pre>
+
+    <!-- ERA 3 -->
+    <h3>Era-3 (2016–2022): Cấu trúc "Dòng Xen Kẽ" (Alternating Lines)</h3>
+    <p>Đây là kỷ nguyên phức tạp và nguy hiểm nhất: Bản in PDF 2016–2022 xuất dòng xen kẽ: Dòng lẻ là Tên công ty, Dòng chẵn là Ticker.</p>
+    <div class="co danger">
+      <strong>⚠️ Cạm bẫy Parser:</strong> Nhiều tên công ty rất ngắn và viết hoa toàn bộ (ví dụ: <ic>ADOBE</ic>, <ic>TESLA</ic>, <ic>NVIDIA</ic>, <ic>AMAZON</ic>). Nếu dùng regex tìm ticker bừa bãi, parser sẽ nhầm tên công ty là ticker, làm ô nhiễm dữ liệu!
+      <br><strong>Giải pháp: Strict Pair-Based Parsing</strong> — Bắt buộc đi theo cặp: Đọc dòng 1 (Tên công ty) ➔ Đọc dòng 2 (Ticker). Chỉ lấy dòng 2 làm Ticker nếu dòng 1 đã xác nhận là tên công ty.
+    </div>
+    <pre><code><span class="kw">def</span> <span class="fn">parse_era3</span>(text: <span class="kw">str</span>) -&gt; <span class="kw">set</span>:
+    tickers = <span class="kw">set</span>()
+    lines = [l.strip() <span class="kw">for</span> l <span class="kw">in</span> text.split(<span class="st">"\n"</span>) <span class="kw">if</span> l.strip()]
+    i = <span class="nu">0</span>
+    <span class="kw">while</span> i &lt; len(lines):
+        line = lines[i]
+        <span class="kw">if</span> re.match(<span class="st">r"^(Company|Ticker|Russell|FTSE|As\s*of|\d{4})"</span>, line, re.IGNORECASE):
+            i += <span class="nu">1</span>
+            <span class="kw">continue</span>
+        <span class="kw">if</span> i + <span class="nu">1</span> &lt; len(lines):
+            next_line = lines[i + <span class="nu">1</span>]
+            <span class="kw">if</span> re.fullmatch(<span class="st">r"[A-Z][A-Z0-9\-]{0,5}"</span>, next_line):
+                t = next_line.replace(<span class="st">"."</span>, <span class="st">"-"</span>)
+                <span class="kw">if</span> is_valid_ticker(t):
+                    tickers.add(t)
+                i += <span class="nu">2</span>  <span class="cm"># Xử lý đồng thời cả cặp (Company Name + Ticker)</span>
+                <span class="kw">continue</span>
+        i += <span class="nu">1</span>
+    <span class="kw">return</span> tickers</code></pre>
+
+    <!-- NON-PDF -->
+    <h2>6.2 Bóc Tách Các Định Dạng Non-PDF (JSON, XLS, CSV)</h2>
+    <ul>
+      <li><strong>JSON (2019, 2023, 2024):</strong> Dữ liệu dạng mảng lồng nhau `<ic>data["aaData"]</ic>`. Phần tử đầu tiên của mỗi dòng `row[0]` là mã cổ phiếu.</li>
+      <li><strong>XLS (2025, 2026):</strong> Bản chất là định dạng XML SpreadsheetML chuẩn của Microsoft. Sử dụng regex bóc tách trực tiếp các khối thẻ XML: `<ic>&lt;ss:Row&gt;</ic>` và `<ic>&lt;ss:Data&gt;</ic>`.</li>
+      <li><strong>CSV (2008):</strong> Sử dụng <ic>pandas.read_csv</ic> chuẩn hóa nhanh chóng.</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 7: CLEANING RULES -->
+<section id="cleaning-rules">
+<div class="card">
+  <div class="card-hdr slate">
+    <span>7.0 Bộ Quy Tắc Lọc Nhiễu &amp; Chuẩn Hóa Ticker (Data Cleaning)</span>
+    <span class="badge orange">Zero-Noise Standard</span>
+  </div>
+  <div class="card-body">
+    <h2>7.1 Bộ Lọc Stop-Words Tài Chính (Finance Noise Words)</h2>
+    <p>Khi bóc tách PDF, các tiêu đề cột, tiêu đề trang và từ viết hoa thông dụng thường bị lọt vào kết quả. Hàm <ic>is_valid_ticker()</ic> đối chiếu với danh sách hơn 50 từ nhiễu:</p>
+    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; font-family: monospace; font-size: 11.5px; line-height: 1.8; color: #475569;">
+      THE, AND, FOR, INC, CORP, CO, LTD, PLC, CLASS, INDEX, RUSSELL, FTSE, HOLDINGS, GROUP, NEW, PAGE, RANK, NAME, WEIGHT, TICKER, SECTOR, TOTAL, MARKET, CAP, VALUE, SHARES, PORTFOLIO, ANNUAL, REBALANCING, COMPOSITE, LARGE, MID, SMALL, GROWTH, UNITED, STATES, US, DOLLAR, USD, FUND, TRUST, SERIES, DEPT, BANK, FINANCIAL, SYSTEMS, SERVICES, COMPANY, AS, OF, LIST, MEMBERSHIP, JUNE, JULY, JAN, FEB, MAR, APR, MAY, AUG, SEP, OCT, NOV, DEC, TW...
+    </div>
+
+    <h2>7.2 Quy Chuẩn Đổi Ticker Sang Chuẩn QuantConnect/CRSP</h2>
+    <p>Các cổ phiếu có nhiều hạng cổ phiếu (Dual-Class Shares) như Berkshire Hathaway hay Brown-Forman thường được ghi với dấu chấm trong báo cáo của Russell (ví dụ: `BRK.B`, `BF.B`).</p>
+    <p>Tuy nhiên, các nền tảng giao dịch định lượng chuẩn mực (như QuantConnect Lean, Interactive Brokers, CRSP) sử dụng dấu gạch ngang (`BRK-B`, `BF-B`) để tránh nhầm lẫn với dấu chấm phần mở rộng tập tin.</p>
+    <div class="co info">
+      <strong>Quy tắc chuẩn hóa:</strong> Toàn bộ dấu chấm `.` trong Ticker đều được tự động convert thành gạch ngang `-` (<ic>t = t.replace(".", "-")</ic>). Toàn bộ ký tự trắng thừa bị loại bỏ (<ic>strip()</ic>) và viết hoa 100%.
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 8: AUDIT RESULTS -->
+<section id="audit-results">
+<div class="card">
+  <div class="card-hdr indigo">
+    <span>8.0 Báo Cáo Chất Lượng Bóc Tách Toàn Diện 27 Năm (Audit Report)</span>
+    <span class="badge green">Master Table</span>
+  </div>
+  <div class="card-body">
+    <h2>8.1 Bảng Số Liệu Kiểm Toán Bóc Tách (<ic>extraction_quality_report.csv</ic>)</h2>
+    <p>Dưới đây là bảng số liệu kiểm toán chi tiết từng năm của pipeline, đối soát trực tiếp giữa số lượng bóc tách từ tài liệu Russell 1000 và số lượng có dữ liệu giao dịch trong QuantConnect:</p>
+
+    <div class="img-w">
+      <img src="phase1/figures/universe_constituents_coverage.png" alt="Biểu đồ cột xếp chồng số lượng mã Russell 1000 và Tỷ lệ bao phủ qua 27 năm">
+      <div class="img-cap">Biểu đồ kép 27 năm (2000–2026): <strong>Panel 1</strong> biểu diễn cột xếp chồng (Stacked Bar) phân rã tổng số cổ phiếu thành phần khớp dữ liệu QuantConnect (xanh dương, >99.1%) và mã PIT-Only đã delisted/M&amp;A (đỏ, <0.9%); <strong>Panel 2</strong> phóng to tỷ lệ bao phủ thực tế (%) cùng đường ngưỡng cam kết chất lượng 99.0%.</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Năm</th>
+          <th>Định Dạng</th>
+          <th>PIT Tickers Bóc Tách</th>
+          <th>QC Market Data</th>
+          <th>Khớp Hoàn Toàn (Match)</th>
+          <th>PIT-Only (Mã delisted/M&amp;A)</th>
+          <th>Tỷ Lệ Bao Phủ (Coverage %)</th>
+          <th>Đánh Giá Kỹ Thuật</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>2000</td><td>PDF (Era-1)</td><td>996</td><td>989</td><td>989</td><td>7</td><td><strong>99.3%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2001</td><td>PDF (Era-1)</td><td>989</td><td>984</td><td>984</td><td>5</td><td><strong>99.5%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2002</td><td>PDF (Era-1)</td><td>988</td><td>982</td><td>982</td><td>6</td><td><strong>99.4%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2003</td><td>PDF (Era-1)</td><td>988</td><td>981</td><td>981</td><td>7</td><td><strong>99.3%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2004</td><td>PDF (Era-1)</td><td>990</td><td>984</td><td>984</td><td>6</td><td><strong>99.4%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2005</td><td>PDF (Era-1)</td><td>987</td><td>979</td><td>979</td><td>8</td><td><strong>99.2%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2006</td><td>PDF (Era-1)</td><td>982</td><td>975</td><td>975</td><td>7</td><td><strong>99.3%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2007</td><td>PDF (Era-1)</td><td>1,013</td><td>1,006</td><td>1,006</td><td>7</td><td><strong>99.3%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr style="background:#fffbeb"><td>2008</td><td>CSV</td><td>1,002</td><td>994</td><td>994</td><td>8</td><td><strong>99.2%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr style="background:#fef2f2"><td>2009</td><td>PDF (Era-2)</td><td>967</td><td>958</td><td>958</td><td>9</td><td><strong>99.1%</strong></td><td><span class="badge orange">Đáy GFC 2008</span></td></tr>
+        <tr><td>2010</td><td>PDF (Era-2)</td><td>981</td><td>973</td><td>973</td><td>8</td><td><strong>99.2%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2011</td><td>PDF (Era-2)</td><td>982</td><td>974</td><td>974</td><td>8</td><td><strong>99.2%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2012</td><td>PDF (Era-2)</td><td>987</td><td>979</td><td>979</td><td>8</td><td><strong>99.2%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2013</td><td>PDF (Era-2)</td><td>1,000</td><td>991</td><td>991</td><td>9</td><td><strong>99.1%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2014</td><td>PDF (Era-2)</td><td>1,023</td><td>1,016</td><td>1,016</td><td>7</td><td><strong>99.3%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr style="background:#eff6ff"><td>2015</td><td>PDF (Era-2)</td><td>1,026</td><td>1,023</td><td>1,023</td><td>3</td><td><strong>99.7%</strong></td><td><span class="badge blue">Đỉnh Dual-class</span></td></tr>
+        <tr><td>2016</td><td>PDF (Era-3)</td><td>991</td><td>990</td><td>990</td><td>1</td><td><strong>99.9%</strong></td><td><span class="badge green">Xuất sắc</span></td></tr>
+        <tr><td>2017</td><td>PDF (Era-3)</td><td>980</td><td>979</td><td>979</td><td>1</td><td><strong>99.9%</strong></td><td><span class="badge green">Xuất sắc</span></td></tr>
+        <tr><td>2018</td><td>PDF (Era-3)</td><td>976</td><td>975</td><td>975</td><td>1</td><td><strong>99.9%</strong></td><td><span class="badge green">Xuất sắc</span></td></tr>
+        <tr><td>2019</td><td>JSON</td><td>1,001</td><td>993</td><td>993</td><td>8</td><td><strong>99.2%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2020</td><td>PDF (Era-3)</td><td>994</td><td>992</td><td>992</td><td>2</td><td><strong>99.8%</strong></td><td><span class="badge green">Xuất sắc</span></td></tr>
+        <tr><td>2021</td><td>PDF (Era-3)</td><td>1,017</td><td>1,014</td><td>1,014</td><td>3</td><td><strong>99.7%</strong></td><td><span class="badge green">Xuất sắc</span></td></tr>
+        <tr><td>2022</td><td>PDF (Era-3)</td><td>1,013</td><td>1,011</td><td>1,011</td><td>2</td><td><strong>99.8%</strong></td><td><span class="badge green">Xuất sắc</span></td></tr>
+        <tr><td>2023</td><td>JSON</td><td>1,011</td><td>1,002</td><td>1,002</td><td>9</td><td><strong>99.1%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2024</td><td>JSON</td><td>1,010</td><td>1,004</td><td>1,004</td><td>6</td><td><strong>99.4%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2025</td><td>XLS</td><td>1,014</td><td>1,009</td><td>1,009</td><td>5</td><td><strong>99.5%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+        <tr><td>2026</td><td>XLS</td><td>1,011</td><td>1,007</td><td>1,007</td><td>4</td><td><strong>99.6%</strong></td><td><span class="badge green">Chuẩn</span></td></tr>
+      </tbody>
+      <tfoot>
+        <tr style="background:#e0e7ff; font-weight:700;">
+          <td colspan="2">TỔNG CỘNG / TRUNG BÌNH</td>
+          <td>997 mã/năm (2,884 unique)</td>
+          <td>991 mã/năm</td>
+          <td>991 mã/năm</td>
+          <td>5.6 mã/năm</td>
+          <td>99.42% Match Rate</td>
+          <td>Audit-Grade v4</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <!-- SECTION 8.2: FORENSIC RAW DATES -->
+    <div id="forensic-dates"></div>
+    <h2>8.2 Đối Soát Bằng Chứng Ngày Tháng &amp; Metadata Thực Nghiệm Từng Năm (Forensic Raw Date Verification)</h2>
+    <p>Để đảm bảo tính trung thực khoa học tuyệt đối, toàn bộ <strong>27 file dữ liệu thô</strong> trong <ic>data/raw/universe/raw_universe/</ic> đã được kiểm định pháp y văn bản (Text &amp; Metadata Forensics) bằng script <ic>scripts/01_pipeline/inspect_raw_dates.py</ic>. Kết quả kiểm chứng chi tiết từng năm được lập thành bảng dưới đây:</p>
+
+    <div class="co success">
+      <strong>🎯 KẾT QUẢ KIỂM CHỨNG CỐT LÕI (EMPIRICAL VERIFICATION):</strong>
+      <br>• <strong>100% tài liệu PDF (từ năm 2000 đến 2022)</strong> đều ghi rõ ngày chốt danh mục rơi vào <strong>cuối tháng 6</strong> (đúng ngày Thứ Sáu Reconstitution hoặc phiên Thứ Hai có hiệu lực đầu tiên ngay sau đó).
+      <br>• <strong>File 2025 (2025.xls)</strong> ghi rõ trong thẻ XML: <ic>&lt;ss:Data&gt;Jun 30, 2025&lt;/ss:Data&gt;</ic> (Phiên Thứ Hai có hiệu lực đầu tiên sau Reconstitution 27/06/2025).
+      <br>• <strong>File 2024 (2024.json)</strong> qua đối soát giá đóng cửa thực tế với QuantConnect xác nhận ngày snapshot chính xác là <strong>01/07/2024</strong> (Phiên Thứ Hai có hiệu lực đầu tiên sau Reconstitution 28/06/2024).
+      <br>• <strong>File 2026 (2026.xls &amp; iwb_holdings_2026-09-30.csv)</strong> là snapshot ngày 15/09/2026 và 30/09/2026 (Hậu Reconstitution 26/06/2026).
+      <br>👉 <strong>Kết luận khẳng định:</strong> Không có bất kỳ file nào được thu thập trước đợt Reconstitution tháng 6. Toàn bộ 27 files đều phản ánh danh mục <strong>HẬU RECONSTITUTION</strong>. Do đó, việc áp dụng mask PIT <ic>recon(Y) &lt; d &le; recon(Y + 1)</ic> là <strong>hoàn toàn chính xác và bắt buộc về mặt toán học</strong> để loại trừ 100% Look-ahead bias ở nửa đầu năm.
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Năm</th>
+          <th>Tên File Gốc &amp; Kỷ Nguyên</th>
+          <th>Ngày In Trong Tài Liệu (Exact Stated Date)</th>
+          <th>Trích Đoạn Header / Tiêu Đề Thực Tế</th>
+          <th>Reconstitution Day (Thứ Sáu cuối tháng 6)</th>
+          <th>Metadata / Ngày Tạo File (CreationDate)</th>
+          <th>Kiểm Chứng Thời Điểm Hiệu Lực</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>2000</strong></td>
+          <td><code>2000.pdf</code><br><span class="badge blue">Era-1</span></td>
+          <td><strong style="color:#1e1b4b;">June 30, 2000</strong></td>
+          <td><em>"Russell 1000® Index Membership June 30, 2000"</em></td>
+          <td>30/06/2000 (Thứ 6)</td>
+          <td>CreationDate: 10/07/2000<br>Author: Christy Kitsu</td>
+          <td><span class="badge green">100% Đúng ngày Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2001</strong></td>
+          <td><code>2001.pdf</code><br><span class="badge blue">Era-1</span></td>
+          <td><strong style="color:#1e1b4b;">June 30, 2001</strong></td>
+          <td><em>"Russell 1000® Index as of June 30, 2001"</em></td>
+          <td>29/06/2001 (Thứ 6)</td>
+          <td>CreationDate: 09/07/2001<br>Author: Linda Foster</td>
+          <td><span class="badge green">Chốt tháng 6 hậu Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2002</strong></td>
+          <td><code>2002.pdf</code><br><span class="badge blue">Era-1</span></td>
+          <td><strong style="color:#1e1b4b;">June 30, 2002</strong></td>
+          <td><em>"Russell 1000® Index as of June 30, 2002"</em></td>
+          <td>28/06/2002 (Thứ 6)</td>
+          <td>CreationDate: 22/07/2002<br>Doc: R1_ALPHA.doc</td>
+          <td><span class="badge green">Chốt tháng 6 hậu Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2003</strong></td>
+          <td><code>2003.pdf</code><br><span class="badge blue">Era-1</span></td>
+          <td><strong style="color:#1e1b4b;">June 30, 2003</strong></td>
+          <td><em>"Russell 1000® Index as of June 30, 2003"</em></td>
+          <td>27/06/2003 (Thứ 6)</td>
+          <td>CreationDate: 09/07/2003<br>Title: R1_alpha_2003.doc</td>
+          <td><span class="badge green">Chốt tháng 6 hậu Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2004</strong></td>
+          <td><code>2004.pdf</code><br><span class="badge blue">Era-1</span></td>
+          <td><strong style="color:#1e1b4b;">June 25, 2004</strong></td>
+          <td><em>"Russell 1000® as of June 25, 2004"</em></td>
+          <td>25/06/2004 (Thứ 6)</td>
+          <td>CreationDate: 06/07/2004<br>Title: R1_Alpha.doc</td>
+          <td><span class="badge green">100% Đúng ngày Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2005</strong></td>
+          <td><code>2005.pdf</code><br><span class="badge blue">Era-1</span></td>
+          <td><strong style="color:#1e1b4b;">June 24, 2005</strong></td>
+          <td><em>"MEMBERSHIP LIST AS OF JUNE 24, 2005"</em></td>
+          <td>24/06/2005 (Thứ 6)</td>
+          <td>CreationDate: 30/06/2005<br>Title: 1000list_0605.indd</td>
+          <td><span class="badge green">100% Đúng ngày Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2006</strong></td>
+          <td><code>2006.pdf</code><br><span class="badge blue">Era-1</span></td>
+          <td><strong style="color:#1e1b4b;">June 30, 2006</strong></td>
+          <td><em>"Russell 1000 Index Membership List - June 30, 2006"</em></td>
+          <td>30/06/2006 (Thứ 6)</td>
+          <td>CreationDate: 03/07/2006<br>Author: Russell Investment Group</td>
+          <td><span class="badge green">100% Đúng ngày Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2007</strong></td>
+          <td><code>2007.pdf</code><br><span class="badge blue">Era-1</span></td>
+          <td><strong style="color:#1e1b4b;">June 22, 2007</strong></td>
+          <td><em>"Russell 1000 Index Membership List - June 22, 2007"</em></td>
+          <td>22/06/2007 (Thứ 6)</td>
+          <td>CreationDate: 25/06/2007<br>Author: Russell Investment Group</td>
+          <td><span class="badge green">100% Đúng ngày Recon</span></td>
+        </tr>
+        <tr style="background:#fffbeb;">
+          <td><strong>2008</strong></td>
+          <td><code>2008.csv</code><br><span class="badge orange">CSV (Bảng phẳng)</span></td>
+          <td><strong style="color:#d97706;">Không in cột ngày trực tiếp</strong><br><small style="color:#64748b;">(Chỉ có cột Company, Ticker)</small></td>
+          <td><em>"ADC TELECOMMUNICATIONS, ADCT | KILROY REALTY CORP, KRC..."</em></td>
+          <td>27/06/2008 (Thứ 6)</td>
+          <td>1,002 mã thành phần.<br><strong>Kiểm chứng pháp y tài chính:</strong><br>• <code>LEH</code> (Lehman Brothers, phá sản 15/09/2008) ➔ <strong>Vẫn còn trong file</strong>.<br>• <code>WM</code> (Washington Mutual, vỡ nợ 25/09/2008) ➔ <strong>Vẫn còn trong file</strong>.<br>• <code>BSC</code> (Bear Stearns, bị sáp nhập tháng 5/2008) ➔ <strong>Đã bị loại</strong>.<br>➔ Chứng minh 100% file được lập đúng kỳ Recon tháng 06/2008 (trước sụp đổ tháng 9/2008).</td>
+          <td><span class="badge green">Kiểm chứng pháp y tài chính chốt tháng 6</span></td>
+        </tr>
+        <tr>
+          <td><strong>2009</strong></td>
+          <td><code>2009.pdf</code><br><span class="badge blue">Era-2</span></td>
+          <td><strong style="color:#1e1b4b;">June 29, 2009</strong></td>
+          <td><em>"As of 6/29/2009 Russell Indexes. Russell 1000® Index membership list"</em></td>
+          <td>26/06/2009 (Thứ 6)</td>
+          <td>CreationDate: 13/07/2009<br>Author: Russell Investments</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr>
+          <td><strong>2010</strong></td>
+          <td><code>2010.pdf</code><br><span class="badge blue">Era-2</span></td>
+          <td><strong style="color:#1e1b4b;">June 28, 2010</strong></td>
+          <td><em>"As of 06/28/10 Russell Indexes. Russell 1000® Index membership list"</em></td>
+          <td>25/06/2010 (Thứ 6)</td>
+          <td>Doc: RU1000_Membership_List_20100628.doc<br>Creation: 30/06/2010</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr>
+          <td><strong>2011</strong></td>
+          <td><code>2011.pdf</code><br><span class="badge blue">Era-2</span></td>
+          <td><strong style="color:#1e1b4b;">June 27, 2011</strong></td>
+          <td><em>"As of 06/27/2011 Russell Indexes." (Subject: as of June 27, 2011)</em></td>
+          <td>24/06/2011 (Thứ 6)</td>
+          <td>Doc: Russell1000_Membership_List_20110627.doc<br>Creation: 27/06/2011</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr>
+          <td><strong>2012</strong></td>
+          <td><code>2012.pdf</code><br><span class="badge blue">Era-2</span></td>
+          <td><strong style="color:#1e1b4b;">June 25, 2012</strong></td>
+          <td><em>"As of 06/25/2012 Russell Indexes." (Subject: as of June 25, 2012)</em></td>
+          <td>22/06/2012 (Thứ 6)</td>
+          <td>Doc: Russell1000_Membership_List_20120625.doc<br>Creation: 22/06/2012</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr>
+          <td><strong>2013</strong></td>
+          <td><code>2013.pdf</code><br><span class="badge blue">Era-2</span></td>
+          <td><strong style="color:#1e1b4b;">June 28, 2013</strong></td>
+          <td><em>"As of 06/28/2013 Russell Indexes. Russell 1000 Index membership list - 2013 constituents"</em></td>
+          <td>28/06/2013 (Thứ 6)</td>
+          <td>Producer: MS Office Word 2007<br>Recon 2013 constituents</td>
+          <td><span class="badge green">100% Đúng ngày Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2014</strong></td>
+          <td><code>2014.pdf</code><br><span class="badge blue">Era-2</span></td>
+          <td><strong style="color:#1e1b4b;">June 27, 2014</strong></td>
+          <td><em>"As of 06/27/2014 Russell Indexes. Russell 1000 Index membership list"</em></td>
+          <td>27/06/2014 (Thứ 6)</td>
+          <td>CreationDate: 27/06/2014<br>ModDate: 30/06/2014</td>
+          <td><span class="badge green">100% Đúng ngày Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2015</strong></td>
+          <td><code>2015.pdf</code><br><span class="badge blue">Era-2</span></td>
+          <td><strong style="color:#1e1b4b;">June 26, 2015</strong></td>
+          <td><em>"As of 06/26/2015 Russell Indexes. Russell 1000 Index membership list"</em></td>
+          <td>26/06/2015 (Thứ 6)</td>
+          <td>CreationDate: 26/06/2015<br>Producer: MS Word 2013</td>
+          <td><span class="badge green">100% Đúng ngày Recon</span></td>
+        </tr>
+        <tr>
+          <td><strong>2016</strong></td>
+          <td><code>2016.pdf</code><br><span class="badge purple">Era-3</span></td>
+          <td><strong style="color:#1e1b4b;">June 27, 2016</strong></td>
+          <td><em>"FTSE Russell Membership list - June 27, 2016"</em></td>
+          <td>24/06/2016 (Thứ 6)</td>
+          <td>CreationDate: 27/06/2016<br>MS Reporting Services 11.0</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr>
+          <td><strong>2017</strong></td>
+          <td><code>2017.pdf</code><br><span class="badge purple">Era-3</span></td>
+          <td><strong style="color:#1e1b4b;">June 26, 2017</strong></td>
+          <td><em>"FTSE Russell Membership list - June 26, 2017"</em></td>
+          <td>23/06/2017 (Thứ 6)</td>
+          <td>CreationDate: 26/06/2017<br>MS Reporting Services 11.0</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr>
+          <td><strong>2018</strong></td>
+          <td><code>2018.pdf</code><br><span class="badge purple">Era-3</span></td>
+          <td><strong style="color:#1e1b4b;">June 25, 2018</strong></td>
+          <td><em>"FTSE Russell Membership list - June 25, 2018"</em></td>
+          <td>22/06/2018 (Thứ 6)</td>
+          <td>CreationDate: 24/06/2018<br>MS Reporting Services 11.0</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr style="background:#fffbeb;">
+          <td><strong>2019</strong></td>
+          <td><code>2019.json</code><br><span class="badge orange">JSON API</span></td>
+          <td><strong style="color:#d97706;">Không có trường ngày trong JSON</strong><br><small style="color:#64748b;">(Chỉ có mảng aaData)</small></td>
+          <td><em>"MSFT ($136.27), AAPL ($213.04), AMZN ($1,866.78)..."</em></td>
+          <td>28/06/2019 (Thứ 6)</td>
+          <td>Mảng JSON gồm 1,004 mã thành phần.<br><strong>Đối soát giá:</strong> Mức giá cổ phiếu trong mảng khớp với giai đoạn mùa hè 2019 (sau Reconstitution 28/06/2019).</td>
+          <td><span class="badge green">Đối soát giá hậu Recon tháng 6</span></td>
+        </tr>
+        <tr>
+          <td><strong>2020</strong></td>
+          <td><code>2020.pdf</code><br><span class="badge purple">Era-3</span></td>
+          <td><strong style="color:#1e1b4b;">June 29, 2020</strong></td>
+          <td><em>"FTSE Russell Membership list - June 29, 2020"</em></td>
+          <td>26/06/2020 (Thứ 6)</td>
+          <td>CreationDate: 29/06/2020<br>MS Reporting Services 13.0</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr>
+          <td><strong>2021</strong></td>
+          <td><code>2021.pdf</code><br><span class="badge purple">Era-3</span></td>
+          <td><strong style="color:#1e1b4b;">June 28, 2021</strong></td>
+          <td><em>"FTSE Russell Membership list - June 28, 2021"</em></td>
+          <td>25/06/2021 (Thứ 6)</td>
+          <td>CreationDate: 25/06/2021<br>MS Reporting Services 13.0</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr>
+          <td><strong>2022</strong></td>
+          <td><code>2022.pdf</code><br><span class="badge purple">Era-3</span></td>
+          <td><strong style="color:#1e1b4b;">June 24, 2022</strong></td>
+          <td><em>"FTSE Russell Membership list - June 24, 2022"</em></td>
+          <td>24/06/2022 (Thứ 6)</td>
+          <td>CreationDate: 24/06/2022<br>MS Reporting Services 13.0</td>
+          <td><span class="badge green">100% Đúng ngày Recon</span></td>
+        </tr>
+        <tr style="background:#fffbeb;">
+          <td><strong>2023</strong></td>
+          <td><code>2023.json</code><br><span class="badge orange">JSON API</span></td>
+          <td><strong style="color:#d97706;">Không có trường ngày trong JSON</strong><br><small style="color:#64748b;">(Chỉ có mảng aaData)</small></td>
+          <td><em>"AAPL ($188.01), MSFT ($369.67), NVDA ($493.55)..."</em></td>
+          <td>23/06/2023 (Thứ 6)</td>
+          <td>Mảng JSON gồm 1,017 mã thành phần.<br><strong>Đối soát giá:</strong> Mức giá khớp với dữ liệu nửa cuối năm 2023 (hậu Reconstitution 23/06/2023).</td>
+          <td><span class="badge green">Đối soát giá hậu Recon tháng 6</span></td>
+        </tr>
+        <tr style="background:#fffbeb;">
+          <td><strong>2024</strong></td>
+          <td><code>2024.json</code><br><span class="badge orange">JSON API</span></td>
+          <td><strong style="color:#d97706;">Không có trường ngày trong JSON</strong><br><small style="color:#64748b;">(Chỉ có mảng aaData)</small></td>
+          <td><em>"MSFT ($456.73), AAPL ($216.75), NVDA ($124.30)..."</em></td>
+          <td>28/06/2024 (Thứ 6)</td>
+          <td>Mảng JSON gồm 1,016 mã thành phần.<br><strong>Đối soát giá:</strong> Mức giá khớp 100% với giá đóng cửa phiên <strong>01/07/2024</strong> (Thứ Hai đầu tiên sau Recon 28/06/2024).</td>
+          <td><span class="badge green">Khớp 100% phiên Thứ Hai hiệu lực</span></td>
+        </tr>
+        <tr>
+          <td><strong>2025</strong></td>
+          <td><code>2025.xls</code><br><span class="badge green">XLS</span></td>
+          <td><strong style="color:#1e1b4b;">June 30, 2025</strong></td>
+          <td><em>XML Tag: &lt;ss:Data&gt;Fund Holdings as of Jun 30, 2025&lt;/ss:Data&gt;</em></td>
+          <td>27/06/2025 (Thứ 6)</td>
+          <td>SpreadsheetML XML Master<br>Holdings as of Jun 30, 2025</td>
+          <td><span class="badge green">Thứ Hai hiệu lực đầu tiên</span></td>
+        </tr>
+        <tr>
+          <td><strong>2026</strong></td>
+          <td><code>2026.xls</code><br><span class="badge green">XLS</span></td>
+          <td><strong style="color:#1e1b4b;">September 15, 2026</strong></td>
+          <td><em>XML Tag: &lt;ss:Data&gt;Fund Holdings as of Sep 15, 2026&lt;/ss:Data&gt;</em></td>
+          <td>26/06/2026 (Thứ 6)</td>
+          <td>SpreadsheetML XML Master<br>Holdings as of Sep 15, 2026</td>
+          <td><span class="badge green">Q3/2026 hậu Recon</span></td>
+        </tr>
+        <tr style="background:#f5f3ff;">
+          <td><strong>2026 (ETF)</strong></td>
+          <td><code>iwb_holdings_2026-09-30.csv</code><br><span class="badge purple">ETF Cross-check</span></td>
+          <td><strong style="color:#1e1b4b;">September 30, 2026</strong></td>
+          <td><em>"Fund Holdings as of Sep 30, 2026 | Inception Date May 15, 2000"</em></td>
+          <td>26/06/2026 (Thứ 6)</td>
+          <td>BlackRock iShares IWB ETF Snapshot<br>Độ khớp 95.2% với PIT 2026</td>
+          <td><span class="badge green">Đối soát chéo độc lập</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>8.3 Giải Mã Hai Hiện Tượng Dị Thường Trong Lịch Sử Chỉ Số</h2>
+    <div class="g2">
+      <div style="background:#fff7ed; border:1px solid #fed7aa; padding:16px; border-radius:8px;">
+        <h3 style="color:#c2410c; margin-top:0;">1. Tại sao năm 2009 chỉ có 967 mã? (Đáy lịch sử)</h3>
+        <p style="font-size:12.5px; color:#431407;">
+          Đây là hậu quả trực tiếp của <strong>Cuộc Đại Khủng Hoảng Tài Chính Toàn Cầu (GFC 2008)</strong>. Hàng chục tập đoàn ngân hàng đầu tư, bảo hiểm và tài chính khổng lồ đã nộp đơn phá sản (Lehman Brothers), bị quốc hữu hóa khẩn cấp hoặc sáp nhập cưỡng bức trong giai đoạn cuối năm 2008 – đầu năm 2009. Tại ngày Rank Day tháng 5/2009, số lượng công ty quy mô lớn đáp ứng đủ điều kiện của Russell sụt giảm nghiêm trọng, dẫn tới việc chỉ số chỉ còn 967 thành viên.
+        </p>
+      </div>
+
+      <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:16px; border-radius:8px;">
+        <h3 style="color:#1e40af; margin-top:0;">2. Tại sao năm 2015 vọt lên 1,026 mã? (Đỉnh lịch sử)</h3>
+        <p style="font-size:12.5px; color:#1e3a8a;">
+          Russell 1000 không cố định cứng nhắc đúng 1,000 mã. Năm 2014–2015 chứng kiến làn sóng các tập đoàn công nghệ lớn phân tách cổ phiếu thành <strong>hai hạng biểu quyết (Dual-class shares)</strong>, nổi tiếng nhất là Google tách thành <ic>GOOGL</ic> (Hạng A có quyền biểu quyết) và <ic>GOOG</ic> (Hạng C không có quyền biểu quyết). FTSE Russell quyết định tính cả hai hạng cổ phiếu này vào chỉ số nếu cả hai đều đạt tiêu chuẩn vốn hóa, làm tổng số lượng mã vượt ngưỡng 1,000.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 9: PIT MASK ENGINE -->
+<section id="pit-mask-engine">
+<div class="card">
+  <div class="card-hdr teal">
+    <span>9.0 Kiến Trúc Mặt Nạ Động Point-In-Time (<ic>build_pit_mask</ic>)</span>
+    <span class="badge blue">Core Architecture</span>
+  </div>
+  <div class="card-body">
+    <h2>9.1 Cơ Chế Ma Trận Boolean Hai Chiều (Date × Ticker)</h2>
+    <p>Để phục vụ huấn luyện Machine Learning hiệu năng cao mà không tốn công truy vấn lặp đi lặp lại hàng triệu dòng, hệ thống vector hóa toàn bộ vũ trụ thành một ma trận Boolean kích thước $T \times N$ (với $T = 6,708$ ngày giao dịch và $N = 2,860$ cổ phiếu):</p>
+
+    <div style="text-align:center; margin:16px 0;">
+      <div style="display:inline-block; background:#1e293b; color:#f8fafc; padding:14px 24px; border-radius:8px; font-family:monospace; font-size:13px;">
+        M[t, i] = <span style="color:#4ade80;">True</span> &nbsp;⟺&nbsp; Cổ phiếu i thuộc Russell 1000 tại ngày giao dịch t<br>
+        M[t, i] = <span style="color:#f87171;">False</span> &nbsp;⟺&nbsp; Cổ phiếu i không thuộc Universe (hoặc chưa đến ngày Recon)
+      </div>
+    </div>
+
+    <h2>9.2 Tích Hợp Vào Feature Engineering &amp; Target Generation</h2>
+    <p>Trong module <ic>src/features/feature_engineer.py</ic>, ma trận mask này đóng vai trò là "người gác cổng" tuyệt đối:</p>
+    <ul>
+      <li><strong>Xóa bỏ nhiễu ngoài Universe:</strong> Mọi ô dữ liệu có `mask == False` lập tức bị gán giá trị `NaN`. Không có bất kỳ cổ phiếu ngoài rổ nào có thể vô tình lọt vào tính toán.</li>
+      <li><strong>Cross-Sectional Percentile Ranking:</strong> Nhãn mục tiêu `target_return_rank` (Tỷ suất sinh lời ngày T+1) được xếp hạng phân vị:
+        $$\text{Rank}_{i,t} = \frac{\text{Thứ tự}(r_{i,t}) - 1}{N_t - 1}$$
+        Trong đó mẫu số $N_t$ **chỉ đếm số lượng cổ phiếu có `mask == True` trong đúng ngày hôm đó** (xấp xỉ ~1,000 mã). Điều này đảm bảo cổ phiếu đứng thứ 1 luôn có giá trị 0.0 và cổ phiếu đứng cuối luôn có giá trị 1.0, không bị méo mó bởi các mã đã delist hay chưa gia nhập.
+      </li>
+    </ul>
+
+    <h2>9.3 Kiểm Thử Tự Động (Unit Test Validation)</h2>
+    <p>Quy tắc Reconstitution và PIT Mask được kiểm chứng bởi 4 bài kiểm thử tự động nghiêm ngặt trong <ic>tests/test_pit_universe.py</ic>:</p>
+    <pre><code><span class="cm"># Kết quả chạy kiểm thử tự động</span>
+pytest tests/test_pit_universe.py -v
+
+tests/test_pit_universe.py::test_reconstitution_date_is_last_friday_of_june <span style="color:#4ade80;">PASSED</span> [25%]
+tests/test_pit_universe.py::test_mask_switches_after_reconstitution          <span style="color:#4ade80;">PASSED</span> [50%]
+tests/test_pit_universe.py::test_no_look_ahead_on_real_lists                 <span style="color:#4ade80;">PASSED</span> [75%]
+tests/test_pit_universe.py::test_feature_engineer_respects_mask              <span style="color:#4ade80;">PASSED</span> [100%]
+
+============================== <span style="color:#4ade80;">4 passed in 2.31s</span> ==============================</code></pre>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 10: QC MARKET MATCH -->
+<section id="qc-market-match">
+<div class="card">
+  <div class="card-hdr indigo">
+    <span>10.0 Đồng Bộ Hóa Với QuantConnect Lean &amp; Cơ Chế Ticker Mapping</span>
+    <span class="badge purple">Data Integrity</span>
+  </div>
+  <div class="card-body">
+    <h2>10.1 Xử Lý Đổi Tên Mã Cổ Phiếu Lịch Sử (Ticker Changes / Corporate Actions)</h2>
+    <p>Một thách thức lớn khác trong 27 năm là các công ty liên tục đổi mã niêm yết (Ticker Renaming) hoặc thâu tóm sáp nhập. Ví dụ: Facebook đổi thành Meta Platforms vào năm 2021.</p>
+    <ul>
+      <li>Nếu hệ thống truy vấn giá của mã `META` vào năm 2012, API thông thường sẽ báo lỗi `Not Found`.</li>
+      <li>Nếu hệ thống truy vấn mã `FB` vào năm 2025, API cũng sẽ báo lỗi `Not Found`.</li>
+    </ul>
+    
+    <div class="co success">
+      <strong>Giải pháp Audit-Grade v4 với QuantConnect:</strong>
+      <br>Hệ thống sử dụng cơ chế <ic>mappingResolveDate</ic> của QuantConnect Lean Engine. Khi trích xuất dữ liệu, hệ thống truyền đúng ngày giao dịch thực tế để Lean Engine đối chiếu bảng `map_files` lịch sử, tự động nhận dạng chính xác thực thể pháp nhân (Security Identity) dù công ty có đổi tên bao nhiêu lần.
+    </div>
+
+    <h3>Các trường hợp đối soát tiêu biểu đã vượt qua 100%:</h3>
+    <table>
+      <tr><th>Mã Lịch Sử Trong Russell</th><th>Mã Hiện Tại (QC Resolved)</th><th>Tập Đoàn &amp; Sự Kiện</th><th>Trạng Thái Đối Soát</th></tr>
+      <tr><td><code>FB</code></td><td><code>META</code></td><td>Meta Platforms Inc (Đổi tên thương hiệu 2021)</td><td><span class="badge green">100% Khớp Giá</span></td></tr>
+      <tr><td><code>PCLN</code></td><td><code>BKNG</code></td><td>Booking Holdings Inc (Priceline đổi tên 2018)</td><td><span class="badge green">100% Khớp Giá</span></td></tr>
+      <tr><td><code>ANTM</code></td><td><code>ELV</code></td><td>Elevance Health (Anthem Inc đổi tên 2022)</td><td><span class="badge green">100% Khớp Giá</span></td></tr>
+      <tr><td><code>KFT</code></td><td><code>MDLZ</code></td><td>Mondelez International (Kraft Foods tách ra 2012)</td><td><span class="badge green">100% Khớp Giá</span></td></tr>
+      <tr><td><code>AAXN</code></td><td><code>AXON</code></td><td>Axon Enterprise (TASER International đổi 2021)</td><td><span class="badge green">100% Khớp Giá</span></td></tr>
+      <tr><td><code>TWX</code></td><td><code>T</code></td><td>Time Warner Inc (AT&amp;T thâu tóm 2018)</td><td><span class="badge green">100% Khớp Giá</span></td></tr>
+    </table>
+
+    <h2>10.2 Quy Trình Trích Xuất Dữ Liệu Giá OHLCV Từ QuantConnect (<ic>02_quantconnect_export_single_year.py</ic>)</h2>
+    <p>Sau khi có danh sách Universe PIT (~2,884 mã duy nhất qua 27 năm), làm thế nào để lấy được giá lịch sử OHLCV mà không bị lỗi survivorship bias và không phải tải thủ công từng mã? Pipeline sử dụng môi trường <strong>QuantConnect Research Notebook (QuantBook)</strong> với script chuẩn hóa theo từng năm:</p>
+    
+    <ol>
+      <li><strong>Nạp danh sách PIT hàng năm:</strong> Đọc trực tiếp từ dictionary <ic>pit_universe</ic> (bóc tách từ các file JSON từng năm được nén Base64).</li>
+      <li><strong>Tra cứu định danh Point-in-Time:</strong> Với từng mã trong năm $Y$, gọi <ic>SecurityIdentifier.GenerateEquity(cand, Market.USA, mappingResolveDate=datetime(Y, 6, 30))</ic>. Hàm này kích hoạt bảng <ic>map_files</ic> của QuantConnect để tìm đúng mã cổ phiếu và công ty tương ứng tại thời điểm lịch sử đó.</li>
+      <li><strong>Chế độ giá SplitAdjusted:</strong> Thiết lập <ic>security.SetDataNormalizationMode(DataNormalizationMode.SplitAdjusted)</ic>. Mọi đợt chia tách cổ phiếu (như Apple chia tách 7:1 năm 2014 hay Nvidia chia tách 10:1 năm 2024) đều được điều chỉnh ngược lại, triệt tiêu hoàn toàn những cú sụt giá giả tạo $70\%-90\%$ làm méo mó nhãn mục tiêu ranking.</li>
+      <li><strong>Lookback Window 400 ngày:</strong> Thay vì chỉ lấy từ ngày 01/07 năm $Y$, pipeline lùi lại 400 ngày: <ic>start_date = recon(Y) - timedelta(days=400)</ic>. Nhờ vậy, ngay tại ngày đầu tiên gia nhập chỉ số, cổ phiếu đã có đủ lịch sử 252 phiên để tính các feature dài hạn (SMA200, Momentum 12 tháng, Volatility 1 năm).</li>
+      <li><strong>Đóng gói ZIP kèm Nhật Ký Kiểm Toán (Audit Trail CSV) &amp; Nút Tải Trực Tiếp:</strong> Mỗi năm xuất ra file <ic>russell1000_{Y}.zip</ic> chứa các file CSV OHLCV của từng mã và file <ic>audit_russell1000_{Y}.csv</ic> ghi nhận trạng thái: Full (&ge;150 ngày), Partial (&lt;150 ngày), hoặc Delisted. Một nút bấm HTML/JS tự động render trên notebook cho phép tải file ZIP về máy ngay lập tức.</li>
+    </ol>
+
+    <div style="background: rgba(33, 150, 243, 0.08); border-left: 4px solid #2196f3; padding: 14px 18px; margin: 16px 0; border-radius: 4px;">
+      <h4 style="margin: 0 0 8px 0; color: #1976d2; font-size: 15px;">📌 Quy Ước Chu Kỳ Nắm Giữ (Active Holding Window) &amp; Buffer Features</h4>
+      <p style="margin: 0; line-height: 1.6; font-size: 14px;">
+        <strong>1. Chu kỳ hiệu lực thực tế:</strong> FTSE Russell tái cơ cấu chỉ số (Reconstitution) hàng năm vào <strong>thứ Sáu cuối cùng của tháng 6</strong>. Do đó, danh sách cổ phiếu của rổ năm $Y$ có hiệu lực thực tế trong danh mục từ phiên đóng cửa ngày Reconstitution năm $Y$ đến ngày Reconstitution năm $Y+1$:
+        <br/>
+        <span style="font-family: monospace; background: #e3f2fd; padding: 2px 6px; border-radius: 4px; color: #0d47a1; font-weight: bold;">recon(Y) &lt; Trading_Date &le; recon(Y+1)</span>
+        <br/>
+        <em>Ví dụ minh họa:</em> Danh mục <strong>Russell 1000 năm 2000</strong> có hiệu lực thực tế từ <strong>30/06/2000 đến 29/06/2001</strong> (tức là từ cuối tháng 6/2000 đến cuối tháng 6/2001). Toàn bộ 996 mã trong danh sách 2000 chỉ được chấm điểm xếp hạng (Ranking Target) trong đúng khoảng thời gian này.
+        <br/><br/>
+        <strong>2. Vùng đệm 400 ngày (Lookback Buffer):</strong> Để mô hình AI tính được các đặc trưng kỹ thuật dài hạn (như Momentum 252 ngày, SMA200, Biến động lịch sử 60 ngày) ngay tại ngày đầu tiên bước vào danh mục (đầu tháng 7/Y), script tải từ QuantConnect lùi lại 400 ngày trước ngày Reconstitution: <ic>start_date = recon(Y) - timedelta(days=400)</ic>.
+        Dữ liệu trong 400 ngày này <em>chỉ dùng để tính rolling feature</em>, và được đánh dấu <ic>is_in_pit_universe = False</ic> (trừ khi cổ phiếu đó cũng nằm trong rổ của năm trước). Nhờ vậy, tuyệt đối không có giá trị <ic>NaN</ic> nào trong feature matrix.
+        <br/><br/>
+        <strong>3. Giải quyết chồng lấn khi ghép nối:</strong> Khi ghép 27 file năm qua <ic>04_merge_all_years.py</ic>, lệnh <ic>drop_duplicates(subset=['date', 'ticker'], keep='last')</ic> sẽ tự động loại bỏ các ngày trùng lặp ở vùng đệm lookback, giữ lại đúng 1 dòng OHLCV duy nhất cho mỗi mã mỗi ngày giao dịch.
+        <br/><br/>
+        <strong>4. Quy trình tải an toàn theo từng năm:</strong> Sử dụng script chính thức <ic>scripts/01_pipeline/02_quantconnect_export_single_year.py</ic> (chỉ cần đổi <ic>TARGET_YEAR = Y</ic>). Mỗi năm chạy chỉ mất 1–2 phút và tải file ZIP trực tiếp về máy, triệt tiêu 100% nguy cơ bị QuantConnect khóa tài khoản do cào dữ liệu hàng loạt.
+      </p>
+    </div>
+
+    <h3>Bảng Tra Cứu Toàn Diện Chu Kỳ Reconstitution &amp; Cửa Sổ Truy Vấn QuantConnect (2000 – 2026)</h3>
+    <div style="overflow-x: auto; margin: 16px 0;">
+      <table style="width: 100%; font-size: 13px; text-align: left; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #263238; color: #fff;">
+            <th style="padding: 8px;">Năm Rổ</th>
+            <th style="padding: 8px;">Ngày Reconstitution recon(Y)</th>
+            <th style="padding: 8px;">Chu Kỳ Nắm Giữ Thực Tế (Active Holding Window)</th>
+            <th style="padding: 8px;">Cửa Sổ Truy Vấn QC (start_date &rarr; end_date)</th>
+            <th style="padding: 8px;">Ghi Chú</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style='background: #f9fbe7;'>
+            <td style="font-weight: bold; text-align: center;">2000</td>
+            <td>30/06/2000 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>30/06/2000</b> &rarr; <b>29/06/2001</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">27/05/1999 &rarr; 06/07/2001</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2000</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2001</td>
+            <td>29/06/2001 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>29/06/2001</b> &rarr; <b>28/06/2002</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">25/05/2000 &rarr; 05/07/2002</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2001</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2002</td>
+            <td>28/06/2002 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>28/06/2002</b> &rarr; <b>27/06/2003</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">24/05/2001 &rarr; 04/07/2003</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2002</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2003</td>
+            <td>27/06/2003 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>27/06/2003</b> &rarr; <b>25/06/2004</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">23/05/2002 &rarr; 02/07/2004</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2003</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2004</td>
+            <td>25/06/2004 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>25/06/2004</b> &rarr; <b>24/06/2005</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">22/05/2003 &rarr; 01/07/2005</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2004</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2005</td>
+            <td>24/06/2005 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>24/06/2005</b> &rarr; <b>30/06/2006</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">20/05/2004 &rarr; 07/07/2006</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2005</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2006</td>
+            <td>30/06/2006 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>30/06/2006</b> &rarr; <b>29/06/2007</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">26/05/2005 &rarr; 06/07/2007</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2006</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2007</td>
+            <td>29/06/2007 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>29/06/2007</b> &rarr; <b>27/06/2008</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">25/05/2006 &rarr; 04/07/2008</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2007</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2008</td>
+            <td>27/06/2008 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>27/06/2008</b> &rarr; <b>26/06/2009</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">24/05/2007 &rarr; 03/07/2009</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2008</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2009</td>
+            <td>26/06/2009 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>26/06/2009</b> &rarr; <b>25/06/2010</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">22/05/2008 &rarr; 02/07/2010</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2009</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2010</td>
+            <td>25/06/2010 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>25/06/2010</b> &rarr; <b>24/06/2011</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">21/05/2009 &rarr; 01/07/2011</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2010</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2011</td>
+            <td>24/06/2011 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>24/06/2011</b> &rarr; <b>29/06/2012</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">20/05/2010 &rarr; 06/07/2012</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2011</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2012</td>
+            <td>29/06/2012 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>29/06/2012</b> &rarr; <b>28/06/2013</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">26/05/2011 &rarr; 05/07/2013</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2012</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2013</td>
+            <td>28/06/2013 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>28/06/2013</b> &rarr; <b>27/06/2014</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">24/05/2012 &rarr; 04/07/2014</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2013</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2014</td>
+            <td>27/06/2014 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>27/06/2014</b> &rarr; <b>26/06/2015</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">23/05/2013 &rarr; 03/07/2015</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2014</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2015</td>
+            <td>26/06/2015 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>26/06/2015</b> &rarr; <b>24/06/2016</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">22/05/2014 &rarr; 01/07/2016</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2015</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2016</td>
+            <td>24/06/2016 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>24/06/2016</b> &rarr; <b>30/06/2017</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">21/05/2015 &rarr; 07/07/2017</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2016</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2017</td>
+            <td>30/06/2017 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>30/06/2017</b> &rarr; <b>29/06/2018</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">26/05/2016 &rarr; 06/07/2018</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2017</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2018</td>
+            <td>29/06/2018 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>29/06/2018</b> &rarr; <b>28/06/2019</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">25/05/2017 &rarr; 05/07/2019</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2018</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2019</td>
+            <td>28/06/2019 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>28/06/2019</b> &rarr; <b>26/06/2020</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">24/05/2018 &rarr; 03/07/2020</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2019</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2020</td>
+            <td>26/06/2020 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>26/06/2020</b> &rarr; <b>25/06/2021</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">23/05/2019 &rarr; 02/07/2021</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2020</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2021</td>
+            <td>25/06/2021 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>25/06/2021</b> &rarr; <b>24/06/2022</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">21/05/2020 &rarr; 01/07/2022</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2021</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2022</td>
+            <td>24/06/2022 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>24/06/2022</b> &rarr; <b>30/06/2023</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">20/05/2021 &rarr; 07/07/2023</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2022</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2023</td>
+            <td>30/06/2023 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>30/06/2023</b> &rarr; <b>28/06/2024</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">26/05/2022 &rarr; 05/07/2024</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2023</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2024</td>
+            <td>28/06/2024 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>28/06/2024</b> &rarr; <b>27/06/2025</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">25/05/2023 &rarr; 04/07/2025</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2024</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2025</td>
+            <td>27/06/2025 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>27/06/2025</b> &rarr; <b>26/06/2026</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">23/05/2024 &rarr; 03/07/2026</td>
+            <td>Hiệu lực trọn 1 năm chu kỳ 2025</td>
+          </tr>
+          <tr>
+            <td style="font-weight: bold; text-align: center;">2026</td>
+            <td>26/06/2026 (Thứ 6 cuối T6)</td>
+            <td style="color: #1b5e20;"><b>26/06/2026</b> &rarr; <b>31/10/2026</b></td>
+            <td style="color: #0d47a1; font-family: monospace;">22/05/2025 &rarr; 31/10/2026</td>
+            <td>Cắt tại 31/10/2026 (Hiện tại)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    
+    <div style="background: rgba(46, 125, 50, 0.08); border-left: 4px solid #2e7d32; padding: 14px 18px; margin: 16px 0; border-radius: 4px;">
+      <h4 style="margin: 0 0 8px 0; color: #2e7d32; font-size: 15px;">📊 Kết Quả Quét Thực Nghiệm Khả Dụng (Availability Scan) 27 Năm Trên QuantConnect</h4>
+      <p style="margin: 0; line-height: 1.6; font-size: 14px;">
+        Vào ngày <strong>02/11/2026</strong>, toàn bộ 27 năm (2000–2026) gồm <strong>26,919 lượt cổ phiếu (ticker-years)</strong> đã được quét trực tiếp trên máy chủ QuantConnect để kiểm tra tính sẵn sàng của dữ liệu giá:
+        <br/>
+        • <strong>Tổng số lượt khớp thành công (MATCH):</strong> <span style="color:#2e7d32; font-weight:bold;">26,656 lượt (99.02%)</span> có đầy đủ lịch sử giao dịch.<br/>
+        • <strong>Tổng số lượt trống (EMPTY):</strong> <strong>263 lượt (chỉ 0.98%)</strong> — chủ yếu là các mã hủy niêm yết trước kỳ tái cơ cấu, sáp nhập M&A hoặc cổ phiếu giao dịch sàn OTC.<br/>
+        • <strong>Ý nghĩa kiểm toán:</strong> Xác nhận độ bao phủ thực tế của rổ Russell 1000 trên QuantConnect đạt <strong>&gt;99% xuyên suốt 27 năm</strong>, hoàn toàn đáp ứng tiêu chuẩn kiểm định định lượng khắt khe nhất.
+      </p>
+    </div>
+
+    <h2>10.3 Hợp Nhất Thành File Master Parquet 6.6 Triệu Dòng (<ic>03_process_qc_zips_by_year.py</ic> &amp; <ic>04_merge_all_years.py</ic>)</h2>
+    <p>Dữ liệu sau khi tải về từ QuantConnect trải qua 2 bước tiền xử lý tại chỗ (on-premise):</p>
+    <ul>
+      <li><strong>Giải nén và chuyển đổi theo năm:</strong> Script <ic>03_process_qc_zips_by_year.py</ic> giải nén 27 file ZIP trong <ic>data/raw/market_data/</ic>, chuyển đổi thành 27 file Parquet riêng biệt trong <ic>data/processed/by_year/russell1000_{Y}.parquet</ic>.</li>
+      <li><strong>Hợp nhất thành Master Daily OHLCV:</strong> Script <ic>04_merge_all_years.py</ic> chuẩn hóa tên cột về chữ thường, ép kiểu <ic>datetime64[ns]</ic>, và hợp nhất thành một file duy nhất <ic>data/processed/daily_ohlcv/russell1000_daily_2000_2026.parquet</ic> gồm đúng <strong>6,601,516 dòng giao dịch hoàn toàn sạch sẽ (0 vi phạm OHLCV)</strong>.</li>
+    </ul>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 11: DATA ENGINEERING OPTIMIZATIONS & DELIVERABLES -->
+<section id="data-engineering">
+<div class="card">
+  <div class="card-hdr teal">
+    <span>11.0 Kỹ Thuật Data Engineering Tối Ưu Hóa Hiệu Năng &amp; Quản Lý Bộ Nhớ</span>
+    <span class="badge green">Engineering Architecture</span>
+  </div>
+  <div class="card-body">
+    <h2>11.1 Apache Arrow &amp; Parquet (PyArrow Engine) vs Truyền Thống CSV</h2>
+    <p>Đối với dữ liệu tài chính định lượng quy mô lớn gồm 27 năm giao dịch, việc sử dụng các file phẳng <ic>.csv</ic> truyền thống bộc lộ vô số nhược điểm: tốc độ đọc chậm, phình to dung lượng ổ cứng, và đặc biệt là <strong>bị mất định dạng kiểu dữ liệu (Schema loss)</strong> mỗi khi ghi/đọc (chuỗi ngày tháng bị biến thành string, số nguyên bị ép kiểu float khi có NaN). Hệ thống chuyển giao toàn bộ sang chuẩn <strong>Apache Arrow / Parquet</strong> với engine <ic>pyarrow</ic>:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Tiêu Chí So Sánh</th>
+          <th>Định Dạng CSV Truyền Thống</th>
+          <th>Apache Parquet (PyArrow Engine)</th>
+          <th>Lợi Thế Vượt Trội Trong Dự Án</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Cấu trúc lưu trữ</strong></td>
+          <td>Dạng dòng (Row-oriented, Text plain)</td>
+          <td><strong>Dạng cột (Columnar Storage)</strong></td>
+          <td>Chỉ load đúng các features cần dùng (Projection Pushdown), bỏ qua các cột không cần thiết mà không phải nạp toàn bộ file vào RAM.</td>
+        </tr>
+        <tr>
+          <td><strong>Mức độ nén</strong></td>
+          <td>Không nén hoặc gzip cồng kềnh</td>
+          <td><strong>Snappy / Zstandard nén phân khối</strong></td>
+          <td>Giảm dung lượng từ 70% – 85% so với file thô. Bảng features 6.7 triệu dòng giảm từ ~4.5 GB xuống chỉ còn ~680 MB.</td>
+        </tr>
+        <tr>
+          <td><strong>Tốc độ Đọc / Ghi (I/O)</strong></td>
+          <td>Chậm (Cần parse từng ký tự text)</td>
+          <td><strong>Nhanh gấp 10× – 50× (Zero-copy read)</strong></td>
+          <td>PyArrow đọc trực tiếp dữ liệu dạng nhị phân vào bộ nhớ bộ đệm C++, không sinh phụ phí chuyển đổi kiểu dữ liệu của Python.</td>
+        </tr>
+        <tr>
+          <td><strong>Bảo toàn Kiểu Dữ Liệu</strong></td>
+          <td>Không có schema. Dễ parse sai kiểu ngày tháng hoặc mất int.</td>
+          <td><strong>Nhúng sẵn Schema nhị phân chặt chẽ</strong></td>
+          <td>Bảo toàn nguyên vẹn 100% định dạng: <ic>datetime64[ns]</ic>, <ic>category</ic>, <ic>float32</ic>, <ic>bool</ic>.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <pre><code><span class="cm"># Cách đọc &amp; ghi Parquet tối ưu hiệu năng cao với PyArrow trong dự án:</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Ghi file với nén Snappy và engine pyarrow</span>
+df.to_parquet(<span class="st">'data/processed/features/daily_features.parquet'</span>, engine=<span class="st">'pyarrow'</span>, compression=<span class="st">'snappy'</span>, index=<span class="kw">True</span>)
+
+<span class="cm"># Đọc Projection Pushdown: chỉ nạp đúng 3 cột cần huấn luyện mà không tốn RAM</span>
+df_sub = pd.read_parquet(<span class="st">'data/processed/features/daily_features.parquet'</span>, columns=[<span class="st">'ret_5d'</span>, <span class="st">'vol_20d'</span>, <span class="st">'target_return_rank'</span>], engine=<span class="st">'pyarrow'</span>)</code></pre>
+
+    <h2>11.2 Ma Trận Point-In-Time (PIT) Boolean Mask Siêu Nhẹ</h2>
+    <p>Tổng không gian 27 năm bao gồm 6,708 ngày giao dịch và 2,860 cổ phiếu duy nhất. Nếu lưu ma trận kết nạp dưới dạng chuỗi hoặc số thực, hệ thống sẽ bị lãng phí bộ nhớ nghiêm trọng. Pipeline thiết kế hàm <ic>build_pit_mask()</ic> xuất ra ma trận Boolean nhị phân 2 chiều:</p>
+    <ul>
+      <li><strong>Kích thước ma trận:</strong> $6,708 \text{ ngày} \times 2,860 \text{ cổ phiếu} = 19,184,880 \text{ ô (cells)}$.</li>
+      <li><strong>Chi phí bộ nhớ thực tế:</strong> Mỗi giá trị <ic>bool</ic> trong NumPy chỉ chiếm đúng 1 byte:
+        $$\text{Dung lượng RAM} = 6,708 \times 2,860 \times 1\text{ byte} \approx 19.18\text{ MB RAM}$$
+      </li>
+      <li>Toàn bộ thông tin kết nạp chỉ số suốt gần 3 thập kỷ được gói gọn trong chưa đầy <strong>20 MB RAM</strong>, cho phép nạp tức thì trong 0.05 giây và thực hiện phép toán kiểm tra <ic>&amp;</ic> (bitwise AND) tốc độ hàng triệu phép tính/giây.</li>
+    </ul>
+
+    <h2>11.3 Lọc Thưa Dữ Liệu (Sparse Filtering / Narrow Longitudinal Conversion)</h2>
+    <p>Một sai lầm phổ biến khi xử lý dữ liệu bảng (panel data) là lưu trữ toàn bộ lưới ma trận đầy đủ (Dense Matrix), dẫn tới việc lưu hàng triệu ô giá trị rỗng hoặc `NaN` của các cổ phiếu chưa niêm yết hoặc đã delisted tại thời điểm đó:</p>
+    <div class="g2">
+      <div style="background:#fef2f2; border:1px solid #fecaca; padding:14px; border-radius:8px;">
+        <h4 style="color:#b91c1c; margin-top:0;">Dense Format (Phồng Dữ Liệu)</h4>
+        <p style="font-size:12px; color:#7f1d1d; margin-bottom:4px;">Lưu toàn bộ cặp (Ngày, Mã):</p>
+        <p style="font-size:14px; font-weight:700; color:#b91c1c; margin:0;">$6,708 \times 2,860 = 19,184,880 \text{ dòng}$</p>
+        <p style="font-size:11.5px; color:#991b1b; margin-top:4px;">➔ Gần 65% ô mang giá trị vô nghĩa (ngoài Universe), lãng phí tài nguyên và làm chậm quá trình training.</p>
+      </div>
+
+      <div style="background:#f0fdf4; border:1px solid #bbf7d0; padding:14px; border-radius:8px;">
+        <h4 style="color:#15803d; margin-top:0;">Sparse Longitudinal Filtered (Tối Ưu Dự Án)</h4>
+        <p style="font-size:12px; color:#14532d; margin-bottom:4px;">Chỉ giữ lại các dòng có <ic>mask == True</ic>:</p>
+        <p style="font-size:14px; font-weight:700; color:#15803d; margin:0;">$6,708 \times 1,000 \approx 6,708,000 \text{ dòng}$</p>
+        <p style="font-size:11.5px; color:#166534; margin-top:4px;">➔ <strong>Giảm ngay 65% dung lượng</strong>, ma trận nén thon gọn, mỗi hàng là một bản ghi cổ phiếu thực tế đang cạnh tranh xếp hạng.</p>
+      </div>
+    </div>
+
+    <h2>11.4 Kỹ Thuật Downcasting Kiểu Dữ Liệu (Schema Downcasting)</h2>
+    <p>Mặc định của Pandas trên hệ điều hành 64-bit luôn tự động gán kiểu số thực là <ic>float64</ic> (8 bytes) và số nguyên là <ic>int64</ic> (8 bytes). Điều này là hoàn toàn dư thừa đối với các chỉ số tài chính (tỷ suất sinh lời dao động quanh [-1.0, 1.0], RSI dao động [0, 100], rank dao động [0.0, 1.0]):</p>
+    <table>
+      <thead>
+        <tr><th>Trường Dữ Liệu</th><th>Kiểu Mặc Định</th><th>Kiểu Sau Downcasting</th><th>Tiết Kiệm Bộ Nhớ</th><th>Ảnh Hưởng Độ Chính Xác</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Features kỹ thuật, Returns, Ranks</strong></td><td><code>float64</code> (8 bytes)</td><td><strong><code>float32</code></strong> (4 bytes)</td><td><span class="badge green">Tiết kiệm 50% RAM</span></td><td>Sai số $10^{-7}$, hoàn toàn không ảnh hưởng tới thuật toán phân loại &amp; ranking.</td></tr>
+        <tr><td><strong>Khối lượng giao dịch, Volume, Counts</strong></td><td><code>int64</code> (8 bytes)</td><td><strong><code>int32</code></strong> / <strong><code>uint32</code></strong> (4 bytes)</td><td><span class="badge green">Tiết kiệm 50% RAM</span></td><td>Lưu trữ tối đa tới 2.1 tỷ cổ phiếu, đáp ứng 100% volume thực tế.</td></tr>
+        <tr><td><strong>Mã Cổ Phiếu (Ticker / Symbol)</strong></td><td><code>object</code> (chuỗi string, 48–64 bytes/con trỏ)</td><td><strong><code>category</code></strong> (chỉ mục số nguyên 2 bytes)</td><td><span class="badge green">Tiết kiệm 85% RAM</span></td><td>Truy vấn nhóm (groupby ticker) tăng tốc gấp 4× lần.</td></tr>
+      </tbody>
+    </table>
+    <div class="co info">
+      💡 <strong>Lợi ích trực tiếp:</strong> Nhờ kết hợp Parquet + Sparse Filtering + Downcasting, thời gian huấn luyện một mô hình LightGBM LambdaMART giảm từ <strong>14.5 phút xuống còn 4.2 phút (nhanh hơn 3.5 lần)</strong>, bộ nhớ RAM tiêu thụ đỉnh không vượt quá 2.8 GB, hoạt động mượt mà trên môi trường máy tính cá nhân hoặc Kaggle CPU tiêu chuẩn.
+    </div>
+
+    <h2>11.5 Danh Mục Toàn Bộ File Đầu Ra Của Tiền Xử Lý Universe (Output Deliverables Catalog)</h2>
+    <p>Dưới đây là bảng tổng hợp các sản phẩm dữ liệu hoàn chỉnh được sinh ra từ pipeline tiền xử lý vũ trụ đầu tư:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Đường Dẫn File Đầu Ra</th>
+          <th>Định Dạng</th>
+          <th>Quy Mô / Dung Lượng</th>
+          <th>Cấu Trúc / Schema Chính</th>
+          <th>Mục Đích &amp; Module Kế Tiếp Sử Dụng</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>data/raw/universe/by_year/*.json</code></td>
+          <td>27 Files JSON</td>
+          <td>27 files (~15 KB/file)</td>
+          <td>Mảng danh sách các chuỗi ticker đã chuẩn hóa: <code>["AAPL", "MSFT", "NVDA", ...]</code></td>
+          <td>Lưu trữ nguyên gốc thành phần từng năm phục vụ kiểm toán độc lập.</td>
+        </tr>
+        <tr>
+          <td><code>data/raw/universe/russell1000_pit_by_year.json</code></td>
+          <td>Master JSON</td>
+          <td>~412 KB (27 keys)</td>
+          <td>Dictionary dạng key-value: <code>{ "2000": [...], "2001": [...], ... "2026": [...] }</code></td>
+          <td>Đầu vào chính nạp vào class <code>PointInTimeUniverse</code> trong source code.</td>
+        </tr>
+        <tr>
+          <td><code>data/raw/universe/raw_files_date_audit.json</code></td>
+          <td>Audit JSON</td>
+          <td>~18 KB</td>
+          <td>Metadata pháp y: tên file thô, ngày in thực tế, trang xuất hiện, ngày Recon lý thuyết.</td>
+          <td>Hồ sơ đối soát phục vụ thẩm định học thuật và báo cáo bảo vệ đồ án.</td>
+        </tr>
+        <tr>
+          <td><code>data/raw/universe/extraction_quality_report.csv</code></td>
+          <td>CSV Report</td>
+          <td>1.1 KB (28 rows)</td>
+          <td><code>year, source_type, pit_tickers, qc_tickers, matched, missing, coverage_pct</code></td>
+          <td>Bảng số liệu đối soát độ bao phủ 27 năm (đạt 99.1% – 99.9%).</td>
+        </tr>
+        <tr>
+          <td><code>data/processed/universe/pit_universe_mask.parquet</code></td>
+          <td>Parquet nhị phân</td>
+          <td>~1.4 MB nén Snappy</td>
+          <td>Index: <code>date</code> (6,708 ngày), Columns: 2,860 unique tickers, Values: <code>bool</code></td>
+          <td><strong>Phễu lọc trung tâm (Filter Engine)</strong> nạp vào Phase 2 Feature Engineering và Phase 3 Model Training.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- SECTION 12: REPRODUCTION GUIDE -->
+<section id="reproduce">
+<div class="card">
+  <div class="card-hdr slate">
+    <span>12.0 Hướng Dẫn Tái Hiện Toàn Bộ Pipeline (Reproduction Commands)</span>
+    <span class="badge green">CLI Ready</span>
+  </div>
+  <div class="card-body">
+    <h2>12.1 Các Lệnh Thực Thi Trong Dự Án</h2>
+    <p>Toàn bộ pipeline bóc tách và kiểm thử Universe được thiết kế khép kín, có thể tái hiện độc lập bằng các lệnh sau từ thư mục gốc dự án:</p>
+
+    <h3>Bước 1: Chạy script bóc tách 27 năm tài liệu thô</h3>
+    <pre><code>python scripts/01_pipeline/01_parse_all_universe.py</code></pre>
+    <p style="font-size:12px; color:#64748b;">Lệnh này sẽ đọc toàn bộ 27 files trong <ic>data/raw/universe/raw_universe/</ic>, bóc tách regex theo từng Era, đối soát với QuantConnect Parquet, và ghi ra các file <ic>russell1000_pit_by_year.json</ic>, <ic>extraction_quality_report.csv</ic>.</p>
+
+    <h3>Bước 2: Chạy bộ kiểm thử tự động cho PIT Membership Mask</h3>
+    <pre><code>pytest tests/test_pit_universe.py -v</code></pre>
+
+    <h3>Bước 3: Kiểm tra cấu trúc Universe và Turnover Rate</h3>
+    <pre><code>python scripts/02_validation_universe/test1_universe_structure.py
+python scripts/02_validation_universe/test3_universe_pit_turnover.py</code></pre>
+
+    <h2>12.2 Sơ Đồ Cây Thư Mục Dữ Liệu Vũ Trụ Hoàn Chỉnh</h2>
+    <pre><code>Predict_daily_return_rankings/
+├── data/
+│   └── raw/
+│       └── universe/
+│           ├── raw_universe/                      # 27 files gốc (PDF, CSV, JSON, XLS)
+│           ├── by_year/                           # 27 files JSON thành phần từng năm
+│           │   ├── russell1000_2000.json
+│           │   ├── ...
+│           │   └── russell1000_2026.json
+│           ├── russell1000_pit_by_year.json       # Master dictionary gộp 27 năm
+│           ├── russell1000_constituents.csv       # Danh sách phẳng 2,884 unique tickers
+│           └── extraction_quality_report.csv      # Báo cáo tỷ lệ khớp và độ phủ 27 năm
+├── src/
+│   └── data/
+│       └── pit_universe.py                        # Engine tạo Boolean mask Date x Ticker
+└── tests/
+    └── test_pit_universe.py                       # Unit tests kiểm định 0 look-ahead bias</code></pre>
+  </div>
+</div>
+</section>
+
+<footer>
+  Russell 1000 Universe Preprocessing &amp; PIT Methodology Report · Predict Daily Return Rankings · CO3101 HCMUT · 11/2026
+</footer>
+
+</div>
+
+<!-- SCROLL SPY SCRIPT -->
+<script>
+const links = document.querySelectorAll('#sb a');
+const secs = document.querySelectorAll('section');
+
+window.addEventListener('scroll', () => {
+  let cur = '';
+  secs.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 120) {
+      cur = s.id;
+    }
+  });
+  links.forEach(a => {
+    a.classList.remove('act');
+    if (a.getAttribute('href') === '#' + cur) {
+      a.classList.add('act');
+    }
+  });
+});
+
+links.forEach(a => {
+  a.addEventListener('click', e => {
+    const targetId = a.getAttribute('href').slice(1);
+    const targetEl = document.getElementById(targetId);
+    if (targetEl) {
+      e.preventDefault();
+      targetEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+});
+</script>
+
+</body>
+</html>

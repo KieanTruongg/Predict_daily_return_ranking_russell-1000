@@ -1,0 +1,11 @@
+batch_index,tickers,rows,start_year,end_year,normalization,zip_filename,compressed_size_mb,uncompressed_size_mb,compression_ratio
+0,289,1369362,1998,2026,Raw,russell_market_batch_01_of_10.zip,21.32,91.55,4.29
+1,289,1358316,1998,2026,Raw,russell_market_batch_02_of_10.zip,20.75,90.23,4.35
+2,289,1384778,1998,2026,Raw,russell_market_batch_03_of_10.zip,21.32,91.66,4.3
+3,289,1245969,1998,2026,Raw,russell_market_batch_04_of_10.zip,19.27,82.89,4.3
+4,289,1358622,1998,2026,Raw,russell_market_batch_05_of_10.zip,20.71,90.41,4.37
+5,289,1309359,1998,2026,Raw,russell_market_batch_06_of_10.zip,20.33,87.55,4.31
+6,289,1289237,1998,2026,Raw,russell_market_batch_07_of_10.zip,19.83,85.6,4.32
+7,289,1258971,1998,2026,Raw,russell_market_batch_08_of_10.zip,19.31,83.87,4.34
+8,289,1333137,1998,2026,Raw,russell_market_batch_09_of_10.zip,20.56,88.79,4.32
+9,283,1239638,1998,2026,Raw,russell_market_batch_10_of_10.zip,19.25,82.46,4.28

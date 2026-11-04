@@ -1,0 +1,29 @@
+period,period_start,period_end,trading_days,official_tickers,theoretical_stock_days,actual_valid_data_stock_days,avg_resolved_membership_count,avg_valid_data_count,avg_valid_label_count,coverage_vs_resolved_membership_pct,coverage_vs_official_snapshot_pct,note
+1998-01-02 đến 2000-06-30 (Feature Warm-up — 630 phiên),1998-01-02,2000-06-30,630,0,0,0,0.0,0.0,0.0,0.0,0.0,Lịch sử khởi tạo feature; không thuộc universe PIT
+2000 Reconstitution,2000-07-03,2001-06-29,251,996,249996,228985,916.3,912.3,911.9,99.56,91.6,Chính thức có mặt trong rổ Russell 1000
+2001 Reconstitution,2001-07-02,2002-06-28,247,989,244283,228220,929.5,924.0,923.6,99.4,93.42,Chính thức có mặt trong rổ Russell 1000
+2002 Reconstitution,2002-07-01,2003-06-30,252,988,248976,237078,945.1,940.8,940.7,99.54,95.22,Chính thức có mặt trong rổ Russell 1000
+2003 Reconstitution,2003-07-01,2004-06-30,252,988,248976,238174,950.4,945.1,945.0,99.45,95.66,Chính thức có mặt trong rổ Russell 1000
+2004 Reconstitution,2004-07-01,2005-06-30,253,990,250470,237832,945.0,940.0,939.9,99.48,94.95,Chính thức có mặt trong rổ Russell 1000
+2005 Reconstitution,2005-07-01,2006-06-30,252,987,248724,232656,928.4,923.2,923.0,99.44,93.54,Chính thức có mặt trong rổ Russell 1000
+2006 Reconstitution,2006-07-03,2007-06-29,250,982,245500,232731,936.1,930.9,930.7,99.44,94.8,Chính thức có mặt trong rổ Russell 1000
+2007 Reconstitution,2007-07-02,2008-06-30,252,1013,255276,239799,956.4,951.6,951.4,99.49,93.94,Chính thức có mặt trong rổ Russell 1000
+2008 Reconstitution,2008-07-01,2009-06-30,252,1002,252504,237974,949.6,944.3,944.2,99.45,94.25,Chính thức có mặt trong rổ Russell 1000
+2009 Reconstitution,2009-07-01,2010-06-30,252,967,243684,233813,932.9,927.8,927.7,99.46,95.95,Chính thức có mặt trong rổ Russell 1000
+2010 Reconstitution,2010-07-01,2011-06-30,253,981,248193,237551,943.2,938.9,938.8,99.55,95.71,Chính thức có mặt trong rổ Russell 1000
+2011 Reconstitution,2011-07-01,2012-06-29,252,982,247464,236171,942.3,937.2,937.1,99.46,95.44,Chính thức có mặt trong rổ Russell 1000
+2012 Reconstitution,2012-07-02,2013-06-28,249,987,245763,235225,950.3,944.7,944.6,99.41,95.71,Chính thức có mặt trong rổ Russell 1000
+2013 Reconstitution,2013-07-01,2014-06-30,252,1000,252000,242191,967.3,961.1,961.0,99.36,96.11,Chính thức có mặt trong rổ Russell 1000
+2014 Reconstitution,2014-07-01,2015-06-30,252,1023,257796,247465,988.1,982.0,981.9,99.38,95.99,Chính thức có mặt trong rổ Russell 1000
+2015 Reconstitution,2015-07-01,2016-06-30,253,1026,259578,246938,979.3,976.0,975.8,99.67,95.13,Chính thức có mặt trong rổ Russell 1000
+2016 Reconstitution,2016-07-01,2017-06-30,252,991,249732,239023,948.8,948.5,948.4,99.96,95.71,Chính thức có mặt trong rổ Russell 1000
+2017 Reconstitution,2017-07-03,2018-06-29,251,980,245980,236033,940.9,940.4,940.2,99.95,95.96,Chính thức có mặt trong rổ Russell 1000
+2018 Reconstitution,2018-07-02,2019-06-28,250,976,244000,234862,939.6,939.4,939.3,99.99,96.25,Chính thức có mặt trong rổ Russell 1000
+2019 Reconstitution,2019-07-01,2020-06-30,253,1001,253253,243824,965.1,963.7,963.6,99.86,96.28,Chính thức có mặt trong rổ Russell 1000
+2020 Reconstitution,2020-07-01,2021-06-30,252,994,250488,243149,965.0,964.9,964.8,99.98,97.07,Chính thức có mặt trong rổ Russell 1000
+2021 Reconstitution,2021-07-01,2022-06-30,252,1017,256284,248700,987.4,986.9,986.8,99.95,97.04,Chính thức có mặt trong rổ Russell 1000
+2022 Reconstitution,2022-07-01,2023-06-30,251,1013,254263,247527,986.4,986.2,986.0,99.98,97.35,Chính thức có mặt trong rổ Russell 1000
+2023 Reconstitution,2023-07-03,2024-06-28,250,1011,252750,246727,987.9,986.9,982.9,99.9,97.62,Chính thức có mặt trong rổ Russell 1000
+2024 Reconstitution,2024-07-01,2025-06-30,250,1010,252500,246638,987.0,986.6,986.5,99.96,97.68,Chính thức có mặt trong rổ Russell 1000
+2025 Reconstitution,2025-07-01,2026-06-30,251,1014,254514,246981,984.5,984.0,983.9,99.95,97.04,Chính thức có mặt trong rổ Russell 1000
+2026 Reconstitution,2026-07-01,2026-10-30,86,1011,86946,85555,995.5,994.8,983.2,99.93,98.4,Chính thức có mặt trong rổ Russell 1000

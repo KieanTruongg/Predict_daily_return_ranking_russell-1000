@@ -49,3 +49,7 @@ outputs/reports/*
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Large local teaching material and reproducible audit (kept outside Git)
+/docs/Teacher Resource/quant overview.pdf
+/docs/Data report/market_data_audit/tables/2t_stitching_conflict_audit.csv

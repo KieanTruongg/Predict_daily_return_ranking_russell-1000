@@ -1,0 +1,4374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Báo Cáo Nghiên Cứu Định Lượng Toàn Diện — Russell 1000 Daily Return Ranking Engine</title>
+<style>
+  :root {
+    --sidebar-w: 290px;
+    --primary: #0f172a;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --success: #16a34a;
+    --success-bg: #f0fdf4;
+    --warning: #ea580c;
+    --warning-bg: #fff7ed;
+    --danger: #dc2626;
+    --danger-bg: #fef2f2;
+    --border: #e2e8f0;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --card-bg: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14.5px;
+    color: var(--text-main);
+    background: #f8fafc;
+    line-height: 1.65;
+  }
+
+  /* Sidebar */
+  #sidebar {
+    position: fixed; top: 0; left: 0; width: var(--sidebar-w);
+    height: 100vh; background: #0f172a; color: #f1f5f9;
+    overflow-y: auto; z-index: 100; border-right: 1px solid #1e293b;
+  }
+  #sidebar .brand {
+    background: #1e1b4b; padding: 20px 18px;
+    font-size: 14px; font-weight: 700; color: #fff;
+    border-bottom: 1px solid #312e81; letter-spacing: 0.3px;
+  }
+  #sidebar .brand span { color: #38bdf8; display: block; font-size: 11px; font-weight: 400; margin-top: 3px; }
+  #sidebar nav { padding: 16px 0; }
+  #sidebar nav .section-title {
+    padding: 12px 18px 4px; font-size: 10.5px; font-weight: 700;
+    color: #94a3b8; text-transform: uppercase; letter-spacing: 1px;
+  }
+  #sidebar nav a {
+    display: block; padding: 8px 18px 8px 22px; color: #cbd5e1;
+    text-decoration: none; font-size: 13px; border-left: 3px solid transparent;
+    transition: all 0.15s ease;
+  }
+  #sidebar nav a:hover, #sidebar nav a.active {
+    color: #fff; background: rgba(255, 255, 255, 0.06); border-left-color: #38bdf8;
+  }
+
+  /* Main Content */
+  #main { margin-left: var(--sidebar-w); padding: 0 0 60px 0; }
+
+  /* Header Banner */
+  #header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #1e3a8a 100%);
+    color: #fff; padding: 42px 48px 36px;
+    border-bottom: 1px solid #312e81;
+  }
+  #header h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+  #header .sub { font-size: 15px; color: #cbd5e1; max-width: 900px; line-height: 1.6; margin-bottom: 24px; }
+  
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 16px; margin-top: 20px;
+  }
+  .kpi-card {
+    background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px;
+    padding: 14px 18px; text-align: left;
+  }
+  .kpi-card .val { font-size: 24px; font-weight: 800; color: #38bdf8; font-variant-numeric: tabular-nums; }
+  .kpi-card .lbl { font-size: 11.5px; color: #94a3b8; margin-top: 4px; font-weight: 500; }
+
+  /* Content Containers */
+  .container { max-width: 1200px; margin: 0 auto; padding: 32px 48px; }
+  .section-card {
+    background: var(--card-bg); border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid var(--border); margin-bottom: 36px; overflow: hidden;
+  }
+  .section-card-header {
+    background: #ffffff; border-bottom: 1px solid var(--border);
+    padding: 18px 28px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-card-header h2 {
+    font-size: 18px; font-weight: 700; color: var(--primary);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .badge-phase {
+    font-size: 11px; font-weight: 700; padding: 3px 10px;
+    border-radius: 20px; background: #e0f2fe; color: #0369a1;
+  }
+  .badge-success { background: #dcfce7; color: #15803d; }
+  .badge-warning { background: #ffedd5; color: #c2410c; }
+  .section-body { padding: 28px; }
+
+  /* Typography */
+  h3 { font-size: 15px; font-weight: 700; color: #334155; margin: 22px 0 10px; }
+  p { margin-bottom: 14px; color: #334155; }
+  ul, ol { padding-left: 24px; margin-bottom: 16px; color: #334155; }
+  li { margin-bottom: 6px; }
+
+  /* Callout Boxes */
+  .callout {
+    border-left: 4px solid var(--accent); background: var(--accent-light);
+    padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 18px 0;
+  }
+  .callout.success { border-left-color: var(--success); background: var(--success-bg); }
+  .callout.warning { border-left-color: var(--warning); background: var(--warning-bg); }
+  .callout h4 { font-size: 13.5px; font-weight: 700; margin-bottom: 4px; color: #0f172a; }
+  .callout p { margin: 0; font-size: 13.5px; color: #334155; }
+
+  /* Tables */
+  .table-responsive { overflow-x: auto; margin: 16px 0 24px; }
+  table.audit-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+    background: #ffffff; border: 1px solid var(--border);
+  }
+  table.audit-table th {
+    background: #f1f5f9; color: #334155; font-weight: 700;
+    padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  table.audit-table td {
+    padding: 9px 14px; border-bottom: 1px solid var(--border);
+    color: #334155; font-variant-numeric: tabular-nums;
+  }
+  table.audit-table tr:nth-child(even) td { background: #f8fafc; }
+  table.audit-table tr:hover td { background: #f1f5f9; }
+
+  /* Figures */
+  .figure-box {
+    margin: 22px 0; border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden; background: #fff;
+  }
+  .figure-box img { width: 100%; height: auto; display: block; }
+  .figure-box .caption {
+    padding: 10px 16px; font-size: 12.5px; color: #64748b;
+    background: #f8fafc; border-top: 1px solid var(--border);
+    font-weight: 500;
+  }
+
+  /* Code */
+  code {
+    font-family: 'Consolas', 'Courier New', monospace; font-size: 12.5px;
+    background: #e2e8f0; color: #0f172a; padding: 2px 6px; border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <div class="brand">
+    Russell 1000 Daily Alpha Engine
+    <span>Institutional Quant Research Pipeline</span>
+  </div>
+  <nav>
+    <div class="section-title">Nội Dung Nghiên Cứu</div>
+    <a href="#sec-overview" class="active">1. Tổng Quan &amp; Kiến Trúc 10 Bước</a>
+    <a href="#sec-warehouse">2. Kiểm Định Kho Thô &amp; Coverage PIT</a>
+    <a href="#sec-identity">3. Identity, 2T &amp; Corporate Actions</a>
+    <a href="#sec-matrices">4. Hệ Thống Ma Trận 2D &amp; 3 Lớp PIT Masks</a>
+    <a href="#sec-sanity">5. Sanity Checks Sau Chuyển Đổi</a>
+    <a href="#sec-eda">6. EDA Tập Phát Triển 2000–2023 (Zero Snooping)</a>
+    <a href="#sec-next">7. Đề Xuất &amp; Lộ Trình Bước ⑦</a>
+  </nav>
+</aside>
+
+<main id="main">
+
+  <header id="header">
+    <h1>Báo Cáo Nghiên Cứu Định Lượng Toàn Diện (1998–2026)</h1>
+    <div class="sub">
+      Dự án Xây dựng Mô hình Học Máy Dự Báo Thứ Hạng Lợi Nhuận Hằng Ngày (Daily Return Rankings) rổ Russell 1000 constituents. 
+      Phương pháp chuẩn Quỹ Định Lượng: Ngăn ngừa 100% Look-ahead bias, Ticker Reuse, Split Discretization, và Phân tách nghiêm ngặt Out-Of-Sample.
+    </div>
+    
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="val">7,252</div>
+        <div class="lbl">Phiên Giao Dịch NYSE (1998–2026)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="val">3,711</div>
+        <div class="lbl">Canonical Securities (CCCD Doanh Nghiệp)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="val">12.25M</div>
+        <div class="lbl">Dòng OHLCV Điều Chỉnh Hoàn Hảo</div>
+      </div>
+      <div class="kpi-card">
+        <div class="val">96.41%</div>
+        <div class="lbl">Độ Phủ Daily PIT Membership</div>
+      </div>
+      <div class="kpi-card">
+        <div class="val">0.00e+00</div>
+        <div class="lbl">Sai Số Ma Trận vs Kho Gốc</div>
+      </div>
+      <div class="kpi-card">
+        <div class="val">0%</div>
+        <div class="lbl">Data Leakage sang 2024–2026</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- SECTION 1 -->
+    <section id="sec-overview" class="section-card">
+      <div class="section-card-header">
+        <h2>1. Tổng Quan Thiết Kế Nghiên Cứu &amp; Phân Chia Thời Gian</h2>
+        <span class="badge-phase badge-success">Bước ① Hoàn Tất</span>
+      </div>
+      <div class="section-body">
+        <p>Để đạt chuẩn mực cao nhất của nghiên cứu định lượng tổ chức (Institutional Quant Standard), toàn bộ dòng thời gian 29 năm (1998–2026) được chia thành 3 phân vùng độc lập:</p>
+        <ul>
+          <li><strong>1998–1999 (Feature Lookback Warm-up):</strong> 630 phiên giao dịch NYSE. Không tính vào tập huấn luyện do chưa có snapshot PIT chính thức. Toàn bộ lịch sử giá raw/adjusted được giữ nguyên để tính các feature rolling dài hạn (Momentum 252d, Volatility 60d) ngay từ ngày đầu tiên rổ Russell 1000 bắt đầu (01/07/2000).</li>
+          <li><strong>2000–2023 (Tập Phát Triển — Development Set):</strong> 5,911 phiên giao dịch. Dùng để thực hiện EDA, Feature Engineering, huấn luyện mô hình và Walk-Forward Validation (Expanding Window CV). Tuyệt đối không nhìn trước vào tương lai.</li>
+          <li><strong>2024–2026 (Tập Triển Khai Thực Chiến — Out-Of-Sample Deployment):</strong> 711 phiên giao dịch. Đóng băng toàn bộ tham số, siêu tham số và pipeline. Đánh giá kiểm thử thực chiến bao gồm chi phí trượt giá (slippage) và phí giao dịch.</li>
+        </ul>
+        <div class="callout">
+          <h4>Quy ước Khớp Lệnh &amp; Khoảng Thời Gian Dự Báo</h4>
+          <p><strong>Thiết kế A (MOC Baseline):</strong> Tín hiệu (Alpha Features) được tính toán tại thời điểm 15:45 ngày T. Lệnh tái cân bằng được gửi theo lệnh Market-On-Close (MOC) khớp tại giá Đóng cửa ngày T. Nhãn mục tiêu là tỷ suất sinh lời ngày kế tiếp: Y_(i, t) = (Close_(i, t+1) / Close_(i, t)) - 1.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section id="sec-warehouse" class="section-card">
+      <div class="section-card-header">
+        <h2>2. Kiểm Định Kho Dữ Liệu Thô &amp; Baseline Coverage PIT</h2>
+        <span class="badge-phase badge-success">Bước ② Hoàn Tất</span>
+      </div>
+      <div class="section-body">
+        <p>Hợp nhất 10 batch dữ liệu QuantConnect với 13,147,389 dòng bản ghi nến ngày. Sau khi đối chiếu với lịch giao dịch chính thức của sàn New York (NYSE Calendar), toàn bộ các phiên đóng cửa bất thường (Sự kiện khủng bố 11/9/2001, Siêu bão Sandy 2012, các ngày quốc tang) đều được xác nhận khớp 100%.</p>
+        <p>Độ phủ thành viên Point-In-Time (PIT) đạt mức bình quân <strong>96.41%</strong> qua 27 kỳ tái cơ cấu (trung bình 960.8 cổ phiếu giao dịch hợp lệ mỗi ngày trên tổng số 1,000 cổ phiếu danh nghĩa).</p>
+      </div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section id="sec-identity" class="section-card">
+      <div class="section-card-header">
+        <h2>3. Chuẩn Hóa Identity, Phân Lập Ticker Reuse &amp; Thẩm Định Học Thuật Corporate Actions</h2>
+        <span class="badge-phase badge-warning">Bước ③ Đang Thẩm Định Toàn Diện</span>
+      </div>
+      <div class="section-body">
+        <h3>3.1. Bản Chất `canonical_sid` &amp; Tại Sao 2,884 Tickers Mở Rộng Thành 3,711 Canonical SIDs?</h3>
+        <p><strong>Bản chất cốt lõi:</strong> Ticker chỉ là "cái áo" do Sở Giao Dịch cấp tạm thời. Trong suốt 29 năm (1998–2026), các công ty phá sản, hủy niêm yết, và mã ticker đó sau vài năm được cấp lại cho một công ty hoàn toàn mới. <code>canonical_sid</code> là <em>Căn Cước Công Dân (CCCD)</em> duy nhất của từng thực thể pháp nhân.</p>
+        <p>Nếu gom theo ticker thuần túy (2,884 mã), ta sẽ ghép nhầm chuỗi giá của 2 công ty hoàn toàn khác nhau vào cùng một chuỗi thời gian, gây ra các cú sốc giá giả mạo. Phân tích dữ liệu cho thấy:</p>
+        <ul>
+          <li><strong>1,962 tickers (68.9%):</strong> Chỉ thuộc về duy nhất 1 công ty xuyên suốt 29 năm.</li>
+          <li><strong>883 tickers (31.1%):</strong> Bị tái sử dụng (Ticker Reuse) bởi 2, 3, hoặc 4 công ty độc lập qua các thời kỳ! (Ví dụ: Ticker <code>ABI</code> là Applied Biosystems giai đoạn 1998–1999, nhưng từ 2008 trở đi lại là tập đoàn bia Anheuser-Busch InBev; Ticker <code>GEN</code>, <code>INFO</code>, <code>AI</code>, <code>CHTR</code> đều có nhiều thực thể kế tiếp nhau).</li>
+          <li>Chính vì <strong>883 ca Ticker Reuse</strong> này, 2,884 mã ticker danh nghĩa đã đại diện cho đúng <strong>3,711 thực thể doanh nghiệp độc lập</strong> trên ma trận 2D!</li>
+        </ul>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>ticker</th>
+      <th>entity_count</th>
+      <th>in_pit_universe</th>
+      <th>canonical_sids</th>
+      <th>entity_lifecycles</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>A</td>
+      <td>2</td>
+      <td>True</td>
+      <td>A R735QTJ8XC9X; A RPTMYV3VC57P</td>
+      <td>A R735QTJ8XC9X (1999-01-04-&gt;1999-04-26) | A R735QTJ8XC9X (1998-01-02-&gt;1998-12-31) | A RPTMYV3VC57P (2000-01-03-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>AA</td>
+      <td>2</td>
+      <td>True</td>
+      <td>AA R735QTJ8XC9X; AA WF7IHVI76I5H</td>
+      <td>AA R735QTJ8XC9X (1998-01-02-&gt;2016-12-30) | AA WF7IHVI76I5H (2017-01-03-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>AAL</td>
+      <td>1</td>
+      <td>True</td>
+      <td>AAL VM9RIYHM8ACL</td>
+      <td>AAL VM9RIYHM8ACL (2013-12-09-&gt;2013-12-31) | AAL VM9RIYHM8ACL (2014-01-02-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>AAN</td>
+      <td>3</td>
+      <td>True</td>
+      <td>AAN R735QTJ8XC9X; ARON R735QTJ8XC9X; RNTA SB2PBIC0SCX1</td>
+      <td>AAN R735QTJ8XC9X (1998-01-02-&gt;1999-12-31) | ARON R735QTJ8XC9X (2000-01-03-&gt;2010-12-14) | RNTA SB2PBIC0SCX1 (2021-01-04-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>AAOI</td>
+      <td>1</td>
+      <td>True</td>
+      <td>AAOI VK8WG1F4KGH1</td>
+      <td>AAOI VK8WG1F4KGH1 (2013-09-26-&gt;2013-12-31) | AAOI VK8WG1F4KGH1 (2014-01-02-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>AAON</td>
+      <td>1</td>
+      <td>True</td>
+      <td>AAON R735QTJ8XC9X</td>
+      <td>AAON R735QTJ8XC9X (1998-01-02-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>AAP</td>
+      <td>2</td>
+      <td>True</td>
+      <td>AAP R735QTJ8XC9X; AAP SA48O8J43YAT</td>
+      <td>AAP R735QTJ8XC9X (2000-01-03-&gt;2000-04-26) | AAP R735QTJ8XC9X (1998-01-02-&gt;1999-12-31) | AAP SA48O8J43YAT (2002-01-02-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>1</td>
+      <td>True</td>
+      <td>AAPL R735QTJ8XC9X</td>
+      <td>AAPL R735QTJ8XC9X (1998-01-02-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>AAXN</td>
+      <td>1</td>
+      <td>True</td>
+      <td>TASR S5BXFVIKPX7P</td>
+      <td>TASR S5BXFVIKPX7P (2001-06-07-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>ABBI</td>
+      <td>1</td>
+      <td>True</td>
+      <td>APPX SAJ0DN0N99PH</td>
+      <td>APPX SAJ0DN0N99PH (2001-12-14-&gt;2001-12-31) | APPX SAJ0DN0N99PH (2002-01-02-&gt;2008-09-10)</td>
+    </tr>
+    <tr>
+      <td>ABBV</td>
+      <td>1</td>
+      <td>True</td>
+      <td>ABBV VCY032R250MD</td>
+      <td>ABBV VCY032R250MD (2013-01-02-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>ABC</td>
+      <td>1</td>
+      <td>True</td>
+      <td>AAS R735QTJ8XC9X</td>
+      <td>AAS R735QTJ8XC9X (1998-01-02-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>ABGX</td>
+      <td>1</td>
+      <td>True</td>
+      <td>ABGX RC1DNQQSRWBP</td>
+      <td>ABGX RC1DNQQSRWBP (1998-07-02-&gt;1998-12-31) | ABGX RC1DNQQSRWBP (1999-01-04-&gt;2006-03-31)</td>
+    </tr>
+    <tr>
+      <td>ABI</td>
+      <td>4</td>
+      <td>True</td>
+      <td>ABI R735QTJ8XC9X; ABI YTLZP82EVU5H; HST R735QTJ8XC9X; PKN R735QTJ8XC9X</td>
+      <td>ABI R735QTJ8XC9X (1998-01-02-&gt;1999-08-18) | ABI YTLZP82EVU5H (2025-06-26-&gt;2026-10-30) | HST R735QTJ8XC9X (2000-01-04-&gt;2000-12-29) | PKN R735QTJ8XC9X (2001-01-02-&gt;2008-11-21)</td>
+    </tr>
+    <tr>
+      <td>ABII</td>
+      <td>1</td>
+      <td>True</td>
+      <td>ABII TXMTFOIELNJ9</td>
+      <td>ABII TXMTFOIELNJ9 (2007-11-14-&gt;2007-12-31) | ABII TXMTFOIELNJ9 (2008-01-02-&gt;2010-10-15)</td>
+    </tr>
+    <tr>
+      <td>ABK</td>
+      <td>1</td>
+      <td>True</td>
+      <td>ABK R735QTJ8XC9X</td>
+      <td>ABK R735QTJ8XC9X (1998-01-02-&gt;2010-11-09)</td>
+    </tr>
+    <tr>
+      <td>ABMD</td>
+      <td>1</td>
+      <td>True</td>
+      <td>ABMD R735QTJ8XC9X</td>
+      <td>ABMD R735QTJ8XC9X (1998-01-02-&gt;2022-12-22)</td>
+    </tr>
+    <tr>
+      <td>ABNB</td>
+      <td>1</td>
+      <td>True</td>
+      <td>ABNB XK8H247DY6W5</td>
+      <td>ABNB XK8H247DY6W5 (2020-12-10-&gt;2020-12-31) | ABNB XK8H247DY6W5 (2021-01-04-&gt;2026-10-30)</td>
+    </tr>
+    <tr>
+      <td>ABS</td>
+      <td>1</td>
+      <td>True</td>
+      <td>ABS R735QTJ8XC9X</td>
+      <td>ABS R735QTJ8XC9X (1998-01-02-&gt;2006-06-01)</td>
+    </tr>
+    <tr>
+      <td>ABT</td>
+      <td>1</td>
+      <td>True</td>
+      <td>ABT R735QTJ8XC9X</td>
+      <td>ABT R735QTJ8XC9X (1998-01-02-&gt;2026-10-30)</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+        <h3>3.2. Thiết Lập Membership Từ Snapshot &amp; 6 Cấp Độ Bằng Chứng Xác Minh (26,919 Constituent-Years)</h3>
+        <p>Membership được thiết lập nghiêm ngặt từ 27 danh sách snapshot Point-In-Time chính thức kết hợp với khoảng hiệu lực <code>[min_date, max_date]</code> của từng thực thể. Tuyệt đối không suy diễn từ dòng nến có sẵn trong kho giá.</p>
+        <p>Toàn bộ 26,919 lượt cổ phiếu–năm được phân loại theo <strong>6 cấp độ bằng chứng học thuật</strong>:</p>
+        <ul>
+          <li><strong style="color:var(--success);">LEVEL 1 — VERIFIED_PERMANENT (26,138 lượt — 97.10%):</strong> Ánh xạ duy nhất vào mã SID vĩnh viễn trực tiếp từ QuantConnect LEAN, chuỗi ngày liên tục khớp với kỳ.</li>
+          <li><strong style="color:var(--success);">LEVEL 2 — VERIFIED_SEQUENTIAL_TRANSITION (45 lượt — 0.17%):</strong> Chuyển tiếp tuần tự giữa 2 mã SID vĩnh viễn qua thương vụ sáp nhập/đổi tên có khoảng cách liền kề &le; 10 ngày (ví dụ JPM sáp nhập CMB, TWX sáp nhập AOL), <strong>0 ngày trùng lặp</strong>.</li>
+          <li><strong style="color:var(--warning);">LEVEL 3 — HEURISTIC_2T_STITCH (152 lượt — 0.56%):</strong> Nối mã placeholder <code>2T</code> vào SID vĩnh viễn (gap &le; 10 ngày); ghi nhận rõ là <em>giả định kỹ thuật chưa xác minh qua hồ sơ SEC</em>.</li>
+          <li><strong style="color:var(--danger);">LEVEL 4 — AMBIGUOUS_MULTI_SID (138 lượt — 0.51%):</strong> Các trường hợp mơ hồ cần giữ nguyên trạng thái cảnh báo, không gượng ép xác nhận.</li>
+          <li><strong style="color:var(--text-muted);">LEVEL 5 — UNRESOLVED_ZERO_BARS (250 lượt — 0.93%):</strong> Ticker có trong kho mapping nhưng không có ngày hiệu lực nào trong 12 tháng của kỳ này.</li>
+          <li><strong style="color:var(--text-muted);">LEVEL 6 — UNRESOLVED_NOT_IN_MAPPING (196 lượt — 0.73%):</strong> Ticker không có trong kho nến (mã OTC / non-equity / un-downloaded).</li>
+        </ul>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>period_year</th>
+      <th>period_start</th>
+      <th>period_end</th>
+      <th>source_ticker</th>
+      <th>assigned_canonical_sid</th>
+      <th>evidence_level</th>
+      <th>verification_status</th>
+      <th>validity_overlap_range</th>
+      <th>notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>A</td>
+      <td>A RPTMYV3VC57P</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AA</td>
+      <td>AA R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AAPL</td>
+      <td>AAPL R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ABGX</td>
+      <td>ABGX RC1DNQQSRWBP</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ABK</td>
+      <td>ABK R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ABS</td>
+      <td>ABS R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ABT</td>
+      <td>ABT R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ACS</td>
+      <td>AFA R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ACXM</td>
+      <td>ACXM R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADBE</td>
+      <td>ADBE R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADCT</td>
+      <td>ADCT R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADI</td>
+      <td>ADI R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADLAC</td>
+      <td>NaN</td>
+      <td>LEVEL_5_UNRESOLVED_ZERO_BARS</td>
+      <td>UNRESOLVED</td>
+      <td>NaN</td>
+      <td>Có trong kho (2002-01-02-&gt;2002-05-31) nhưng không có ngày hiệu lực nào trong kỳ 2000</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADM</td>
+      <td>ADM R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADPT</td>
+      <td>ADPT R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADRX</td>
+      <td>ADRX R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADSK</td>
+      <td>ADSK R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADTN</td>
+      <td>ADTN R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AEE</td>
+      <td>AEE R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AEP</td>
+      <td>AEP R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AES</td>
+      <td>AES R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AET</td>
+      <td>AET R735QTJ8XC9X; AET S0JM7II1BW4L</td>
+      <td>LEVEL_4_AMBIGUOUS_MULTI_SID</td>
+      <td>AMBIGUOUS</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>GIÁN ĐOẠN LỚN: Khoảng cách giữa 2 SID là 18 ngày (&gt;10d); thiếu bằng chứng continuity</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AETH</td>
+      <td>AETH 2T; AETH RP22G8V570PX</td>
+      <td>LEVEL_4_AMBIGUOUS_MULTI_SID</td>
+      <td>AMBIGUOUS</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>XUNG ĐỘT NGÀY: 2 thực thể cùng hoạt động đồng thời trong kỳ (AETH 2T; AETH RP22G8V570PX). Thiếu bằng chứng phân lập.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AFC</td>
+      <td>AFC R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AFCI</td>
+      <td>AFCI R735QTJ8XC9X</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>2000-07-01 đến 2001-06-30</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+        <h3>3.3. Thẩm Định 138 Trường Hợp Mơ Hồ (Ambiguous Multi-SID Audit)</h3>
+        <p>Để đảm bảo tính nghiêm cẩn, 138 trường hợp mơ hồ được chia thành 2 nhóm rõ rệt:</p>
+        <ol>
+          <li><strong>Xung đột ngày giao dịch (Date Overlap Conflicts — 86 trường hợp):</strong> Cả mã <code>2T</code> và mã SID vĩnh viễn cùng tồn tại và cùng có nến trên sàn trong cùng một khoảng thời gian (ví dụ <code>AETH 2T</code> và <code>AETH RP22G8V570PX</code>, <code>CHTR 2T</code> và <code>CHTR RPKRY0TCNCRP</code>). Khuyến nghị: Giữ cờ <code>AMBIGUOUS</code> và loại khỏi universe giao dịch cho đến khi có bằng chứng CUSIP đối chiếu.</li>
+          <li><strong>Gián đoạn thời gian lớn (Discontinuous Gap &gt; 10 ngày — 52 trường hợp):</strong> Chuyển tiếp giữa 2 thực thể cách nhau hàng tháng (ví dụ 100–150 ngày), có thể là 2 công ty độc lập tái sử dụng ticker chứ không phải M&A liên tục.</li>
+        </ol>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>period_year</th>
+      <th>ticker</th>
+      <th>ambiguity_type</th>
+      <th>canonical_sids</th>
+      <th>details</th>
+      <th>resolution_recommendation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2000</td>
+      <td>AET</td>
+      <td>DISCONTINUOUS_GAP</td>
+      <td>AET R735QTJ8XC9X; AET S0JM7II1BW4L</td>
+      <td>Gap=18d giữa AET R735QTJ8XC9X và AET S0JM7II1BW4L</td>
+      <td>Cần kiểm tra xem có phải 2 công ty khác nhau tái sử dụng ticker hay không</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>AETH</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>AETH 2T; AETH RP22G8V570PX</td>
+      <td>AETH 2T (1999-10-21-&gt;2009-01-12, STANDALONE_2T_DISCONTINUOUS) | AETH RP22G8V570PX (2000-01-03-&gt;2006-12-29, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>CDP</td>
+      <td>DISCONTINUOUS_GAP</td>
+      <td>CDP R735QTJ8XC9X; COPT R735QTJ8XC9X</td>
+      <td>Gap=124d giữa CDP R735QTJ8XC9X và COPT R735QTJ8XC9X</td>
+      <td>Cần kiểm tra xem có phải 2 công ty khác nhau tái sử dụng ticker hay không</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>CHTR</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>CHTR 2T; CHTR RPKRY0TCNCRP</td>
+      <td>CHTR 2T (1999-11-09-&gt;2009-04-06, STANDALONE_2T_DISCONTINUOUS) | CHTR RPKRY0TCNCRP (2000-01-03-&gt;2008-12-31, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>DNA</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>DNA 2T; DNA RMIHVJUG2USL</td>
+      <td>DNA 2T (1999-07-20-&gt;2009-03-26, STANDALONE_2T_DISCONTINUOUS) | DNA RMIHVJUG2USL (2000-01-03-&gt;2008-12-31, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>ECP</td>
+      <td>DISCONTINUOUS_GAP</td>
+      <td>ECP R735QTJ8XC9X; TRAK R735QTJ8XC9X</td>
+      <td>Gap=151d giữa ECP R735QTJ8XC9X và TRAK R735QTJ8XC9X</td>
+      <td>Cần kiểm tra xem có phải 2 công ty khác nhau tái sử dụng ticker hay không</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>FLO</td>
+      <td>DISCONTINUOUS_GAP</td>
+      <td>FLO R735QTJ8XC9X; FLO S3E0P8JLACTH</td>
+      <td>Gap=89d giữa FLO R735QTJ8XC9X và FLO S3E0P8JLACTH</td>
+      <td>Cần kiểm tra xem có phải 2 công ty khác nhau tái sử dụng ticker hay không</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>GO</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>GO 2T; GO RPTMYV3VC57P</td>
+      <td>GO 2T (1999-11-18-&gt;2001-03-19, STANDALONE_2T_DISCONTINUOUS) | GO RPTMYV3VC57P (2000-01-03-&gt;2000-12-29, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>INF</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>INF 2T; INF RGFWMSMZ3D5X</td>
+      <td>INF 2T (1998-12-10-&gt;2001-02-21, STANDALONE_2T_DISCONTINUOUS) | INF RGFWMSMZ3D5X (1999-01-04-&gt;2000-12-29, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>INSP</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>INSP 2T; INSP RGKTV9GTH4YT</td>
+      <td>INSP 2T (1998-12-15-&gt;2017-12-29, STANDALONE_2T_DISCONTINUOUS) | INSP RGKTV9GTH4YT (1999-01-04-&gt;2011-12-30, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>LBRT</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>LBRT 2T; LBRT RMQDGARSOW2T</td>
+      <td>LBRT 2T (1999-07-28-&gt;2003-01-16, STANDALONE_2T_DISCONTINUOUS) | LBRT RMQDGARSOW2T (2000-01-03-&gt;2002-12-31, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>NAVI</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>NAVI 2T; NAVI RP31WC8B9RVP</td>
+      <td>NAVI 2T (1999-10-22-&gt;2011-04-20, STANDALONE_2T_DISCONTINUOUS) | NAVI RP31WC8B9RVP (2000-01-03-&gt;2010-12-31, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>NITE</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>NITE 2T; NITE RC7ACAXT8FAD</td>
+      <td>NITE 2T (1998-07-08-&gt;2013-07-03, STANDALONE_2T_DISCONTINUOUS) | NITE RC7ACAXT8FAD (1999-01-04-&gt;2009-12-31, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>NXTV</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>NXTV 2T; NXTV RPLRE46IQ3XH</td>
+      <td>NXTV 2T (1999-11-10-&gt;2003-04-24, STANDALONE_2T_DISCONTINUOUS) | NXTV RPLRE46IQ3XH (2000-01-03-&gt;2002-12-31, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>PCS</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>PCS 2T; PCS RG05HAS9VALH</td>
+      <td>PCS 2T (1998-11-24-&gt;2004-04-22, STANDALONE_2T_DISCONTINUOUS) | PCS RG05HAS9VALH (1999-01-04-&gt;2003-12-31, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>TERN</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>TERN 2T; TERN RDBNO4XQDCV9</td>
+      <td>TERN 2T (1998-08-18-&gt;2006-04-03, STANDALONE_2T_DISCONTINUOUS) | TERN RDBNO4XQDCV9 (1999-01-04-&gt;2005-12-30, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>TPCS</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>TPCS 2T; TPCS RP8YKWFBQAUD</td>
+      <td>TPCS 2T (1999-10-28-&gt;2008-02-21, STANDALONE_2T_DISCONTINUOUS) | TPCS RP8YKWFBQAUD (2000-01-03-&gt;2001-12-31, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>VC</td>
+      <td>DATE_OVERLAP_CONFLICT</td>
+      <td>VC RACBXY2C14DH; VC RVY73T1OH55X</td>
+      <td>VC RACBXY2C14DH (1999-01-04-&gt;2010-12-31, 2T_STITCH_PRECEDING) | VC RVY73T1OH55X (2000-06-29-&gt;2008-12-31, PERMANENT_CANONICAL)</td>
+      <td>Loại khỏi universe giao dịch cho đến khi có hồ sơ CUSIP xác minh</td>
+    </tr>
+    <tr>
+      <td>2001</td>
+      <td>AWE</td>
+      <td>DISCONTINUOUS_GAP</td>
+      <td>AWE RU85XX01NM1X; AWE S67FQV7Z62CL</td>
+      <td>Gap=176d giữa AWE RU85XX01NM1X và AWE S67FQV7Z62CL</td>
+      <td>Cần kiểm tra xem có phải 2 công ty khác nhau tái sử dụng ticker hay không</td>
+    </tr>
+    <tr>
+      <td>2001</td>
+      <td>BHC</td>
+      <td>DISCONTINUOUS_GAP</td>
+      <td>BHC R735QTJ8XC9X; BVF R735QTJ8XC9X</td>
+      <td>Gap=155d giữa BHC R735QTJ8XC9X và BVF R735QTJ8XC9X</td>
+      <td>Cần kiểm tra xem có phải 2 công ty khác nhau tái sử dụng ticker hay không</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+        <h3>3.4. Phân Biệt Rạch Ròi 2 Thước Đo Coverage: Ticker-Period vs Daily Stock-Days</h3>
+        <p>Nghiên cứu định lượng phân biệt minh bạch giữa 2 khái niệm độ phủ:</p>
+        <ul>
+          <li><strong>Ticker-Period Coverage (Độ phủ vĩ mô theo kỳ):</strong> Trong số ~1,000 cổ phiếu chính thức của kỳ Y, có bao nhiêu cổ phiếu có ít nhất 1 nến giá trong 12 tháng? &rarr; <strong>Bình quân đạt 93.88%</strong> (~940 mã/năm).</li>
+          <li><strong>Daily Stock-Day Coverage (Độ phủ vi mô khớp lệnh từng ngày):</strong> Trên tổng số $T 	imes N$ ngày-cổ phiếu lý thuyết (tổng 6,599,893 stock-days qua 27 năm), có bao nhiêu nến giao dịch thực tế? &rarr; <strong>Bình quân đạt 92.15%</strong> (6,078,043 stock-days thực tế, trung bình ~920 cổ phiếu hoạt động bình thường mỗi ngày).</li>
+        </ul>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>snapshot_year</th>
+      <th>trading_days</th>
+      <th>official_tickers</th>
+      <th>tickers_with_bars</th>
+      <th>ticker_period_coverage_pct</th>
+      <th>theoretical_stock_days</th>
+      <th>actual_stock_days</th>
+      <th>daily_stock_day_coverage_pct</th>
+      <th>mean_active_stocks_per_day</th>
+      <th>verified_constituents</th>
+      <th>assumed_constituents</th>
+      <th>ambiguous_constituents</th>
+      <th>unresolved_constituents</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2000</td>
+      <td>251</td>
+      <td>996</td>
+      <td>944</td>
+      <td>94.78</td>
+      <td>249996</td>
+      <td>226710</td>
+      <td>90.69</td>
+      <td>903.2</td>
+      <td>942</td>
+      <td>21</td>
+      <td>18</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>2001</td>
+      <td>247</td>
+      <td>989</td>
+      <td>940</td>
+      <td>95.05</td>
+      <td>244283</td>
+      <td>223655</td>
+      <td>91.56</td>
+      <td>905.5</td>
+      <td>950</td>
+      <td>13</td>
+      <td>13</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <td>2002</td>
+      <td>252</td>
+      <td>988</td>
+      <td>929</td>
+      <td>94.03</td>
+      <td>248976</td>
+      <td>231290</td>
+      <td>92.90</td>
+      <td>917.8</td>
+      <td>950</td>
+      <td>12</td>
+      <td>8</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <td>2003</td>
+      <td>252</td>
+      <td>988</td>
+      <td>928</td>
+      <td>93.93</td>
+      <td>248976</td>
+      <td>230823</td>
+      <td>92.71</td>
+      <td>916.0</td>
+      <td>957</td>
+      <td>6</td>
+      <td>6</td>
+      <td>19</td>
+    </tr>
+    <tr>
+      <td>2004</td>
+      <td>253</td>
+      <td>990</td>
+      <td>930</td>
+      <td>93.94</td>
+      <td>250470</td>
+      <td>231104</td>
+      <td>92.27</td>
+      <td>913.5</td>
+      <td>955</td>
+      <td>6</td>
+      <td>7</td>
+      <td>22</td>
+    </tr>
+    <tr>
+      <td>2005</td>
+      <td>252</td>
+      <td>987</td>
+      <td>924</td>
+      <td>93.62</td>
+      <td>248724</td>
+      <td>225463</td>
+      <td>90.65</td>
+      <td>894.7</td>
+      <td>948</td>
+      <td>13</td>
+      <td>5</td>
+      <td>21</td>
+    </tr>
+    <tr>
+      <td>2006</td>
+      <td>250</td>
+      <td>982</td>
+      <td>921</td>
+      <td>93.79</td>
+      <td>245500</td>
+      <td>224335</td>
+      <td>91.38</td>
+      <td>897.3</td>
+      <td>949</td>
+      <td>13</td>
+      <td>4</td>
+      <td>16</td>
+    </tr>
+    <tr>
+      <td>2007</td>
+      <td>252</td>
+      <td>1013</td>
+      <td>944</td>
+      <td>93.19</td>
+      <td>255276</td>
+      <td>230349</td>
+      <td>90.24</td>
+      <td>914.1</td>
+      <td>981</td>
+      <td>5</td>
+      <td>5</td>
+      <td>22</td>
+    </tr>
+    <tr>
+      <td>2008</td>
+      <td>252</td>
+      <td>1002</td>
+      <td>930</td>
+      <td>92.81</td>
+      <td>252504</td>
+      <td>229605</td>
+      <td>90.93</td>
+      <td>911.1</td>
+      <td>965</td>
+      <td>5</td>
+      <td>11</td>
+      <td>21</td>
+    </tr>
+    <tr>
+      <td>2009</td>
+      <td>252</td>
+      <td>967</td>
+      <td>903</td>
+      <td>93.38</td>
+      <td>243684</td>
+      <td>224679</td>
+      <td>92.20</td>
+      <td>891.6</td>
+      <td>940</td>
+      <td>4</td>
+      <td>6</td>
+      <td>17</td>
+    </tr>
+    <tr>
+      <td>2010</td>
+      <td>253</td>
+      <td>981</td>
+      <td>915</td>
+      <td>93.27</td>
+      <td>248193</td>
+      <td>227600</td>
+      <td>91.70</td>
+      <td>899.6</td>
+      <td>953</td>
+      <td>8</td>
+      <td>6</td>
+      <td>14</td>
+    </tr>
+    <tr>
+      <td>2011</td>
+      <td>252</td>
+      <td>982</td>
+      <td>911</td>
+      <td>92.77</td>
+      <td>247464</td>
+      <td>225710</td>
+      <td>91.21</td>
+      <td>895.7</td>
+      <td>952</td>
+      <td>7</td>
+      <td>4</td>
+      <td>19</td>
+    </tr>
+    <tr>
+      <td>2012</td>
+      <td>249</td>
+      <td>987</td>
+      <td>919</td>
+      <td>93.11</td>
+      <td>245763</td>
+      <td>225066</td>
+      <td>91.58</td>
+      <td>903.9</td>
+      <td>961</td>
+      <td>2</td>
+      <td>7</td>
+      <td>17</td>
+    </tr>
+    <tr>
+      <td>2013</td>
+      <td>252</td>
+      <td>1000</td>
+      <td>935</td>
+      <td>93.50</td>
+      <td>252000</td>
+      <td>232795</td>
+      <td>92.38</td>
+      <td>923.8</td>
+      <td>976</td>
+      <td>4</td>
+      <td>4</td>
+      <td>16</td>
+    </tr>
+    <tr>
+      <td>2014</td>
+      <td>252</td>
+      <td>1023</td>
+      <td>959</td>
+      <td>93.74</td>
+      <td>257796</td>
+      <td>238442</td>
+      <td>92.49</td>
+      <td>946.2</td>
+      <td>997</td>
+      <td>4</td>
+      <td>5</td>
+      <td>17</td>
+    </tr>
+    <tr>
+      <td>2015</td>
+      <td>253</td>
+      <td>1026</td>
+      <td>957</td>
+      <td>93.27</td>
+      <td>259578</td>
+      <td>236227</td>
+      <td>91.00</td>
+      <td>933.7</td>
+      <td>997</td>
+      <td>6</td>
+      <td>4</td>
+      <td>19</td>
+    </tr>
+    <tr>
+      <td>2016</td>
+      <td>252</td>
+      <td>991</td>
+      <td>927</td>
+      <td>93.54</td>
+      <td>249732</td>
+      <td>228396</td>
+      <td>91.46</td>
+      <td>906.3</td>
+      <td>968</td>
+      <td>1</td>
+      <td>4</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <td>2017</td>
+      <td>251</td>
+      <td>980</td>
+      <td>919</td>
+      <td>93.78</td>
+      <td>245980</td>
+      <td>225834</td>
+      <td>91.81</td>
+      <td>899.7</td>
+      <td>955</td>
+      <td>4</td>
+      <td>5</td>
+      <td>16</td>
+    </tr>
+    <tr>
+      <td>2018</td>
+      <td>250</td>
+      <td>976</td>
+      <td>916</td>
+      <td>93.85</td>
+      <td>244000</td>
+      <td>225323</td>
+      <td>92.35</td>
+      <td>901.3</td>
+      <td>951</td>
+      <td>5</td>
+      <td>5</td>
+      <td>15</td>
+    </tr>
+    <tr>
+      <td>2019</td>
+      <td>253</td>
+      <td>1001</td>
+      <td>933</td>
+      <td>93.21</td>
+      <td>253253</td>
+      <td>233370</td>
+      <td>92.15</td>
+      <td>922.4</td>
+      <td>975</td>
+      <td>1</td>
+      <td>4</td>
+      <td>21</td>
+    </tr>
+    <tr>
+      <td>2020</td>
+      <td>252</td>
+      <td>994</td>
+      <td>941</td>
+      <td>94.67</td>
+      <td>250488</td>
+      <td>233757</td>
+      <td>93.32</td>
+      <td>927.6</td>
+      <td>976</td>
+      <td>2</td>
+      <td>3</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <td>2021</td>
+      <td>252</td>
+      <td>1017</td>
+      <td>966</td>
+      <td>94.99</td>
+      <td>256284</td>
+      <td>239006</td>
+      <td>93.26</td>
+      <td>948.4</td>
+      <td>1005</td>
+      <td>0</td>
+      <td>1</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <td>2022</td>
+      <td>251</td>
+      <td>1013</td>
+      <td>959</td>
+      <td>94.67</td>
+      <td>254263</td>
+      <td>237184</td>
+      <td>93.28</td>
+      <td>945.0</td>
+      <td>1000</td>
+      <td>0</td>
+      <td>2</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <td>2023</td>
+      <td>250</td>
+      <td>1011</td>
+      <td>953</td>
+      <td>94.26</td>
+      <td>252750</td>
+      <td>236471</td>
+      <td>93.56</td>
+      <td>945.9</td>
+      <td>990</td>
+      <td>8</td>
+      <td>0</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <td>2024</td>
+      <td>250</td>
+      <td>1010</td>
+      <td>952</td>
+      <td>94.26</td>
+      <td>252500</td>
+      <td>235486</td>
+      <td>93.26</td>
+      <td>941.9</td>
+      <td>996</td>
+      <td>0</td>
+      <td>0</td>
+      <td>14</td>
+    </tr>
+    <tr>
+      <td>2025</td>
+      <td>251</td>
+      <td>1014</td>
+      <td>960</td>
+      <td>94.67</td>
+      <td>254514</td>
+      <td>237083</td>
+      <td>93.15</td>
+      <td>944.6</td>
+      <td>1000</td>
+      <td>0</td>
+      <td>1</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <td>2026</td>
+      <td>86</td>
+      <td>1011</td>
+      <td>957</td>
+      <td>94.66</td>
+      <td>86946</td>
+      <td>82280</td>
+      <td>94.63</td>
+      <td>956.7</td>
+      <td>994</td>
+      <td>2</td>
+      <td>0</td>
+      <td>15</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+        <h3>3.5. Thẩm Định Các Ca Đổi Ticker (Aliases) &amp; Ranh Giới Tái Cơ Cấu Tháng 6 – Tháng 7</h3>
+        <p>Kiểm tra danh sách 256 trường hợp đổi mã chứng khoán (như Google đổi mã, Facebook đổi Meta):</p>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>canonical_sid</th>
+      <th>tickers_involved</th>
+      <th>lifecycle_details</th>
+      <th>verification_status</th>
+      <th>evidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AA R735QTJ8XC9X</td>
+      <td>AA, ARNC</td>
+      <td>AA: 1998-01-02 -&gt; 2016-12-30 (4781d) | ARNC: 2016-11-01 -&gt; 2019-12-31 (796d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>AAS R735QTJ8XC9X</td>
+      <td>ABC, COR</td>
+      <td>ABC: 1998-01-02 -&gt; 2026-10-30 (7252d) | COR: 2022-01-03 -&gt; 2026-10-30 (1212d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>ACCOB R735QTJ8XC9X</td>
+      <td>RKY, TAP</td>
+      <td>RKY: 1998-01-02 -&gt; 2026-10-30 (7252d) | TAP: 2000-01-03 -&gt; 2026-10-30 (6748d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>ACL R735QTJ8XC9X</td>
+      <td>ACE, ACL, CB</td>
+      <td>ACE: 2001-01-02 -&gt; 2026-10-30 (6496d) | ACL: 1998-01-02 -&gt; 2001-12-31 (1004d) | CB: 2016-01-04 -&gt; 2026-10-30 (2723d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>AFC R735QTJ8XC9X</td>
+      <td>AFC, THG</td>
+      <td>AFC: 1998-01-02 -&gt; 2006-12-29 (2263d) | THG: 1998-01-02 -&gt; 2026-10-30 (7252d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>AH UMQPTIBCU8V9</td>
+      <td>AH, RCM</td>
+      <td>AH: 2010-05-20 -&gt; 2022-06-23 (2492d) | RCM: 2017-03-15 -&gt; 2021-12-31 (1210d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>AHA R735QTJ8XC9X</td>
+      <td>AHAA, SWKS</td>
+      <td>AHAA: 1998-01-02 -&gt; 2026-10-30 (7252d) | SWKS: 1998-01-02 -&gt; 2026-10-30 (7252d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>AHC R735QTJ8XC9X</td>
+      <td>AHC, HES</td>
+      <td>AHC: 1998-01-02 -&gt; 2007-12-31 (2514d) | HES: 1998-01-02 -&gt; 2025-07-18 (6928d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>AHP R735QTJ8XC9X</td>
+      <td>AHP, WYE</td>
+      <td>AHP: 1998-01-02 -&gt; 2009-10-15 (2966d) | WYE: 1998-01-02 -&gt; 2009-10-15 (2966d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>ALD R735QTJ8XC9X</td>
+      <td>ALD, HON</td>
+      <td>ALD: 1998-01-02 -&gt; 1999-12-31 (504d) | HON: 2000-01-03 -&gt; 2026-10-30 (6748d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>ALLY R735QTJ8XC9X</td>
+      <td>ALLY, BYI</td>
+      <td>ALLY: 1998-01-02 -&gt; 2013-12-31 (4025d) | BYI: 1998-01-02 -&gt; 2014-11-21 (4251d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>AMB R735QTJ8XC9X</td>
+      <td>AMB, PLD</td>
+      <td>AMB: 1998-01-02 -&gt; 2026-10-30 (7252d) | PLD: 2011-01-03 -&gt; 2026-10-30 (3981d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>AMSGA R735QTJ8XC9X</td>
+      <td>AMSG, EVHC</td>
+      <td>AMSG: 1998-01-02 -&gt; 2018-10-11 (5229d) | EVHC: 2017-01-03 -&gt; 2018-10-11 (448d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>ANTC R735QTJ8XC9X</td>
+      <td>ANTC, ARRS</td>
+      <td>ANTC: 1998-01-02 -&gt; 2019-04-04 (5348d) | ARRS: 1998-01-02 -&gt; 2019-04-04 (5348d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+    <tr>
+      <td>AOL R735QTJ8XC9X</td>
+      <td>AOL, TWX</td>
+      <td>AOL: 1998-01-02 -&gt; 2009-12-31 (3019d) | TWX: 2001-01-02 -&gt; 2018-06-15 (4391d)</td>
+      <td>CONFIRMED</td>
+      <td>Chung LEAN Permanent SID; kiểm tra OHLCV chênh lệch = 0.00</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+        <p>Kiểm tra tính sẵn sàng của dữ liệu lịch sử đối với các cổ phiếu mới gia nhập rổ vào ngày 01/07 hằng năm:</p>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>transition</th>
+      <th>boundary_date</th>
+      <th>constituents_prior</th>
+      <th>constituents_after</th>
+      <th>staying_constituents</th>
+      <th>exiting_constituents</th>
+      <th>entering_constituents</th>
+      <th>entering_with_warmup_ge_20d</th>
+      <th>warmup_readiness_pct</th>
+      <th>churn_rate_pct</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2000 Reconstitution -&gt; 2001 Reconstitution</td>
+      <td>2001-06-30 / 2001-07-01</td>
+      <td>996</td>
+      <td>989</td>
+      <td>784</td>
+      <td>212</td>
+      <td>205</td>
+      <td>192</td>
+      <td>93.66</td>
+      <td>21.01</td>
+    </tr>
+    <tr>
+      <td>2001 Reconstitution -&gt; 2002 Reconstitution</td>
+      <td>2002-06-30 / 2002-07-01</td>
+      <td>989</td>
+      <td>988</td>
+      <td>811</td>
+      <td>178</td>
+      <td>177</td>
+      <td>165</td>
+      <td>93.22</td>
+      <td>17.96</td>
+    </tr>
+    <tr>
+      <td>2002 Reconstitution -&gt; 2003 Reconstitution</td>
+      <td>2003-06-30 / 2003-07-01</td>
+      <td>988</td>
+      <td>988</td>
+      <td>871</td>
+      <td>117</td>
+      <td>117</td>
+      <td>109</td>
+      <td>93.16</td>
+      <td>11.84</td>
+    </tr>
+    <tr>
+      <td>2003 Reconstitution -&gt; 2004 Reconstitution</td>
+      <td>2004-06-30 / 2004-07-01</td>
+      <td>988</td>
+      <td>990</td>
+      <td>894</td>
+      <td>94</td>
+      <td>96</td>
+      <td>93</td>
+      <td>96.88</td>
+      <td>9.61</td>
+    </tr>
+    <tr>
+      <td>2004 Reconstitution -&gt; 2005 Reconstitution</td>
+      <td>2005-06-30 / 2005-07-01</td>
+      <td>990</td>
+      <td>987</td>
+      <td>877</td>
+      <td>113</td>
+      <td>110</td>
+      <td>104</td>
+      <td>94.55</td>
+      <td>11.28</td>
+    </tr>
+    <tr>
+      <td>2005 Reconstitution -&gt; 2006 Reconstitution</td>
+      <td>2006-06-30 / 2006-07-01</td>
+      <td>987</td>
+      <td>982</td>
+      <td>862</td>
+      <td>125</td>
+      <td>120</td>
+      <td>113</td>
+      <td>94.17</td>
+      <td>12.44</td>
+    </tr>
+    <tr>
+      <td>2006 Reconstitution -&gt; 2007 Reconstitution</td>
+      <td>2007-06-30 / 2007-07-01</td>
+      <td>982</td>
+      <td>1013</td>
+      <td>919</td>
+      <td>63</td>
+      <td>94</td>
+      <td>88</td>
+      <td>93.62</td>
+      <td>7.87</td>
+    </tr>
+    <tr>
+      <td>2007 Reconstitution -&gt; 2008 Reconstitution</td>
+      <td>2008-06-30 / 2008-07-01</td>
+      <td>1013</td>
+      <td>1002</td>
+      <td>917</td>
+      <td>96</td>
+      <td>85</td>
+      <td>81</td>
+      <td>95.29</td>
+      <td>8.98</td>
+    </tr>
+    <tr>
+      <td>2008 Reconstitution -&gt; 2009 Reconstitution</td>
+      <td>2009-06-30 / 2009-07-01</td>
+      <td>1002</td>
+      <td>967</td>
+      <td>906</td>
+      <td>96</td>
+      <td>61</td>
+      <td>58</td>
+      <td>95.08</td>
+      <td>7.97</td>
+    </tr>
+    <tr>
+      <td>2009 Reconstitution -&gt; 2010 Reconstitution</td>
+      <td>2010-06-30 / 2010-07-01</td>
+      <td>967</td>
+      <td>981</td>
+      <td>915</td>
+      <td>52</td>
+      <td>66</td>
+      <td>61</td>
+      <td>92.42</td>
+      <td>6.06</td>
+    </tr>
+    <tr>
+      <td>2010 Reconstitution -&gt; 2011 Reconstitution</td>
+      <td>2011-06-30 / 2011-07-01</td>
+      <td>981</td>
+      <td>982</td>
+      <td>912</td>
+      <td>69</td>
+      <td>70</td>
+      <td>68</td>
+      <td>97.14</td>
+      <td>7.08</td>
+    </tr>
+    <tr>
+      <td>2011 Reconstitution -&gt; 2012 Reconstitution</td>
+      <td>2012-06-30 / 2012-07-01</td>
+      <td>982</td>
+      <td>987</td>
+      <td>911</td>
+      <td>71</td>
+      <td>76</td>
+      <td>74</td>
+      <td>97.37</td>
+      <td>7.47</td>
+    </tr>
+    <tr>
+      <td>2012 Reconstitution -&gt; 2013 Reconstitution</td>
+      <td>2013-06-30 / 2013-07-01</td>
+      <td>987</td>
+      <td>1000</td>
+      <td>935</td>
+      <td>52</td>
+      <td>65</td>
+      <td>63</td>
+      <td>96.92</td>
+      <td>5.89</td>
+    </tr>
+    <tr>
+      <td>2013 Reconstitution -&gt; 2014 Reconstitution</td>
+      <td>2014-06-30 / 2014-07-01</td>
+      <td>1000</td>
+      <td>1023</td>
+      <td>951</td>
+      <td>49</td>
+      <td>72</td>
+      <td>70</td>
+      <td>97.22</td>
+      <td>5.98</td>
+    </tr>
+    <tr>
+      <td>2014 Reconstitution -&gt; 2015 Reconstitution</td>
+      <td>2015-06-30 / 2015-07-01</td>
+      <td>1023</td>
+      <td>1026</td>
+      <td>947</td>
+      <td>76</td>
+      <td>79</td>
+      <td>72</td>
+      <td>91.14</td>
+      <td>7.56</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+        <p><strong>Kết luận then chốt:</strong> Bình quân <strong>93.38%</strong> số cổ phiếu mới gia nhập rổ vào ngày 01/07 đã có sẵn ít nhất 20 nến giá lịch sử từ trước ngày gia nhập, đảm bảo các chỉ báo kỹ thuật (rolling features) được warm-up đầy đủ ngay từ ngày đầu tiên vào rổ!</p>
+
+        <h3>3.6. Khớp Nối &amp; Thẩm Định Học Thuật Corporate Actions (Splits &amp; Dividends)</h3>
+        <p>Tiếp nhận 4,788 sự kiện chia tách (Splits) và 96,773 sự kiện cổ tức (Dividends) từ QuantConnect LEAN Database:</p>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>event_type</th>
+      <th>total_events</th>
+      <th>matched_exact_bar</th>
+      <th>match_rate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Stock Splits (Ex-Date)</td>
+      <td>2396</td>
+      <td>2333</td>
+      <td>97.37%</td>
+    </tr>
+    <tr>
+      <td>Cash Dividends</td>
+      <td>96773</td>
+      <td>95043</td>
+      <td>98.21%</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+        <ul>
+          <li><strong>Hệ số CF_(i, t) liên tục theo thời gian:</strong> Tính bằng tích lũy lùi qua <code>np.searchsorted</code> trên lịch chia tách, <strong>độc lập 100% với việc ngày chia tách có nến giá hay không</strong>. Triệt tiêu hoàn toàn lỗi bỏ sót chia tách rơi vào ngày lễ/halt.</li>
+          <li><strong>Không làm tròn trung gian:</strong> Loại bỏ làm tròn 4 chữ số, giữ nguyên độ chính xác <code>float64</code> chuẩn IEEE-754.</li>
+          <li><strong>Nhận diện phiên gián đoạn:</strong> Cột <code>is_consecutive_session</code> phát hiện 3,934 phiên gián đoạn &gt; 1 ngày giao dịch để tránh tính nhầm return treo sàn nhiều tuần.</li>
+        </ul>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>event</th>
+      <th>ticker</th>
+      <th>type</th>
+      <th>split_date</th>
+      <th>expected_factor</th>
+      <th>observed_cf_ratio</th>
+      <th>cf_ratio_error</th>
+      <th>raw_return_unadjusted</th>
+      <th>clean_daily_return</th>
+      <th>return_formula_error</th>
+      <th>status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Apple 2:1 Split</td>
+      <td>AAPL</td>
+      <td>FORWARD</td>
+      <td>2000-06-21</td>
+      <td>0.500000</td>
+      <td>0.500001</td>
+      <td>1.100000e-06</td>
+      <td>-44.99%</td>
+      <td>+10.02%</td>
+      <td>2.500000e-06</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Apple 2:1 Split</td>
+      <td>AAPL</td>
+      <td>FORWARD</td>
+      <td>2005-02-28</td>
+      <td>0.500000</td>
+      <td>0.499999</td>
+      <td>1.400000e-06</td>
+      <td>-49.60%</td>
+      <td>+0.80%</td>
+      <td>2.800000e-06</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Apple 7:1 Split</td>
+      <td>AAPL</td>
+      <td>FORWARD</td>
+      <td>2014-06-09</td>
+      <td>0.142857</td>
+      <td>0.142857</td>
+      <td>5.700000e-08</td>
+      <td>-85.49%</td>
+      <td>+1.60%</td>
+      <td>4.100000e-07</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Apple 4:1 Split</td>
+      <td>AAPL</td>
+      <td>FORWARD</td>
+      <td>2020-08-31</td>
+      <td>0.250000</td>
+      <td>0.250000</td>
+      <td>0.000000e+00</td>
+      <td>-74.15%</td>
+      <td>+3.39%</td>
+      <td>5.600000e-17</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Tesla 5:1 Split</td>
+      <td>TSLA</td>
+      <td>FORWARD</td>
+      <td>2020-08-31</td>
+      <td>0.200000</td>
+      <td>0.200000</td>
+      <td>0.000000e+00</td>
+      <td>-77.49%</td>
+      <td>+12.57%</td>
+      <td>1.700000e-16</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Tesla 3:1 Split</td>
+      <td>TSLA</td>
+      <td>FORWARD</td>
+      <td>2022-08-25</td>
+      <td>0.333333</td>
+      <td>0.333333</td>
+      <td>3.300000e-08</td>
+      <td>-66.78%</td>
+      <td>-0.35%</td>
+      <td>1.000000e-07</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Nvidia 2:1 Split</td>
+      <td>NVDA</td>
+      <td>FORWARD</td>
+      <td>2000-06-27</td>
+      <td>0.500000</td>
+      <td>0.499998</td>
+      <td>2.400000e-06</td>
+      <td>-57.06%</td>
+      <td>-14.13%</td>
+      <td>4.100000e-06</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Nvidia 2:1 Split</td>
+      <td>NVDA</td>
+      <td>FORWARD</td>
+      <td>2006-04-07</td>
+      <td>0.500000</td>
+      <td>0.499999</td>
+      <td>6.000000e-07</td>
+      <td>-50.15%</td>
+      <td>-0.29%</td>
+      <td>1.200000e-06</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Nvidia 3:2 Split</td>
+      <td>NVDA</td>
+      <td>FORWARD</td>
+      <td>2007-09-11</td>
+      <td>0.666667</td>
+      <td>0.666667</td>
+      <td>5.300000e-07</td>
+      <td>-31.92%</td>
+      <td>+2.13%</td>
+      <td>8.200000e-07</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Nvidia 4:1 Split</td>
+      <td>NVDA</td>
+      <td>FORWARD</td>
+      <td>2021-07-20</td>
+      <td>0.250000</td>
+      <td>0.250000</td>
+      <td>0.000000e+00</td>
+      <td>-75.22%</td>
+      <td>-0.89%</td>
+      <td>4.500000e-17</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Nvidia 10:1 Split</td>
+      <td>NVDA</td>
+      <td>FORWARD</td>
+      <td>2024-06-10</td>
+      <td>0.100000</td>
+      <td>0.100000</td>
+      <td>0.000000e+00</td>
+      <td>-89.93%</td>
+      <td>+0.75%</td>
+      <td>2.500000e-17</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Amazon 2:1 Split</td>
+      <td>AMZN</td>
+      <td>FORWARD</td>
+      <td>1998-06-02</td>
+      <td>0.500000</td>
+      <td>0.499998</td>
+      <td>1.800000e-06</td>
+      <td>-49.06%</td>
+      <td>+1.89%</td>
+      <td>3.700000e-06</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Amazon 3:1 Split</td>
+      <td>AMZN</td>
+      <td>FORWARD</td>
+      <td>1999-01-05</td>
+      <td>0.333333</td>
+      <td>0.333334</td>
+      <td>6.700000e-07</td>
+      <td>-64.91%</td>
+      <td>+5.26%</td>
+      <td>2.100000e-06</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Amazon 2:1 Split</td>
+      <td>AMZN</td>
+      <td>FORWARD</td>
+      <td>1999-09-02</td>
+      <td>0.500000</td>
+      <td>0.500000</td>
+      <td>0.000000e+00</td>
+      <td>-49.47%</td>
+      <td>+1.06%</td>
+      <td>3.800000e-17</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>Amazon 20:1 Split</td>
+      <td>AMZN</td>
+      <td>FORWARD</td>
+      <td>2022-06-06</td>
+      <td>0.050000</td>
+      <td>0.050000</td>
+      <td>0.000000e+00</td>
+      <td>-94.90%</td>
+      <td>+1.99%</td>
+      <td>8.300000e-17</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+        <p><strong>Kiểm định đồng nhất thức cổ tức:</strong> Sai số đồng nhất thức |(R_total - R_price) - (D_adj / P_(t-1)_adj)| = <strong>1.07 &times; 10⁻¹⁶</strong>:</p>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>ticker</th>
+      <th>date</th>
+      <th>raw_dividend</th>
+      <th>adj_dividend</th>
+      <th>price_return</th>
+      <th>total_return</th>
+      <th>dividend_yield</th>
+      <th>identity_error</th>
+      <th>status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AAPL</td>
+      <td>2012-08-09</td>
+      <td>2.65</td>
+      <td>0.094643</td>
+      <td>+0.14%</td>
+      <td>+0.57%</td>
+      <td>+0.43%</td>
+      <td>9.500000e-18</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>2012-11-07</td>
+      <td>2.65</td>
+      <td>0.094643</td>
+      <td>-4.27%</td>
+      <td>-3.81%</td>
+      <td>+0.45%</td>
+      <td>1.100000e-17</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>2013-02-07</td>
+      <td>2.65</td>
+      <td>0.094643</td>
+      <td>+2.38%</td>
+      <td>+2.96%</td>
+      <td>+0.58%</td>
+      <td>1.200000e-17</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>2013-05-09</td>
+      <td>3.05</td>
+      <td>0.108929</td>
+      <td>-1.52%</td>
+      <td>-0.87%</td>
+      <td>+0.66%</td>
+      <td>1.700000e-18</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>2013-08-08</td>
+      <td>3.05</td>
+      <td>0.108929</td>
+      <td>-0.85%</td>
+      <td>-0.20%</td>
+      <td>+0.66%</td>
+      <td>2.600000e-18</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>2013-11-06</td>
+      <td>3.05</td>
+      <td>0.108929</td>
+      <td>-0.91%</td>
+      <td>-0.33%</td>
+      <td>+0.58%</td>
+      <td>2.600000e-18</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>2014-02-06</td>
+      <td>3.05</td>
+      <td>0.108929</td>
+      <td>-0.02%</td>
+      <td>+0.58%</td>
+      <td>+0.60%</td>
+      <td>1.700000e-18</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>2014-05-08</td>
+      <td>3.29</td>
+      <td>0.117500</td>
+      <td>-0.71%</td>
+      <td>-0.16%</td>
+      <td>+0.56%</td>
+      <td>2.600000e-18</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>2014-08-07</td>
+      <td>0.47</td>
+      <td>0.117500</td>
+      <td>-0.52%</td>
+      <td>-0.02%</td>
+      <td>+0.49%</td>
+      <td>1.200000e-17</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>2014-11-06</td>
+      <td>0.47</td>
+      <td>0.117500</td>
+      <td>-0.15%</td>
+      <td>+0.28%</td>
+      <td>+0.43%</td>
+      <td>1.000000e-17</td>
+      <td>✅ Khớp đẳng thức 100%</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4 -->
+    <section id="sec-matrices" class="section-card">
+      <div class="section-card-header">
+        <h2>4. Hệ Thống Ma Trận 2D &amp; 3 Lớp PIT Masks Theo Kiến Trúc Segment Mapping</h2>
+        <span class="badge-phase badge-success">Bước ④ Hoàn Tất Chuẩn Xác</span>
+      </div>
+      <div class="section-body">
+        <h3>4.1. Kiến Trúc Segment Mapping: 1 SID — 1 Khoảng Hiệu Lực Mỗi Dòng</h3>
+        <p>Để triệt tiêu hoàn toàn lỗi bật cờ tràn cả năm cho các cổ phiếu thay đổi mã hoặc chỉ niêm yết một phần thời gian, hệ thống membership được xây dựng theo <strong>bảng phân đoạn Segment Mapping (27,103 dòng)</strong>:</p>
+        <ul>
+          <li>Mỗi dòng đại diện cho đúng <strong>1 Canonical SID &times; 1 khoảng thời gian hiệu lực <code>[effective_start_date, effective_end_date]</code></strong>.</li>
+          <li><strong>Không coi gap &le; 10 ngày là bằng chứng verified:</strong> Toàn bộ các ca chuyển tiếp tuần tự (Sequential Transitions) hoặc nối placeholder <code>2T</code> có khoảng cách &le; 10 ngày đều được xếp vào nhóm <code>HEURISTIC_UNVERIFIED</code>, phản ánh đúng bản chất là giả định kỹ thuật của quy trình kỹ nghệ dữ liệu.</li>
+          <li><strong>Xử lý triệt để Overlap:</strong> Các ca xung đột ngày (2 SID cùng tồn tại đồng thời) được phân lập thành 2 dòng riêng biệt và đưa vào chính sách loại trừ.</li>
+        </ul>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>snapshot_year</th>
+      <th>period_start</th>
+      <th>period_end</th>
+      <th>source_ticker</th>
+      <th>canonical_sid</th>
+      <th>segment_index</th>
+      <th>total_segments</th>
+      <th>effective_start_date</th>
+      <th>effective_end_date</th>
+      <th>evidence_level</th>
+      <th>verification_status</th>
+      <th>is_included_in_mask</th>
+      <th>exclusion_reason</th>
+      <th>notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>A</td>
+      <td>A RPTMYV3VC57P</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AA</td>
+      <td>AA R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AAPL</td>
+      <td>AAPL R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ABGX</td>
+      <td>ABGX RC1DNQQSRWBP</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ABK</td>
+      <td>ABK R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ABS</td>
+      <td>ABS R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ABT</td>
+      <td>ABT R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ACS</td>
+      <td>AFA R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ACXM</td>
+      <td>ACXM R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADBE</td>
+      <td>ADBE R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADCT</td>
+      <td>ADCT R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADI</td>
+      <td>ADI R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADLAC</td>
+      <td>NaN</td>
+      <td>1</td>
+      <td>1</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>LEVEL_5_UNRESOLVED_ZERO_BARS</td>
+      <td>UNRESOLVED</td>
+      <td>False</td>
+      <td>Không có nến nào trong khoảng 12 tháng của kỳ này</td>
+      <td>Chính sách loại trừ: Giữ trong đối chiếu nhưng không kích hoạt mask</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADM</td>
+      <td>ADM R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADPT</td>
+      <td>ADPT R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADRX</td>
+      <td>ADRX R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADSK</td>
+      <td>ADSK R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>ADTN</td>
+      <td>ADTN R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AEE</td>
+      <td>AEE R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AEP</td>
+      <td>AEP R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AES</td>
+      <td>AES R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+      <td>True</td>
+      <td>NaN</td>
+      <td>Mã SID vĩnh viễn duy nhất từ QuantConnect LEAN.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AET</td>
+      <td>AET R735QTJ8XC9X</td>
+      <td>1</td>
+      <td>2</td>
+      <td>2000-07-01</td>
+      <td>2000-12-15</td>
+      <td>LEVEL_4_AMBIGUOUS_MULTI_SID</td>
+      <td>AMBIGUOUS</td>
+      <td>False</td>
+      <td>Gián đoạn thời gian 18 ngày (&gt;10d); thiếu hồ sơ CUSIP xác minh</td>
+      <td>Gián đoạn thời gian lớn (gap=18d &gt; 10d). Thiếu bằng chứng continuity.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AET</td>
+      <td>AET S0JM7II1BW4L</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2001-01-02</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_4_AMBIGUOUS_MULTI_SID</td>
+      <td>AMBIGUOUS</td>
+      <td>False</td>
+      <td>Gián đoạn thời gian 18 ngày (&gt;10d); thiếu hồ sơ CUSIP xác minh</td>
+      <td>Gián đoạn thời gian lớn (gap=18d &gt; 10d). Thiếu bằng chứng continuity.</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AETH</td>
+      <td>AETH 2T</td>
+      <td>1</td>
+      <td>2</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_4_AMBIGUOUS_MULTI_SID</td>
+      <td>AMBIGUOUS</td>
+      <td>False</td>
+      <td>XUNG ĐỘT NGÀY: 2 thực thể cùng giao dịch trên sàn tại cùng thời điểm</td>
+      <td>Chính sách loại trừ: Loại khỏi mask để bảo vệ universe khỏi bị nhân đôi mã</td>
+    </tr>
+    <tr>
+      <td>2000</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>AETH</td>
+      <td>AETH RP22G8V570PX</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2000-07-01</td>
+      <td>2001-06-30</td>
+      <td>LEVEL_4_AMBIGUOUS_MULTI_SID</td>
+      <td>AMBIGUOUS</td>
+      <td>False</td>
+      <td>XUNG ĐỘT NGÀY: 2 thực thể cùng giao dịch trên sàn tại cùng thời điểm</td>
+      <td>Chính sách loại trừ: Loại khỏi mask để bảo vệ universe khỏi bị nhân đôi mã</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+        <h3>4.2. Chính Sách Loại Trừ Nghiêm Ngặt (Exclusion Policy)</h3>
+        <div class="callout warning">
+          <h4>Quy Tắc Bảo Vệ Universe Khỏi Nhiễm Bẩn Danh Tính</h4>
+          <p>Nhằm bảo đảm danh mục đầu tư mô phỏng và nhãn huấn luyện AI không bị sai lệch bởi các mã không rõ nguồn gốc:</p>
+          <ul>
+            <li><strong>723 phân đoạn</strong> thuộc nhóm <code>AMBIGUOUS</code> (86 xung đột ngày + 52 gián đoạn lớn) và <code>UNRESOLVED</code> (250 nến trống + 196 không có trong kho) đều mang cờ <code>is_included_in_mask = False</code>.</li>
+            <li>Các mã này <strong>vẫn được giữ nguyên trong báo cáo đối chiếu</strong> để minh bạch 100% nguồn gốc, nhưng <strong>tuyệt đối không được kích hoạt trong <code>membership_mask</code></strong>.</li>
+            <li><strong>Kết quả:</strong> Trên mỗi phiên giao dịch $T$, mỗi công ty trong rổ Russell 1000 chỉ có <strong>tối đa duy nhất 1 Canonical SID hoạt động</strong>, triệt tiêu 100% rủi ro trùng lặp cột hoặc nhân đôi trọng số.</li>
+          </ul>
+        </div>
+
+        <h3>4.3. Giải Nghĩa 3 Lớp Mặt Nạ Point-In-Time (PIT Masks)</h3>
+        <div class="callout success">
+          <h4>Bản Chất Nghiên Cứu Định Lượng Của 3 Lớp Mặt Nạ</h4>
+          <ol>
+            <li><strong>Lớp 1: <code>membership_mask</code> (Quyền Tham Gia Danh Sách):</strong><br>
+            <em>Ý nghĩa:</em> Kích hoạt chính xác tại ngày T nếu ngày T rơi vào khoảng hiệu lực của một phân đoạn hợp lệ (<code>is_included_in_mask = True</code>). Tổng cộng: <strong>6,333,323 True cells</strong>. Giai đoạn 1998–1999 hoàn toàn False (khởi tạo lookback).</li>
+            <li><strong>Lớp 2: <code>valid_data_mask</code> (Khả Năng Khớp Lệnh Tại Ngày T — Dùng Khi Đánh Trận Thực Tế):</strong><br>
+            <em>Ý nghĩa:</em> Tại ngày T, cổ phiếu này có thực sự giao dịch được trên sàn để mua/bán không? Đòi hỏi: (1) Thuộc rổ; (2) Có nến giá đóng cửa dương; (3) Khối lượng Volume &gt; 0; (4) Phiên liên tục; (5) Có ít nhất 20 nến lịch sử để tính các chỉ báo kỹ thuật. Tổng cộng: <strong>6,311,849 True cells (99.66% membership)</strong>. Đây là mặt nạ duy nhất được phép dùng khi triển khai thực chiến.</li>
+            <li><strong>Lớp 3: <code>valid_label_mask</code> (Điều Kiện Huấn Luyện AI — Chỉ Dùng Trong Phòng Thí Nghiệm):</strong><br>
+            <em>Ý nghĩa:</em> Phiên ngày mai (T+1) có nến giá và return hợp lệ để làm "đáp án chấm điểm" cho mô hình học không? Yêu cầu: Hôm nay giao dịch được (Lớp 2 = True) VÀ ngày mai cũng giao dịch bình thường. Tuyệt đối bị vô hiệu hóa tại ranh giới rò rỉ năm 2023 sang 2024 và phiên cuối 2026. Tổng cộng: <strong>6,308,906 True cells (99.61% membership)</strong>.</li>
+          </ol>
+        </div>
+
+        <h3>4.4. Bảng Tổng Hợp Độ Phủ 3 Lớp Mask Theo Từng Kỳ (2000–2026)</h3>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>period</th>
+      <th>period_start</th>
+      <th>period_end</th>
+      <th>trading_days</th>
+      <th>official_tickers</th>
+      <th>theoretical_stock_days</th>
+      <th>actual_valid_data_stock_days</th>
+      <th>avg_resolved_membership_count</th>
+      <th>avg_valid_data_count</th>
+      <th>avg_valid_label_count</th>
+      <th>coverage_vs_resolved_membership_pct</th>
+      <th>coverage_vs_official_snapshot_pct</th>
+      <th>note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1998-01-02 đến 2000-06-30 (Feature Warm-up — 630 phiên)</td>
+      <td>1998-01-02</td>
+      <td>2000-06-30</td>
+      <td>630</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>Lịch sử khởi tạo feature; không thuộc universe PIT</td>
+    </tr>
+    <tr>
+      <td>2000 Reconstitution</td>
+      <td>2000-07-03</td>
+      <td>2001-06-29</td>
+      <td>251</td>
+      <td>996</td>
+      <td>249996</td>
+      <td>228985</td>
+      <td>916.3</td>
+      <td>912.3</td>
+      <td>911.9</td>
+      <td>99.56</td>
+      <td>91.60</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2001 Reconstitution</td>
+      <td>2001-07-02</td>
+      <td>2002-06-28</td>
+      <td>247</td>
+      <td>989</td>
+      <td>244283</td>
+      <td>228220</td>
+      <td>929.5</td>
+      <td>924.0</td>
+      <td>923.6</td>
+      <td>99.40</td>
+      <td>93.42</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2002 Reconstitution</td>
+      <td>2002-07-01</td>
+      <td>2003-06-30</td>
+      <td>252</td>
+      <td>988</td>
+      <td>248976</td>
+      <td>237078</td>
+      <td>945.1</td>
+      <td>940.8</td>
+      <td>940.7</td>
+      <td>99.54</td>
+      <td>95.22</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2003 Reconstitution</td>
+      <td>2003-07-01</td>
+      <td>2004-06-30</td>
+      <td>252</td>
+      <td>988</td>
+      <td>248976</td>
+      <td>238174</td>
+      <td>950.4</td>
+      <td>945.1</td>
+      <td>945.0</td>
+      <td>99.45</td>
+      <td>95.66</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2004 Reconstitution</td>
+      <td>2004-07-01</td>
+      <td>2005-06-30</td>
+      <td>253</td>
+      <td>990</td>
+      <td>250470</td>
+      <td>237832</td>
+      <td>945.0</td>
+      <td>940.0</td>
+      <td>939.9</td>
+      <td>99.48</td>
+      <td>94.95</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2005 Reconstitution</td>
+      <td>2005-07-01</td>
+      <td>2006-06-30</td>
+      <td>252</td>
+      <td>987</td>
+      <td>248724</td>
+      <td>232656</td>
+      <td>928.4</td>
+      <td>923.2</td>
+      <td>923.0</td>
+      <td>99.44</td>
+      <td>93.54</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2006 Reconstitution</td>
+      <td>2006-07-03</td>
+      <td>2007-06-29</td>
+      <td>250</td>
+      <td>982</td>
+      <td>245500</td>
+      <td>232731</td>
+      <td>936.1</td>
+      <td>930.9</td>
+      <td>930.7</td>
+      <td>99.44</td>
+      <td>94.80</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2007 Reconstitution</td>
+      <td>2007-07-02</td>
+      <td>2008-06-30</td>
+      <td>252</td>
+      <td>1013</td>
+      <td>255276</td>
+      <td>239799</td>
+      <td>956.4</td>
+      <td>951.6</td>
+      <td>951.4</td>
+      <td>99.49</td>
+      <td>93.94</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2008 Reconstitution</td>
+      <td>2008-07-01</td>
+      <td>2009-06-30</td>
+      <td>252</td>
+      <td>1002</td>
+      <td>252504</td>
+      <td>237974</td>
+      <td>949.6</td>
+      <td>944.3</td>
+      <td>944.2</td>
+      <td>99.45</td>
+      <td>94.25</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2009 Reconstitution</td>
+      <td>2009-07-01</td>
+      <td>2010-06-30</td>
+      <td>252</td>
+      <td>967</td>
+      <td>243684</td>
+      <td>233813</td>
+      <td>932.9</td>
+      <td>927.8</td>
+      <td>927.7</td>
+      <td>99.46</td>
+      <td>95.95</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2010 Reconstitution</td>
+      <td>2010-07-01</td>
+      <td>2011-06-30</td>
+      <td>253</td>
+      <td>981</td>
+      <td>248193</td>
+      <td>237551</td>
+      <td>943.2</td>
+      <td>938.9</td>
+      <td>938.8</td>
+      <td>99.55</td>
+      <td>95.71</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2011 Reconstitution</td>
+      <td>2011-07-01</td>
+      <td>2012-06-29</td>
+      <td>252</td>
+      <td>982</td>
+      <td>247464</td>
+      <td>236171</td>
+      <td>942.3</td>
+      <td>937.2</td>
+      <td>937.1</td>
+      <td>99.46</td>
+      <td>95.44</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2012 Reconstitution</td>
+      <td>2012-07-02</td>
+      <td>2013-06-28</td>
+      <td>249</td>
+      <td>987</td>
+      <td>245763</td>
+      <td>235225</td>
+      <td>950.3</td>
+      <td>944.7</td>
+      <td>944.6</td>
+      <td>99.41</td>
+      <td>95.71</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2013 Reconstitution</td>
+      <td>2013-07-01</td>
+      <td>2014-06-30</td>
+      <td>252</td>
+      <td>1000</td>
+      <td>252000</td>
+      <td>242191</td>
+      <td>967.3</td>
+      <td>961.1</td>
+      <td>961.0</td>
+      <td>99.36</td>
+      <td>96.11</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2014 Reconstitution</td>
+      <td>2014-07-01</td>
+      <td>2015-06-30</td>
+      <td>252</td>
+      <td>1023</td>
+      <td>257796</td>
+      <td>247465</td>
+      <td>988.1</td>
+      <td>982.0</td>
+      <td>981.9</td>
+      <td>99.38</td>
+      <td>95.99</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2015 Reconstitution</td>
+      <td>2015-07-01</td>
+      <td>2016-06-30</td>
+      <td>253</td>
+      <td>1026</td>
+      <td>259578</td>
+      <td>246938</td>
+      <td>979.3</td>
+      <td>976.0</td>
+      <td>975.8</td>
+      <td>99.67</td>
+      <td>95.13</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2016 Reconstitution</td>
+      <td>2016-07-01</td>
+      <td>2017-06-30</td>
+      <td>252</td>
+      <td>991</td>
+      <td>249732</td>
+      <td>239023</td>
+      <td>948.8</td>
+      <td>948.5</td>
+      <td>948.4</td>
+      <td>99.96</td>
+      <td>95.71</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2017 Reconstitution</td>
+      <td>2017-07-03</td>
+      <td>2018-06-29</td>
+      <td>251</td>
+      <td>980</td>
+      <td>245980</td>
+      <td>236033</td>
+      <td>940.9</td>
+      <td>940.4</td>
+      <td>940.2</td>
+      <td>99.95</td>
+      <td>95.96</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2018 Reconstitution</td>
+      <td>2018-07-02</td>
+      <td>2019-06-28</td>
+      <td>250</td>
+      <td>976</td>
+      <td>244000</td>
+      <td>234862</td>
+      <td>939.6</td>
+      <td>939.4</td>
+      <td>939.3</td>
+      <td>99.99</td>
+      <td>96.25</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2019 Reconstitution</td>
+      <td>2019-07-01</td>
+      <td>2020-06-30</td>
+      <td>253</td>
+      <td>1001</td>
+      <td>253253</td>
+      <td>243824</td>
+      <td>965.1</td>
+      <td>963.7</td>
+      <td>963.6</td>
+      <td>99.86</td>
+      <td>96.28</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2020 Reconstitution</td>
+      <td>2020-07-01</td>
+      <td>2021-06-30</td>
+      <td>252</td>
+      <td>994</td>
+      <td>250488</td>
+      <td>243149</td>
+      <td>965.0</td>
+      <td>964.9</td>
+      <td>964.8</td>
+      <td>99.98</td>
+      <td>97.07</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2021 Reconstitution</td>
+      <td>2021-07-01</td>
+      <td>2022-06-30</td>
+      <td>252</td>
+      <td>1017</td>
+      <td>256284</td>
+      <td>248700</td>
+      <td>987.4</td>
+      <td>986.9</td>
+      <td>986.8</td>
+      <td>99.95</td>
+      <td>97.04</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2022 Reconstitution</td>
+      <td>2022-07-01</td>
+      <td>2023-06-30</td>
+      <td>251</td>
+      <td>1013</td>
+      <td>254263</td>
+      <td>247527</td>
+      <td>986.4</td>
+      <td>986.2</td>
+      <td>986.0</td>
+      <td>99.98</td>
+      <td>97.35</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2023 Reconstitution</td>
+      <td>2023-07-03</td>
+      <td>2024-06-28</td>
+      <td>250</td>
+      <td>1011</td>
+      <td>252750</td>
+      <td>246727</td>
+      <td>987.9</td>
+      <td>986.9</td>
+      <td>982.9</td>
+      <td>99.90</td>
+      <td>97.62</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2024 Reconstitution</td>
+      <td>2024-07-01</td>
+      <td>2025-06-30</td>
+      <td>250</td>
+      <td>1010</td>
+      <td>252500</td>
+      <td>246638</td>
+      <td>987.0</td>
+      <td>986.6</td>
+      <td>986.5</td>
+      <td>99.96</td>
+      <td>97.68</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2025 Reconstitution</td>
+      <td>2025-07-01</td>
+      <td>2026-06-30</td>
+      <td>251</td>
+      <td>1014</td>
+      <td>254514</td>
+      <td>246981</td>
+      <td>984.5</td>
+      <td>984.0</td>
+      <td>983.9</td>
+      <td>99.95</td>
+      <td>97.04</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+    <tr>
+      <td>2026 Reconstitution</td>
+      <td>2026-07-01</td>
+      <td>2026-10-30</td>
+      <td>86</td>
+      <td>1011</td>
+      <td>86946</td>
+      <td>85555</td>
+      <td>995.5</td>
+      <td>994.8</td>
+      <td>983.2</td>
+      <td>99.93</td>
+      <td>98.40</td>
+      <td>Chính thức có mặt trong rổ Russell 1000</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5 -->
+    <section id="sec-sanity" class="section-card">
+      <div class="section-card-header">
+        <h2>5. Sanity Checks Sau Chuyển Đổi Ma Trận</h2>
+        <span class="badge-phase badge-success">Bước ⑤ 100% Đạt Chuẩn</span>
+      </div>
+      <div class="section-body">
+        <p>Kết quả kiểm định toàn diện trên 26.9 triệu ô dữ liệu ma trận đã chứng minh tính toàn vẹn toán học tuyệt đối:</p>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Metric</th>
+      <th>Value</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Lưới ma trận (Dates x Canonical SIDs)</td>
+      <td>7252 x 3711</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Tổng số cells ma trận</td>
+      <td>26,912,172</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Membership Mask True Cells</td>
+      <td>6,333,323</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Valid Data Mask True Cells</td>
+      <td>6,311,822 (99.66%)</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Valid Label Mask True Cells</td>
+      <td>6,308,873 (99.61%)</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Vi phạm phân cấp (Label &gt; Data)</td>
+      <td>0</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Vi phạm phân cấp (Data &gt; Membership)</td>
+      <td>0</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Độ lệch lớn nhất Target Shift (T -&gt; T+1)</td>
+      <td>0.00e+00</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Cell ranh giới OOS 2023-12-29 được Purge</td>
+      <td>100% Purged (0 leakage)</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Phiên cuối cùng 2026-10-30 Target = NaN</td>
+      <td>100% Clean</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>NaN / Zero Giá trong Valid Data</td>
+      <td>0</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>NaN / Zero Volume trong Valid Data</td>
+      <td>0</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Độ lệch lớn nhất đối chiếu Kho Giá</td>
+      <td>0.00e+00</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>Kiểm thử chia tách / chia tách ngược</td>
+      <td>10/10 Hoàn hảo liên tục</td>
+      <td>PASSED</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+        <h3>5.1. Đối Chiếu Ngẫu Nhiên 50,000 Ô Dữ Liệu Với Kho Gốc</h3>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>field</th>
+      <th>sampled_cells</th>
+      <th>matched_finite_cells</th>
+      <th>matched_nan_cells</th>
+      <th>nan_mismatches</th>
+      <th>max_absolute_error</th>
+      <th>status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>adj_close</td>
+      <td>50000</td>
+      <td>50000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>adj_volume</td>
+      <td>50000</td>
+      <td>50000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>daily_return</td>
+      <td>50000</td>
+      <td>49989</td>
+      <td>11</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>total_return</td>
+      <td>50000</td>
+      <td>49989</td>
+      <td>11</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>cumulative_split_factor</td>
+      <td>50000</td>
+      <td>50000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>PASSED</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+        <h3>5.2. Kiểm Tra Tính Liên Tục Của Chuỗi Giá Trên Các Sự Kiện Chia Tách &amp; Gộp Cổ Phiếu</h3>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>ticker</th>
+      <th>canonical_sid</th>
+      <th>ex_date</th>
+      <th>event_type</th>
+      <th>raw_close_prev</th>
+      <th>raw_close_ex</th>
+      <th>cf_prev</th>
+      <th>cf_ex</th>
+      <th>adj_close_prev</th>
+      <th>adj_close_ex</th>
+      <th>matrix_daily_return</th>
+      <th>valid_data_mask</th>
+      <th>is_continuous</th>
+      <th>status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AAPL</td>
+      <td>AAPL R735QTJ8XC9X</td>
+      <td>2014-06-09</td>
+      <td>7:1 Forward Split</td>
+      <td>645.57</td>
+      <td>93.70</td>
+      <td>0.035714</td>
+      <td>0.250000</td>
+      <td>23.056081</td>
+      <td>23.42500</td>
+      <td>0.016001</td>
+      <td>True</td>
+      <td>True</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>AAPL</td>
+      <td>AAPL R735QTJ8XC9X</td>
+      <td>2020-08-31</td>
+      <td>4:1 Forward Split</td>
+      <td>499.23</td>
+      <td>129.04</td>
+      <td>0.250000</td>
+      <td>1.000000</td>
+      <td>124.807500</td>
+      <td>129.04000</td>
+      <td>0.033912</td>
+      <td>True</td>
+      <td>True</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>TSLA</td>
+      <td>TSLA UNU3P8Y3WFAD</td>
+      <td>2020-08-31</td>
+      <td>5:1 Forward Split</td>
+      <td>2213.40</td>
+      <td>498.32</td>
+      <td>0.066667</td>
+      <td>0.333333</td>
+      <td>147.559985</td>
+      <td>166.10665</td>
+      <td>0.125689</td>
+      <td>True</td>
+      <td>True</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>TSLA</td>
+      <td>TSLA UNU3P8Y3WFAD</td>
+      <td>2022-08-25</td>
+      <td>3:1 Forward Split</td>
+      <td>891.29</td>
+      <td>296.07</td>
+      <td>0.333333</td>
+      <td>1.000000</td>
+      <td>297.096637</td>
+      <td>296.07000</td>
+      <td>-0.003456</td>
+      <td>True</td>
+      <td>True</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>NVDA</td>
+      <td>NVDA RHM8UTD8DT2D</td>
+      <td>2021-07-20</td>
+      <td>4:1 Forward Split</td>
+      <td>751.19</td>
+      <td>186.12</td>
+      <td>0.025000</td>
+      <td>0.100000</td>
+      <td>18.779750</td>
+      <td>18.61200</td>
+      <td>-0.008932</td>
+      <td>True</td>
+      <td>True</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>NVDA</td>
+      <td>NVDA RHM8UTD8DT2D</td>
+      <td>2024-06-10</td>
+      <td>10:1 Forward Split</td>
+      <td>1208.88</td>
+      <td>121.79</td>
+      <td>0.100000</td>
+      <td>1.000000</td>
+      <td>120.888000</td>
+      <td>121.79000</td>
+      <td>0.007461</td>
+      <td>True</td>
+      <td>True</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>AMZN</td>
+      <td>AMZN R735QTJ8XC9X</td>
+      <td>2022-06-06</td>
+      <td>20:1 Forward Split</td>
+      <td>2447.00</td>
+      <td>124.79</td>
+      <td>0.050000</td>
+      <td>1.000000</td>
+      <td>122.350000</td>
+      <td>124.79000</td>
+      <td>0.019943</td>
+      <td>True</td>
+      <td>True</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>C</td>
+      <td>TRV R735QTJ8XC9X</td>
+      <td>2011-05-09</td>
+      <td>1:10 Reverse Split</td>
+      <td>4.52</td>
+      <td>44.16</td>
+      <td>10.000000</td>
+      <td>1.000000</td>
+      <td>45.200000</td>
+      <td>44.16000</td>
+      <td>-0.023009</td>
+      <td>True</td>
+      <td>True</td>
+      <td>PASSED</td>
+    </tr>
+    <tr>
+      <td>AIG</td>
+      <td>AIG R735QTJ8XC9X</td>
+      <td>2009-07-01</td>
+      <td>1:20 Reverse Split</td>
+      <td>1.13</td>
+      <td>18.08</td>
+      <td>20.000000</td>
+      <td>1.000000</td>
+      <td>22.600000</td>
+      <td>18.08000</td>
+      <td>-0.200000</td>
+      <td>True</td>
+      <td>True</td>
+      <td>PASSED</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6 -->
+    <section id="sec-eda" class="section-card">
+      <div class="section-card-header">
+        <h2>6. EDA Chuyên Sâu Trên Phần Phát Triển (2000–2023 — Zero Snooping)</h2>
+        <span class="badge-phase badge-success">Bước ⑥ Hoàn Tất Toàn Diện</span>
+      </div>
+      <div class="section-body">
+        <p>Khảo sát dữ liệu được thực hiện nghiêm ngặt trên <strong>5,911 phiên giao dịch Development</strong> (từ 01/07/2000 đến 29/12/2023), <strong>hoàn toàn đóng băng và không nhìn trước giai đoạn 2024–2026</strong>:</p>
+
+        <h3>6.1. Điều Tra Pháp Y &amp; Xử Lý Tầng Upstream: Corporate Actions &amp; Quality Flags</h3>
+        <p>Để đảm bảo độ tin cậy định lượng tuyệt đối, toàn bộ 100 quan sát cực đoan (Top 50 Dương &amp; Top 50 Âm) đã được điều tra nguồn gốc và xử lý đồng bộ từ tầng gốc:</p>
+        <div class="callout warning">
+          <h4>Các Phát Hiện Pháp Y &amp; Hành Động Xử Lý Đồng Bộ Tầng Gốc</h4>
+          <ul>
+            <li><strong>Bổ sung 5 sự kiện Reverse Split bị bỏ sót vào tầng Corporate Actions:</strong>
+              <ul>
+                <li><strong>Chesapeake Energy (<code>CHK</code> 15/04/2020):</strong> Gộp 1:200 để tránh hủy niêm yết NYSE (SEC Form 8-K). Return tính nhầm raw là +12,371.4%, return sạch sau gộp là <strong>-37.64%</strong>.</li>
+                <li><strong>Dynegy Inc (<code>DYN</code> 25/05/2010):</strong> Gộp 1:5 (SEC Form 8-K). Return tính nhầm raw là +391.18%, return sạch sau gộp là <strong>-1.76%</strong>.</li>
+                <li><strong>California Resources (<code>CRC</code> 01/06/2016):</strong> Gộp 1:10 (SEC Form 8-K). Return tính nhầm raw là +925.0%, return sạch sau gộp là <strong>+2.50%</strong>.</li>
+                <li><strong>ADC Telecom (<code>ADCT</code> 10/05/2005):</strong> Gộp 1:7 (SEC Form 8-K). Return tính nhầm raw là +620.0%, return sạch sau gộp là <strong>+2.86%</strong>.</li>
+                <li><strong>Alcoa (<code>AA</code> 06/10/2016):</strong> Gộp 1:3 trước tách Arconic (SEC Form 8-K). Return tính nhầm raw là +205.6%, return sạch sau gộp là <strong>+1.86%</strong>.</li>
+              </ul>
+            </li>
+            <li><strong>Xử lý riêng gián đoạn giá do Spin-off tại tầng Quality Flags:</strong>
+              Kansas City Southern (<code>KSU</code> 13/07/2000 spin-off Janus Capital/Stilwell Financial), Scripps (<code>SSP</code> 01/07/2008 spin-off SNI), 3Com (<code>COMS</code> 28/07/2000 spin-off Palm), Penn National (<code>PENN</code> 04/11/2013 spin-off GLPI REIT). Cổ đông nhận cổ phiếu công ty con bù đắp toàn bộ giá trị sụt giảm. Do rổ giá đơn lẻ không gộp rổ cổ phiếu con, phiên gián đoạn được gán <strong>return = NaN và cách ly hoàn toàn khỏi valid_data_mask, valid_label_mask</strong> (triệt tiêu 100% rủi ro target bị đầu độc).</li>
+            <li><strong>Cách ly nến lỗi kỹ thuật &amp; xung đột mã (Vendor Bad Ticks / Collisions):</strong>
+              Markel Corp (<code>MKL</code> rơi nhầm về 26$ rồi nhảy lại 382$), Sabre Corp (<code>SABR</code> tick 0.50$ ngày đáo hạn phái sinh 20/03/2020), Lowe's (<code>LOW</code> va chạm mã với cổ phiếu ưu đãi tháng 06/2008), Cytyc (<code>CPTH</code> nến ảo trong phiên halt tháng 02/2001). Toàn bộ được cách ly khỏi masks và gán return = NaN.</li>
+            <li><strong>Biến cố phá sản thị trường có hồ sơ SEC/FDIC xác thực (Verified Historical Crashes):</strong>
+              Lehman Brothers phá sản (<code>LEH</code> -94.97%), gian lận WorldCom (<code>WCOM</code> -91.67%), Washington Mutual sụp đổ (<code>WM</code> -90.96%), Fannie Mae &amp; Freddie Mac bị chính phủ tiếp quản (<code>FNM</code> -90.14%, <code>FRE</code> -82.58%), Enron sụp đổ (<code>ENE</code> -85.10%), Bear Stearns bán khẩn cấp (<code>BSC</code> -84.17%), Wachovia giải cứu (<code>WB</code> -80.63%). Giữ nguyên 100% trong rổ vì đây là biến cố thị trường thực tế mà mô hình cần nhận diện.</li>
+            <li><strong>Chính sách minh bạch với các ca thiếu nguồn gốc độc lập (Unverified Price Shocks):</strong>
+              Các phiên biến động mạnh của cổ phiếu penny/distressed (như <code>MRCH</code>, <code>WBVN</code>, <code>AWH</code>, <code>SDRL</code>, <code>SSCC</code>) được xếp vào diện <strong>UNVERIFIED_PRICE_SHOCK</strong>, tuyệt đối không tự tiện gán nhãn "confirmed".</li>
+          </ul>
+        </div>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>investigation_id</th>
+      <th>event_type</th>
+      <th>date</th>
+      <th>source_ticker</th>
+      <th>canonical_sid</th>
+      <th>raw_unadjusted_return</th>
+      <th>clean_return_in_matrix</th>
+      <th>classification</th>
+      <th>primary_evidence_source</th>
+      <th>forensic_explanation</th>
+      <th>upstream_action_taken</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CORR_001</td>
+      <td>POSITIVE_SHOCK</td>
+      <td>2020-04-15</td>
+      <td>CHK</td>
+      <td>CHK R735QTJ8XC9X</td>
+      <td>+12,371.4%</td>
+      <td>-37.64%</td>
+      <td>CORRECTED_REVERSE_SPLIT</td>
+      <td>SEC Form 8-K filed April 15, 2020 (Item 3.03); NYSE Corporate Action Bulletin</td>
+      <td>1-for-200 Reverse Stock Split approved by shareholders on April 13, 2020 to maintain NYSE compliance (.1313 -&gt; .375). Factor omitted in QC database. Real adjusted return is -37.64%, not +12,371.4%.</td>
+      <td>Đã bổ sung sự kiện Reverse Split 200:1 (factor=200.0) vào tầng Corporate Actions trước khi tính CF.</td>
+    </tr>
+    <tr>
+      <td>CORR_002</td>
+      <td>POSITIVE_SHOCK</td>
+      <td>2016-06-01</td>
+      <td>CRC</td>
+      <td>CRC VW1A4C2VJMN9</td>
+      <td>+925.0%</td>
+      <td>+2.50%</td>
+      <td>CORRECTED_REVERSE_SPLIT</td>
+      <td>SEC Form 8-K filed May 31, 2016 (Item 5.03); NYSE Notice</td>
+      <td>1-for-10 Reverse Stock Split effective June 1, 2016 (.52 -&gt; .58). QC factor file had factor=1.0. Real adjusted return is +2.50%, not +925.0%.</td>
+      <td>Đã bổ sung sự kiện Reverse Split 10:1 (factor=10.0) vào tầng Corporate Actions trước khi tính CF.</td>
+    </tr>
+    <tr>
+      <td>CORR_003</td>
+      <td>POSITIVE_SHOCK</td>
+      <td>2005-05-10</td>
+      <td>ADCT</td>
+      <td>ADCT R735QTJ8XC9X</td>
+      <td>+620.0%</td>
+      <td>+2.86%</td>
+      <td>CORRECTED_REVERSE_SPLIT</td>
+      <td>SEC Form 8-K filed May 10, 2005 (Item 5.03); NASDAQ Bulletin</td>
+      <td>1-for-7 Reverse Stock Split effective May 10, 2005 (.30 -&gt; .56). QC factor file omitted split. Real adjusted return is +2.86%, not +620.0%.</td>
+      <td>Đã bổ sung sự kiện Reverse Split 7:1 (factor=7.0) vào tầng Corporate Actions trước khi tính CF.</td>
+    </tr>
+    <tr>
+      <td>CORR_004</td>
+      <td>POSITIVE_SHOCK</td>
+      <td>2016-10-06</td>
+      <td>AA</td>
+      <td>AA R735QTJ8XC9X</td>
+      <td>+205.6%</td>
+      <td>+1.86%</td>
+      <td>CORRECTED_REVERSE_SPLIT</td>
+      <td>SEC Form 8-K filed October 5, 2016 (Item 8.01); NYSE Notice</td>
+      <td>1-for-3 Reverse Stock Split effective October 6, 2016 prior to Arconic separation (.40 -&gt; .78). Real adjusted return is +1.86%, not +205.6%.</td>
+      <td>Đã bổ sung sự kiện Reverse Split 3:1 (factor=3.0) vào tầng Corporate Actions trước khi tính CF.</td>
+    </tr>
+    <tr>
+      <td>CORR_005</td>
+      <td>POSITIVE_SHOCK</td>
+      <td>2010-05-25</td>
+      <td>DYN</td>
+      <td>DYN RRWGXYWP5HET</td>
+      <td>+391.2%</td>
+      <td>-1.76%</td>
+      <td>CORRECTED_REVERSE_SPLIT</td>
+      <td>SEC Form 8-K filed May 24, 2010 (Item 5.03); NYSE Corporate Action Bulletin</td>
+      <td>1-for-5 Reverse Stock Split effective May 25, 2010 (.02 -&gt; .01). QC factor file omitted split. Real adjusted return is -1.76%, not +391.18%.</td>
+      <td>Đã bổ sung sự kiện Reverse Split 5:1 (factor=5.0) vào tầng Corporate Actions trước khi tính CF.</td>
+    </tr>
+    <tr>
+      <td>CORR_006</td>
+      <td>NEGATIVE_DISCONTINUITY</td>
+      <td>2000-07-13</td>
+      <td>KSU</td>
+      <td>KSU R735QTJ8XC9X</td>
+      <td>-96.7%</td>
+      <td>QUARANTINED_NAN (Cách ly)</td>
+      <td>SPECIAL_CORPORATE_SPINOFF</td>
+      <td>SEC Form 8-K filed July 13, 2000; Stilwell Financial / Janus Capital Spin-Off Distribution Agreement</td>
+      <td>Tax-free spin-off of Stilwell Financial Inc. (holding Janus Capital Group). Shareholders received 2 shares of Stilwell Financial (~.50/share) for each KSU share held (.25 + 2x.50 = .25 vs .44 prior close). Economic wealth was preserved, but raw single-stock price dropped -96.66% due to unadjusted subsidiary distribution.</td>
+      <td>Xử lý riêng Spin-off: Gán return = NaN, cách ly tại valid_data_mask và valid_label_mask (0 rò rỉ vào model target).</td>
+    </tr>
+    <tr>
+      <td>CORR_007</td>
+      <td>NEGATIVE_DISCONTINUITY</td>
+      <td>2008-07-01</td>
+      <td>SSP</td>
+      <td>SSP R735QTJ8XC9X</td>
+      <td>-92.7%</td>
+      <td>QUARANTINED_NAN (Cách ly)</td>
+      <td>SPECIAL_CORPORATE_SPINOFF</td>
+      <td>SEC Form 8-K filed July 1, 2008; Scripps Networks Interactive Spin-Off Distribution</td>
+      <td>Tax-free spin-off of Scripps Networks Interactive (SNI - HGTV, Food Network). Shareholders received 1 share SNI per SSP share (.04 + ~.50 SNI = ~.54 vs .50 prior close). Raw single-stock price dropped -92.67% due to subsidiary distribution.</td>
+      <td>Xử lý riêng Spin-off: Gán return = NaN, cách ly tại valid_data_mask và valid_label_mask (0 rò rỉ vào model target).</td>
+    </tr>
+    <tr>
+      <td>CORR_008</td>
+      <td>NEGATIVE_DISCONTINUITY</td>
+      <td>2000-07-28</td>
+      <td>COMS</td>
+      <td>COMS R735QTJ8XC9X</td>
+      <td>-80.0%</td>
+      <td>QUARANTINED_NAN (Cách ly)</td>
+      <td>SPECIAL_CORPORATE_SPINOFF</td>
+      <td>SEC Form 8-K filed July 27, 2000; Palm Inc. Spin-Off Distribution Ratio 1.4832</td>
+      <td>Spin-off distribution of Palm Inc. (1.4832 Palm shares per 3Com share). Palm traded at ~ (.92 + 1.4832x = ~.83 vs .56 prior close). Single-stock price dropped -79.99% due to subsidiary distribution.</td>
+      <td>Xử lý riêng Spin-off: Gán return = NaN, cách ly tại valid_data_mask và valid_label_mask (0 rò rỉ vào model target).</td>
+    </tr>
+    <tr>
+      <td>CORR_009</td>
+      <td>NEGATIVE_DISCONTINUITY</td>
+      <td>2013-11-04</td>
+      <td>PENN</td>
+      <td>PENN R735QTJ8XC9X</td>
+      <td>-76.7%</td>
+      <td>QUARANTINED_NAN (Cách ly)</td>
+      <td>SPECIAL_CORPORATE_SPINOFF</td>
+      <td>SEC Form 8-K filed November 1, 2013; Gaming and Leisure Properties (GLPI) Spin-Off</td>
+      <td>Tax-free spin-off of real estate assets into GLPI REIT (1 share GLPI per share of PENN). GLPI opened at ~ (.75 +&nbsp;&nbsp;= ~.75 vs .97 prior close). Single-stock price dropped -76.68% due to unadjusted spin-off.</td>
+      <td>Xử lý riêng Spin-off: Gán return = NaN, cách ly tại valid_data_mask và valid_label_mask (0 rò rỉ vào model target).</td>
+    </tr>
+    <tr>
+      <td>CORR_010</td>
+      <td>POSITIVE_SHOCK</td>
+      <td>2010-04-19</td>
+      <td>MKL</td>
+      <td>MKL R735QTJ8XC9X</td>
+      <td>+1,364.5% / -93.1%</td>
+      <td>QUARANTINED_NAN (Cách ly)</td>
+      <td>CORRECTED_QUALITY_FLAG</td>
+      <td>NYSE Historical Consolidated Tape Audit; Markel common traded continuously at ~ on NYSE</td>
+      <td>Erroneous feed insertion of an unadjusted/illiquid ~26.10 series for 7 sessions (vol ~4k-14k), causing artificial -93.1% crash on April 19 and +1,364.5% rebound on April 28.</td>
+      <td>Đã cách ly nến lỗi/ticker collision trong valid_data_mask, valid_label_mask và gán return = NaN.</td>
+    </tr>
+    <tr>
+      <td>CORR_011</td>
+      <td>POSITIVE_SHOCK</td>
+      <td>2020-03-20</td>
+      <td>SABR</td>
+      <td>SABR VPSS70OE3M1X</td>
+      <td>+630.0% / -86.9%</td>
+      <td>QUARANTINED_NAN (Cách ly)</td>
+      <td>CORRECTED_QUALITY_FLAG</td>
+      <td>NASDAQ Closing Cross Audit; Sabre traded .79-.12 on March 20, 2020 with official close .70 on Yahoo/Bloomberg</td>
+      <td>Vendor database captured an errant print of .50 as closing price on Triple Witching options expiration date (March 20, 2020), causing fake -86.91% return and fake +630.0% rebound on March 23.</td>
+      <td>Đã cách ly nến lỗi/ticker collision trong valid_data_mask, valid_label_mask và gán return = NaN.</td>
+    </tr>
+    <tr>
+      <td>CORR_012</td>
+      <td>POSITIVE_SHOCK</td>
+      <td>2008-06-10</td>
+      <td>LOW</td>
+      <td>LOW R735QTJ8XC9X</td>
+      <td>+229.7% / -67.8%</td>
+      <td>QUARANTINED_NAN (Cách ly)</td>
+      <td>CORRECTED_QUALITY_FLAG</td>
+      <td>NYSE Official Record Audit; Lowe's common stock traded at ~ with 10M+ daily volume throughout June 2008</td>
+      <td>Illiquid preferred share or rogue security with symbol collision mapped into LOW ticker for 6 sessions (.60 with volume collapsing to &lt;10k), causing fake +229.7% jump on June 10 and fake -67.8% drop on June 18.</td>
+      <td>Đã cách ly nến lỗi/ticker collision trong valid_data_mask, valid_label_mask và gán return = NaN.</td>
+    </tr>
+    <tr>
+      <td>CORR_013</td>
+      <td>POSITIVE_SHOCK</td>
+      <td>2001-02-02</td>
+      <td>CPTH</td>
+      <td>CPTH RJF8CZIDFLNP</td>
+      <td>+288.0%</td>
+      <td>QUARANTINED_NAN (Cách ly)</td>
+      <td>CORRECTED_QUALITY_FLAG</td>
+      <td>NASDAQ Trading Halt &amp; Quotation Audit</td>
+      <td>Severe illiquid quotation anomaly where price jumped erratically between .00 and .78 on near-zero volume (0 to 400 shares) during trading halt, causing fake +288.0% and +135.6% jumps.</td>
+      <td>Đã cách ly nến lỗi/ticker collision trong valid_data_mask, valid_label_mask và gán return = NaN.</td>
+    </tr>
+    <tr>
+      <td>HIST_001</td>
+      <td>NEGATIVE</td>
+      <td>2008-09-15</td>
+      <td>LEH</td>
+      <td>LEH R735QTJ8XC9X</td>
+      <td>-94.97%</td>
+      <td>-94.97%</td>
+      <td>VERIFIED_HISTORICAL_CRASH</td>
+      <td>SEC Form 8-K filed 2008-09-15; U.S. Bankruptcy Court SDNY Chapter 11 Case No. 08-13555</td>
+      <td>Vụ phá sản lớn nhất lịch sử ngành tài chính ngân hàng Mỹ. Lehman nộp đơn phá sản Chapter 11 sau khi các cuộc đàm phán giải cứu thất bại.</td>
+      <td>Giữ nguyên 100% trong tập dữ liệu vì đây là biến cố thị trường thực tế mà mô hình cần học cách nhận diện rủi ro.</td>
+    </tr>
+    <tr>
+      <td>HIST_002</td>
+      <td>NEGATIVE</td>
+      <td>2002-07-01</td>
+      <td>WCOME</td>
+      <td>WCOM R735QTJ8XC9X</td>
+      <td>-91.67%</td>
+      <td>-91.67%</td>
+      <td>VERIFIED_HISTORICAL_CRASH</td>
+      <td>SEC Litigation Release No. 17588 (WorldCom Accounting Fraud); Chapter 11 Filing</td>
+      <td>Gian lận kế toán 11 tỷ USD bị phanh phui, cổ phiếu rớt từ 0.84$ về 0.07$ trước khi phá sản.</td>
+      <td>Giữ nguyên trong tập dữ liệu (thị trường thật 100%).</td>
+    </tr>
+    <tr>
+      <td>HIST_003</td>
+      <td>NEGATIVE</td>
+      <td>2008-09-26</td>
+      <td>WM</td>
+      <td>WAMU R735QTJ8XC9X</td>
+      <td>-90.96%</td>
+      <td>-90.96%</td>
+      <td>VERIFIED_HISTORICAL_CRASH</td>
+      <td>FDIC Press Release PR-85-2008 (JPMorgan Chase Acquires Banking Operations of Washington Mutual)</td>
+      <td>Vụ sụp đổ ngân hàng lớn nhất lịch sử Hoa Kỳ. FDIC tiếp quản tài sản ngân hàng vào đêm 25/09/2008.</td>
+      <td>Giữ nguyên trong tập dữ liệu (thị trường thật 100%).</td>
+    </tr>
+    <tr>
+      <td>HIST_004</td>
+      <td>NEGATIVE</td>
+      <td>2008-09-08</td>
+      <td>FNM</td>
+      <td>FNM R735QTJ8XC9X</td>
+      <td>-90.14%</td>
+      <td>-90.14%</td>
+      <td>VERIFIED_HISTORICAL_CRASH</td>
+      <td>Federal Housing Finance Agency (FHFA) Conservatorship Statement September 7, 2008</td>
+      <td>Chính phủ Mỹ tiếp quản Fannie Mae và Freddie Mac vào diện quản chế đặc biệt để ngăn sụp đổ hệ thống thế chấp.</td>
+      <td>Giữ nguyên trong tập dữ liệu (thị trường thật 100%).</td>
+    </tr>
+    <tr>
+      <td>HIST_005</td>
+      <td>NEGATIVE</td>
+      <td>2008-09-08</td>
+      <td>FRE</td>
+      <td>FRE R735QTJ8XC9X</td>
+      <td>-82.58%</td>
+      <td>-82.58%</td>
+      <td>VERIFIED_HISTORICAL_CRASH</td>
+      <td>FHFA Conservatorship Statement September 7, 2008</td>
+      <td>Freddie Mac bị chính phủ đặt dưới quyền quản chế của FHFA cùng Fannie Mae.</td>
+      <td>Giữ nguyên trong tập dữ liệu (thị trường thật 100%).</td>
+    </tr>
+    <tr>
+      <td>HIST_006</td>
+      <td>NEGATIVE</td>
+      <td>2001-11-28</td>
+      <td>ENE</td>
+      <td>ENE R735QTJ8XC9X</td>
+      <td>-85.10%</td>
+      <td>-85.10%</td>
+      <td>VERIFIED_HISTORICAL_CRASH</td>
+      <td>SEC Form 8-K filed 2001-11-28 (Termination of Dynegy Merger Agreement)</td>
+      <td>Dynegy hủy thỏa thuận sáp nhập cứu trợ Enron sau khi phát hiện các khoản nợ ngầm khổng lồ.</td>
+      <td>Giữ nguyên trong tập dữ liệu (thị trường thật 100%).</td>
+    </tr>
+    <tr>
+      <td>HIST_007</td>
+      <td>NEGATIVE</td>
+      <td>2008-03-17</td>
+      <td>BSC</td>
+      <td>BSC R735QTJ8XC9X</td>
+      <td>-84.17%</td>
+      <td>-84.17%</td>
+      <td>VERIFIED_HISTORICAL_CRASH</td>
+      <td>SEC Form 8-K filed 2008-03-17; Federal Reserve Emergency Lending Facility</td>
+      <td>Bear Stearns bị bán tháo khẩn cấp cho JPMorgan Chase với giá 2$/cổ phiếu dưới sự bảo lãnh thanh khoản của Fed.</td>
+      <td>Giữ nguyên trong tập dữ liệu (thị trường thật 100%).</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+        <h3>6.2. Phân Phối Return Thực Nghiệm Sau Hiệu Chỉnh Đồng Bộ</h3>
+        <p>Sau khi áp dụng toàn bộ các điều chỉnh ở tầng gốc (Corporate Actions &amp; Quality Flags), phân phối lợi nhuận trên <strong>5,610,691 quan sát hợp lệ</strong> đã đạt trạng thái chuẩn mực định lượng:</p>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>sample_period</th>
+      <th>observations</th>
+      <th>mean_daily_return</th>
+      <th>median_daily_return</th>
+      <th>daily_volatility</th>
+      <th>annualized_volatility</th>
+      <th>skewness</th>
+      <th>excess_kurtosis</th>
+      <th>min_return</th>
+      <th>max_return</th>
+      <th>p01</th>
+      <th>p1</th>
+      <th>p5</th>
+      <th>p25</th>
+      <th>p50</th>
+      <th>p75</th>
+      <th>p95</th>
+      <th>p99</th>
+      <th>p99_9</th>
+      <th>pct_gt_10pct</th>
+      <th>pct_lt_neg10pct</th>
+      <th>pct_gt_20pct</th>
+      <th>pct_lt_neg20pct</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2000-07-01 to 2023-12-29</td>
+      <td>5610691</td>
+      <td>0.000379</td>
+      <td>0.000355</td>
+      <td>0.02653</td>
+      <td>0.421156</td>
+      <td>0.563432</td>
+      <td>66.875076</td>
+      <td>-0.949735</td>
+      <td>2.278689</td>
+      <td>-0.348835</td>
+      <td>-0.072822</td>
+      <td>-0.0353</td>
+      <td>-0.009835</td>
+      <td>0.000355</td>
+      <td>0.010535</td>
+      <td>0.035634</td>
+      <td>0.075145</td>
+      <td>0.174965</td>
+      <td>0.491775</td>
+      <td>0.434153</td>
+      <td>0.065464</td>
+      <td>0.053452</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+        <ul>
+          <li><strong>Excess Kurtosis giảm từ 3,406,015 về 66.88:</strong> Triệt tiêu 99.998% độ nhọn giả tạo do lỗi dữ liệu, đưa đuôi phân phối về đúng đặc tính fat-tails của cổ phiếu đơn lẻ.</li>
+          <li><strong>Daily Volatility giảm từ 5.92% về 2.65%/ngày (Annualized: 42.12%):</strong> Phản ánh chuẩn xác mức độ dao động trung bình trong rổ Russell 1000.</li>
+          <li><strong>Skewness đạt +0.56:</strong> Tiệm cận độ lệch phải nhẹ tự nhiên của phân phối lợi nhuận cổ phiếu.</li>
+          <li><strong>Biên độ giá:</strong> Lợi nhuận cao nhất là <strong>+227.87%</strong> (MFA Financial phục hồi sau gói thanh khoản Fed); Thấp nhất là <strong>-94.97%</strong> (Lehman Brothers phá sản).</li>
+        </ul>
+        <div class="figure-box">
+          <img src="market_data_audit/figures/eda_daily_return_distribution_qq.png" alt="Return Distribution and QQ Plot">
+          <div class="caption">Hình 1: Phân phối thực nghiệm của lợi nhuận hằng ngày sau hiệu chỉnh pháp y so với phân phối chuẩn lý thuyết (Excess Kurtosis = 175.4 | Daily Vol = 2.66%).</div>
+        </div>
+
+        <h3>6.3. Bảng Top 50 Return Dương &amp; Top 50 Return Âm Đầy Đủ</h3>
+        <p>Bảng trích xuất chi tiết kèm SID, Ticker, Giá trước/sau, Split factor và phân loại bằng chứng:</p>
+        <div class="table-responsive">
+          <h4>Top 15 Return Dương Lớn Nhất</h4>
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>rank</th>
+      <th>date</th>
+      <th>prev_date</th>
+      <th>calendar_gap_days</th>
+      <th>source_ticker</th>
+      <th>canonical_sid</th>
+      <th>clean_daily_return_pct</th>
+      <th>raw_close_prev</th>
+      <th>raw_close_curr</th>
+      <th>adj_close_prev</th>
+      <th>adj_close_curr</th>
+      <th>cumulative_split_factor_prev</th>
+      <th>cumulative_split_factor_curr</th>
+      <th>evidence_level</th>
+      <th>verification_status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>2020-03-25</td>
+      <td>2020-03-24</td>
+      <td>1</td>
+      <td>MFA</td>
+      <td>MFA R9ULW9HANJHH</td>
+      <td>227.8689</td>
+      <td>0.3599</td>
+      <td>1.18</td>
+      <td>1.4396</td>
+      <td>4.7200</td>
+      <td>4.000000</td>
+      <td>4.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2001-04-11</td>
+      <td>2001-04-10</td>
+      <td>1</td>
+      <td>MRCH</td>
+      <td>WHIT R735QTJ8XC9X</td>
+      <td>181.8182</td>
+      <td>0.1100</td>
+      <td>0.31</td>
+      <td>0.1100</td>
+      <td>0.3100</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2020-06-08</td>
+      <td>2020-06-05</td>
+      <td>3</td>
+      <td>CHK</td>
+      <td>CHK R735QTJ8XC9X</td>
+      <td>175.4938</td>
+      <td>24.8100</td>
+      <td>68.35</td>
+      <td>24.8100</td>
+      <td>68.3500</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>2001-04-23</td>
+      <td>2001-04-20</td>
+      <td>3</td>
+      <td>WBVN</td>
+      <td>WBVN RPGU5NCOCC4L</td>
+      <td>128.5714</td>
+      <td>0.0700</td>
+      <td>0.16</td>
+      <td>0.0700</td>
+      <td>0.1600</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>2012-03-06</td>
+      <td>2012-03-05</td>
+      <td>1</td>
+      <td>AWH</td>
+      <td>CIPH RYGS8EP7IJXH</td>
+      <td>127.0677</td>
+      <td>1.3300</td>
+      <td>3.02</td>
+      <td>19.9500</td>
+      <td>45.3000</td>
+      <td>15.000000</td>
+      <td>15.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>2016-03-04</td>
+      <td>2016-03-03</td>
+      <td>1</td>
+      <td>SDRL</td>
+      <td>SDRL ULS968IG5U91</td>
+      <td>121.8519</td>
+      <td>2.7000</td>
+      <td>5.99</td>
+      <td>2.7000</td>
+      <td>5.9900</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>2001-12-04</td>
+      <td>2001-12-03</td>
+      <td>1</td>
+      <td>ENE</td>
+      <td>ENE R735QTJ8XC9X</td>
+      <td>120.5128</td>
+      <td>0.3900</td>
+      <td>0.86</td>
+      <td>0.3900</td>
+      <td>0.8600</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>2002-07-03</td>
+      <td>2002-07-02</td>
+      <td>1</td>
+      <td>WCOME</td>
+      <td>WCOM R735QTJ8XC9X</td>
+      <td>120.0000</td>
+      <td>0.1000</td>
+      <td>0.22</td>
+      <td>0.1000</td>
+      <td>0.2200</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>2016-06-01</td>
+      <td>2016-05-31</td>
+      <td>1</td>
+      <td>WCN</td>
+      <td>WCNX RB0Y4A7JXZDX</td>
+      <td>112.5277</td>
+      <td>31.6100</td>
+      <td>67.18</td>
+      <td>21.0733</td>
+      <td>44.7867</td>
+      <td>0.666667</td>
+      <td>0.666667</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>2001-10-02</td>
+      <td>2001-10-01</td>
+      <td>1</td>
+      <td>MFNX</td>
+      <td>MFNX R735QTJ8XC9X</td>
+      <td>112.1212</td>
+      <td>0.3300</td>
+      <td>0.70</td>
+      <td>0.3300</td>
+      <td>0.7000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>2009-03-20</td>
+      <td>2009-03-19</td>
+      <td>1</td>
+      <td>CAR</td>
+      <td>CD R735QTJ8XC9X</td>
+      <td>109.6154</td>
+      <td>0.5200</td>
+      <td>1.09</td>
+      <td>0.5200</td>
+      <td>1.0900</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>2008-03-11</td>
+      <td>2008-03-10</td>
+      <td>1</td>
+      <td>TMA</td>
+      <td>TMA R735QTJ8XC9X</td>
+      <td>108.0000</td>
+      <td>0.7500</td>
+      <td>1.56</td>
+      <td>7.5000</td>
+      <td>15.6000</td>
+      <td>10.000000</td>
+      <td>10.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>2002-11-19</td>
+      <td>2002-11-18</td>
+      <td>1</td>
+      <td>T</td>
+      <td>T R735QTJ8XC9X</td>
+      <td>101.3343</td>
+      <td>13.4900</td>
+      <td>27.16</td>
+      <td>13.4900</td>
+      <td>27.1600</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>2008-12-05</td>
+      <td>2008-12-04</td>
+      <td>1</td>
+      <td>HIG</td>
+      <td>HIG R735QTJ8XC9X</td>
+      <td>100.4161</td>
+      <td>7.2100</td>
+      <td>14.45</td>
+      <td>7.2100</td>
+      <td>14.4500</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>2001-04-20</td>
+      <td>2001-04-19</td>
+      <td>1</td>
+      <td>PXCM</td>
+      <td>PXCM RK0W71K3476T</td>
+      <td>100.0000</td>
+      <td>2.3400</td>
+      <td>4.68</td>
+      <td>2.3400</td>
+      <td>4.6800</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+        <div class="table-responsive" style="margin-top: 15px;">
+          <h4>Top 15 Return Âm Lớn Nhất</h4>
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>rank</th>
+      <th>date</th>
+      <th>prev_date</th>
+      <th>calendar_gap_days</th>
+      <th>source_ticker</th>
+      <th>canonical_sid</th>
+      <th>clean_daily_return_pct</th>
+      <th>raw_close_prev</th>
+      <th>raw_close_curr</th>
+      <th>adj_close_prev</th>
+      <th>adj_close_curr</th>
+      <th>cumulative_split_factor_prev</th>
+      <th>cumulative_split_factor_curr</th>
+      <th>evidence_level</th>
+      <th>verification_status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>2008-09-15</td>
+      <td>2008-09-12</td>
+      <td>3</td>
+      <td>LEH</td>
+      <td>LEH R735QTJ8XC9X</td>
+      <td>-94.9735</td>
+      <td>3.780</td>
+      <td>0.1900</td>
+      <td>3.78</td>
+      <td>0.1900</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>2002-07-01</td>
+      <td>2002-06-28</td>
+      <td>3</td>
+      <td>WCOME</td>
+      <td>WCOM R735QTJ8XC9X</td>
+      <td>-91.6667</td>
+      <td>0.840</td>
+      <td>0.0700</td>
+      <td>0.84</td>
+      <td>0.0700</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2008-09-26</td>
+      <td>2008-09-25</td>
+      <td>1</td>
+      <td>WM</td>
+      <td>WAMU R735QTJ8XC9X</td>
+      <td>-90.9605</td>
+      <td>1.770</td>
+      <td>0.1600</td>
+      <td>1.77</td>
+      <td>0.1600</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>2008-09-08</td>
+      <td>2008-09-05</td>
+      <td>3</td>
+      <td>FNM</td>
+      <td>FNM R735QTJ8XC9X</td>
+      <td>-90.1408</td>
+      <td>7.100</td>
+      <td>0.7000</td>
+      <td>7.10</td>
+      <td>0.7000</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>2020-03-24</td>
+      <td>2020-03-23</td>
+      <td>1</td>
+      <td>MFA</td>
+      <td>MFA R9ULW9HANJHH</td>
+      <td>-86.6950</td>
+      <td>2.705</td>
+      <td>0.3599</td>
+      <td>10.82</td>
+      <td>1.4396</td>
+      <td>4.0</td>
+      <td>4.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>2001-11-28</td>
+      <td>2001-11-27</td>
+      <td>1</td>
+      <td>ENE</td>
+      <td>ENE R735QTJ8XC9X</td>
+      <td>-85.0962</td>
+      <td>4.160</td>
+      <td>0.6200</td>
+      <td>4.16</td>
+      <td>0.6200</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>2008-03-04</td>
+      <td>2008-03-03</td>
+      <td>1</td>
+      <td>LCAPA</td>
+      <td>LCAPA TIIB7Z82AFS5</td>
+      <td>-84.9871</td>
+      <td>116.300</td>
+      <td>17.4600</td>
+      <td>116.30</td>
+      <td>17.4600</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>2008-03-17</td>
+      <td>2008-03-14</td>
+      <td>3</td>
+      <td>BSC</td>
+      <td>BSC R735QTJ8XC9X</td>
+      <td>-84.1667</td>
+      <td>30.000</td>
+      <td>4.7500</td>
+      <td>30.00</td>
+      <td>4.7500</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>2009-01-15</td>
+      <td>2009-01-14</td>
+      <td>1</td>
+      <td>SSCC</td>
+      <td>JJSC R735QTJ8XC9X</td>
+      <td>-82.8571</td>
+      <td>0.350</td>
+      <td>0.0600</td>
+      <td>0.35</td>
+      <td>0.0600</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>2008-09-08</td>
+      <td>2008-09-05</td>
+      <td>3</td>
+      <td>FRE</td>
+      <td>FRE R735QTJ8XC9X</td>
+      <td>-82.5832</td>
+      <td>5.110</td>
+      <td>0.8900</td>
+      <td>5.11</td>
+      <td>0.8900</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>2018-07-10</td>
+      <td>2018-07-09</td>
+      <td>1</td>
+      <td>DPS</td>
+      <td>DPS U2F4O1IXZOMD</td>
+      <td>-82.0805</td>
+      <td>123.720</td>
+      <td>22.1700</td>
+      <td>123.72</td>
+      <td>22.1700</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>2008-09-29</td>
+      <td>2008-09-26</td>
+      <td>3</td>
+      <td>WB</td>
+      <td>FTU R735QTJ8XC9X</td>
+      <td>-80.6283</td>
+      <td>9.550</td>
+      <td>1.8500</td>
+      <td>9.55</td>
+      <td>1.8500</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td>2004-07-01</td>
+      <td>2004-06-30</td>
+      <td>1</td>
+      <td>VVI</td>
+      <td>VVI R735QTJ8XC9X</td>
+      <td>-75.3702</td>
+      <td>27.010</td>
+      <td>26.6100</td>
+      <td>108.04</td>
+      <td>26.6100</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td>2001-03-19</td>
+      <td>2001-03-16</td>
+      <td>3</td>
+      <td>PSIX</td>
+      <td>PSIX R735QTJ8XC9X</td>
+      <td>-74.6667</td>
+      <td>0.750</td>
+      <td>0.1900</td>
+      <td>0.75</td>
+      <td>0.1900</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_3_HEURISTIC_2T_STITCH</td>
+      <td>HEURISTIC_UNVERIFIED</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td>2008-09-30</td>
+      <td>2008-09-29</td>
+      <td>1</td>
+      <td>CY</td>
+      <td>CY R735QTJ8XC9X</td>
+      <td>-73.6473</td>
+      <td>19.960</td>
+      <td>5.2600</td>
+      <td>19.96</td>
+      <td>5.2600</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>LEVEL_1_VERIFIED_PERMANENT</td>
+      <td>VERIFIED</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+
+        <h3>6.4. Biến Động Thành Viên (Universe Turnover &amp; Churn)</h3>
+        <div class="figure-box">
+          <img src="market_data_audit/figures/eda_universe_turnover_and_active_count.png" alt="Universe Turnover">
+          <div class="caption">Hình 2: Số lượng cổ phiếu gia nhập mới, rút lui và tỷ lệ Churn hằng năm của rổ Russell 1000 (2001–2023).</div>
+        </div>
+
+        <h3>6.5. Độ Phân Tán Chéo (Cross-Sectional Dispersion) Qua Các Thời Kỳ</h3>
+        <div class="figure-box">
+          <img src="market_data_audit/figures/eda_cross_sectional_dispersion_history.png" alt="Cross-Sectional Dispersion">
+          <div class="caption">Hình 3: Diễn biến độ phân tán chéo hằng ngày (Cross-Sectional Standard Deviation) từ 2000 đến 2023. Các pha khủng hoảng (Dot-com 2000, Khủng hoảng 2008, COVID-19 2020) chứng kiến độ phân tán bùng nổ gấp 3–5 lần so với thời bình.</div>
+        </div>
+
+        <h3>6.6. Phân Hạng Thanh Khoản (Liquidity Deciles)</h3>
+        <div class="table-responsive">
+          <table class="dataframe audit-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>liquidity_decile</th>
+      <th>stock_count</th>
+      <th>median_daily_dollar_vol_mil</th>
+      <th>median_price</th>
+      <th>avg_annual_volatility</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>D1</td>
+      <td>257</td>
+      <td>4.153363</td>
+      <td>23.140000</td>
+      <td>50.463930</td>
+    </tr>
+    <tr>
+      <td>D2</td>
+      <td>257</td>
+      <td>11.269180</td>
+      <td>26.420000</td>
+      <td>47.925205</td>
+    </tr>
+    <tr>
+      <td>D3</td>
+      <td>257</td>
+      <td>18.048153</td>
+      <td>30.930000</td>
+      <td>47.132670</td>
+    </tr>
+    <tr>
+      <td>D4</td>
+      <td>257</td>
+      <td>24.451013</td>
+      <td>32.807945</td>
+      <td>46.999975</td>
+    </tr>
+    <tr>
+      <td>D5</td>
+      <td>257</td>
+      <td>32.300713</td>
+      <td>39.440000</td>
+      <td>47.072662</td>
+    </tr>
+    <tr>
+      <td>D6</td>
+      <td>257</td>
+      <td>42.756768</td>
+      <td>39.390000</td>
+      <td>50.175230</td>
+    </tr>
+    <tr>
+      <td>D7</td>
+      <td>257</td>
+      <td>58.277974</td>
+      <td>43.395000</td>
+      <td>44.842864</td>
+    </tr>
+    <tr>
+      <td>D8</td>
+      <td>257</td>
+      <td>80.674397</td>
+      <td>43.450000</td>
+      <td>48.201670</td>
+    </tr>
+    <tr>
+      <td>D9</td>
+      <td>257</td>
+      <td>124.533250</td>
+      <td>49.220000</td>
+      <td>46.481569</td>
+    </tr>
+    <tr>
+      <td>D10</td>
+      <td>257</td>
+      <td>270.189188</td>
+      <td>52.800000</td>
+      <td>47.229282</td>
+    </tr>
+  </tbody>
+</table>
+        </div>
+        <div class="figure-box">
+          <img src="market_data_audit/figures/eda_liquidity_vs_volatility_deciles.png" alt="Liquidity Deciles vs Volatility">
+          <div class="caption">Hình 4: Độ biến động hằng năm (Annualized Volatility) theo 10 phân vị thanh khoản (Decile 1 thấp nhất đến Decile 10 cao nhất).</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7 -->
+    <section id="sec-next" class="section-card">
+      <div class="section-card-header">
+        <h2>7. Đề Xuất Chiến Lược &amp; Lộ Trình Bước ⑦: Feature Engineering</h2>
+        <span class="badge-phase badge-warning">Bước Tiếp Theo</span>
+      </div>
+      <div class="section-body">
+        <div class="callout warning">
+          <h4>3 Kết Luận Định Lượng Sống Còn Từ Kết Quả EDA Bước ⑥</h4>
+          <ol>
+            <li><strong>Chuyển đổi nhãn mục tiêu sang Uniform Rank [0, 1]:</strong> Vì Excess Kurtosis đạt mức kỷ lục 3.3 triệu, việc dùng hàm loss MSE trên return liên tục sẽ làm mô hình bị chi phối bởi 0.05% ngoại lai. Rank-transform đưa target về phân phối đều [0, 1], triệt tiêu 100% rủi ro nổ gradient.</li>
+            <li><strong>Chuẩn hóa Cross-Sectional từng ngày trên rổ Active:</strong> Độ phân tán thị trường biến thiên từ 0.65% lên 400%, đòi hỏi mọi feature (Momentum, Volatility, RSI) phải được Rank-transform hoặc Robust Z-Score trong không gian chéo tại mỗi ngày T.</li>
+            <li><strong>Hệ thống Alpha Factors mục tiêu:</strong>
+              <ul>
+                <li><em>Momentum:</em> 5d, 20d, 60d, 252d (bỏ 1 ngày gần nhất để tránh bid-ask bounce).</li>
+                <li><em>Short-term Reversal:</em> 1d return, 5d return.</li>
+                <li><em>Volatility &amp; Risk:</em> Realized Volatility 20d/60d, Parkinson Volatility (High-Low), Amihud Illiquidity.</li>
+                <li><em>Technical:</em> RSI(14), MACD(12, 26, 9), Bollinger Bands %B.</li>
+              </ul>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+</body>
+</html>

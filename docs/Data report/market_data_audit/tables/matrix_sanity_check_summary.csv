@@ -1,0 +1,15 @@
+Metric,Value,Status
+Lưới ma trận (Dates x Canonical SIDs),7252 x 3711,PASSED
+Tổng số cells ma trận,"26,912,172",PASSED
+Membership Mask True Cells,"6,333,323",PASSED
+Valid Data Mask True Cells,"6,311,822 (99.66%)",PASSED
+Valid Label Mask True Cells,"6,308,873 (99.61%)",PASSED
+Vi phạm phân cấp (Label > Data),0,PASSED
+Vi phạm phân cấp (Data > Membership),0,PASSED
+Độ lệch lớn nhất Target Shift (T -> T+1),0.00e+00,PASSED
+Cell ranh giới OOS 2023-12-29 được Purge,100% Purged (0 leakage),PASSED
+Phiên cuối cùng 2026-10-30 Target = NaN,100% Clean,PASSED
+NaN / Zero Giá trong Valid Data,0,PASSED
+NaN / Zero Volume trong Valid Data,0,PASSED
+Độ lệch lớn nhất đối chiếu Kho Giá,0.00e+00,PASSED
+Kiểm thử chia tách / chia tách ngược,10/10 Hoàn hảo liên tục,PASSED

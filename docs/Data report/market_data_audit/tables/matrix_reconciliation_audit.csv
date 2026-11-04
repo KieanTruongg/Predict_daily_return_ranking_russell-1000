@@ -1,0 +1,6 @@
+field,sampled_cells,matched_finite_cells,matched_nan_cells,nan_mismatches,max_absolute_error,status
+adj_close,50000,50000,0,0,0.0,PASSED
+adj_volume,50000,50000,0,0,0.0,PASSED
+daily_return,50000,49989,11,0,0.0,PASSED
+total_return,50000,49989,11,0,0.0,PASSED
+cumulative_split_factor,50000,50000,0,0,0.0,PASSED

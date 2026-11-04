@@ -1,27 +1,29 @@
 # Master Configuration for Daily Return Rankings Project
-# Adhering to the hedge-fund research methodology
-# Updated: 2026-10-02 — v4 QuantConnect data (Point-In-Time with mappingResolveDate)
+# Institutional Quant Research Pipeline (Point-In-Time Russell 1000)
+# Updated: 2026-11-04 — Tier 2 Warehouse & 2D Matrices Migration
 
 universe:
   name: "Russell_1000"
   min_stocks: 500
   target_stocks: 1000
-  universe_cache_path: "data/raw/universe/russell1000_constituents.csv"
+  constituents_csv: "data/raw/universe/russell1000_constituents.csv"
   pit_by_year_json: "data/raw/universe/russell1000_pit_by_year.json"
 
 data:
-  source: "quantconnect_parquet"  # v4 QuantConnect Lean Engine (SplitAdjusted)
-  history_years: 26
-  start_date: "2000-01-01"       # Full 27-year coverage (2000-2026)
-  # In-sample vs Out-of-sample split strictly per instructor instructions
-  split_date: "2024-01-01"       # All data >= 2024-01-01 is OUT-OF-SAMPLE (strictly locked)
-  end_date: null                 # Fetches latest date available
-  by_year_dir: "data/processed/by_year"
-  daily_ohlcv_path: "data/processed/daily_ohlcv/russell1000_daily_2000_2026.parquet"
-  in_sample_dir: "data/processed/in_sample"
-  out_sample_dir: "data/processed/out_sample"
-  price_field_for_return: "Close"  # SplitAdjusted, so Close == Adj Close
-  data_normalization: "SplitAdjusted"
+  raw_warehouse: "data/processed/constituents_market_data/russell1000_constituents_daily_ohlcv_1998_2026.parquet"
+  canonical_warehouse: "data/processed/constituents_market_data/russell1000_constituents_daily_ohlcv_canonical_1998_2026.parquet"
+  adjusted_warehouse: "data/processed/constituents_market_data/russell1000_constituents_daily_ohlcv_adjusted_1998_2026.parquet"
+  matrices_dir: "data/processed/matrices"
+  corporate_actions_dir: "data/processed/constituents_market_data/corporate_actions"
+
+  # Institutional Trading Session Windows (Total: 7,252 NYSE sessions)
+  start_date: "1998-01-02"
+  warmup_end_date: "2000-06-30"       # 630 sessions: Warmup window for long-horizon features
+  dev_start_date: "2000-07-01"        # 5,911 sessions: Development / Training & Validation window
+  dev_end_date: "2023-12-29"
+  oos_start_date: "2024-01-02"        # 711 sessions: Out-of-Sample window
+  oos_end_date: "2026-10-30"
+  oos_strictly_frozen: true           # Strict prohibition of access during feature engineering
 
 portfolio:
   initial_capital: 10000000.0    # $10M book size

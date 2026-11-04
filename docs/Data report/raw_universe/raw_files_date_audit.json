@@ -1,0 +1,603 @@
+[
+  {
+    "year": "2000",
+    "filename": "2000.pdf",
+    "format": "PDF",
+    "filesize_bytes": 44486,
+    "exact_dates_found": [
+      "June 30, 2000"
+    ],
+    "document_title": "Russell 1000  Index Membership June 30, 2000",
+    "header_snippet": "Russell 1000  Index Membership June 30, 2000 | Ticker* Company Name Ticker* Company Name | *Ticker subject to change Page 1 of 10 | TW 21ST CENTURY INSURANCE GROUP | COMS 3COM CORP | SVEV 7-ELEVEN INC",
+    "recon_mentions": [
+      "Russell 1000  Index Membership June 30, 2000",
+      "Russell 1000  Index Membership June 30, 2000",
+      "Russell 1000  Index Membership June 30, 2000",
+      "Russell 1000  Index Membership June 30, 2000"
+    ],
+    "metadata": {
+      "/Producer": "Acrobat Distiller 4.0 for Windows",
+      "/Keywords": "[DocumentType=Document]",
+      "/ModDate": "D:20000710103151-07'00'",
+      "/Author": "Christy Kitsu",
+      "/CreationDate": "D:20000710103126",
+      "/Title": "AIR_",
+      "/Creator": "Microsoft Word 8.0"
+    },
+    "num_pages": 10
+  },
+  {
+    "year": "2001",
+    "filename": "2001.pdf",
+    "format": "PDF",
+    "filesize_bytes": 48338,
+    "exact_dates_found": [
+      "June 30, 2001",
+      "as of June 30, 2001"
+    ],
+    "document_title": "Russell 1000® Index as of June 30, 2001",
+    "header_snippet": "Russell 1000® Index as of June 30, 2001 | Page 1 of 10 | Ticker Name | TW 21ST CENTY INS GROUP | COMS 3COM CORP | ADCT A D C TELECOMMUNICAT",
+    "recon_mentions": [],
+    "metadata": {
+      "/Producer": "Acrobat Distiller 4.0 for Windows",
+      "/Creator": "Microsoft Word 8.0",
+      "/ModDate": "D:20010709144244-07'00'",
+      "/Author": "Linda Foster",
+      "/Title": "Ticker",
+      "/CreationDate": "D:20010709144204"
+    },
+    "num_pages": 10
+  },
+  {
+    "year": "2002",
+    "filename": "2002.pdf",
+    "format": "PDF",
+    "filesize_bytes": 47977,
+    "exact_dates_found": [
+      "June 30, 2002",
+      "as of June 30, 2002"
+    ],
+    "document_title": "Russell 1000® Index as of June 30, 2002",
+    "header_snippet": "Russell 1000® Index as of June 30, 2002 | Page 1 of 11 | Ticker Name | TW 21ST CENTY INS GROUP | COMS 3COM CORP | MMM 3M CO",
+    "recon_mentions": [],
+    "metadata": {
+      "/Creator": "R1_ALPHA.doc (Read-Only) - Microsoft Word",
+      "/CreationDate": "D:20020722082951",
+      "/Title": "R1_ALPHA.doc",
+      "/Author": "ehudak",
+      "/Producer": "Acrobat PDFWriter 5.0 for Windows NT"
+    },
+    "num_pages": 11
+  },
+  {
+    "year": "2003",
+    "filename": "2003.pdf",
+    "format": "PDF",
+    "filesize_bytes": 87275,
+    "exact_dates_found": [
+      "June 30, 2003",
+      "as of June 30, 2003"
+    ],
+    "document_title": "Russell 1000® Index as of June 30, 2003",
+    "header_snippet": "Russell 1000® Index as of June 30, 2003 | Page 1 of 15 | Ticker  Name | ADCT A D C TELECOMMUNICATIONS | AFL AFLAC INC | AG AGCO CORP",
+    "recon_mentions": [],
+    "metadata": {
+      "/CreationDate": "D:20030709102830-07'00'",
+      "/ModDate": "D:20030709102830-07'00'",
+      "/Producer": "Acrobat Distiller 5.0 (Windows)",
+      "/Author": "jbrooker",
+      "/Creator": "PScript5.dll Version 5.2",
+      "/Title": "Microsoft Word - R1_alpha_2003.doc"
+    },
+    "num_pages": 15
+  },
+  {
+    "year": "2004",
+    "filename": "2004.pdf",
+    "format": "PDF",
+    "filesize_bytes": 87617,
+    "exact_dates_found": [
+      "June 25, 2004",
+      "as of June 25, 2004"
+    ],
+    "document_title": "Russell 1000® as of June 25, 2004",
+    "header_snippet": "Russell 1000® as of June 25, 2004 | Page 1 of 11 | Ticker Name | A AGILENT TECHNOLOGIES INC | AA ALCOA INC | AAP ADVANCE AUTO PARTS INC",
+    "recon_mentions": [],
+    "metadata": {
+      "/CreationDate": "D:20040706134501-07'00'",
+      "/ModDate": "D:20040706134501-07'00'",
+      "/Producer": "Acrobat Distiller 5.0.5 (Windows)",
+      "/Author": "Ehudak",
+      "/Creator": "PScript5.dll Version 5.2",
+      "/Title": "Microsoft Word - R1_Alpha.doc"
+    },
+    "num_pages": 11
+  },
+  {
+    "year": "2005",
+    "filename": "2005.pdf",
+    "format": "PDF",
+    "filesize_bytes": 62781,
+    "exact_dates_found": [
+      "AS OF JUNE 24, 2005",
+      "JUNE 24, 2005"
+    ],
+    "document_title": "ADCT ADC TELECOMMUNICATIONS",
+    "header_snippet": "ADCT ADC TELECOMMUNICATIONS | AFL AFLAC INC | ATG AGL RESOURCES INC | AES AES CORP | AMB AMB PROPERTY CORP | AMR AMR CORP",
+    "recon_mentions": [
+      "MEMBERSHIP LIST"
+    ],
+    "metadata": {
+      "/ModDate": "D:20050630080932-07'00'",
+      "/CreationDate": "D:20050630080932-07'00'",
+      "/Title": "1000list_0605.indd",
+      "/Creator": "PScript5.dll Version 5.2.2",
+      "/Producer": "Acrobat Distiller 6.0.1 (Windows)",
+      "/Author": "rreilley"
+    },
+    "num_pages": 9
+  },
+  {
+    "year": "2006",
+    "filename": "2006.pdf",
+    "format": "PDF",
+    "filesize_bytes": 269175,
+    "exact_dates_found": [
+      "AS OF JUNE 24, 2005",
+      "AS OF JUNE 30, 2006",
+      "JUNE 24, 2005",
+      "JUNE 30, 2006"
+    ],
+    "document_title": "MEMBERSHIP LIST",
+    "header_snippet": "MEMBERSHIP LIST | AS OF JUNE 24, 2005 | Page 1 of 9 | ADCT ADC TELECOMMUNICATIONS | AFL AFLAC INC | AG AGCO CORP",
+    "recon_mentions": [
+      "MEMBERSHIP LIST",
+      "MEMBERSHIP LIST"
+    ],
+    "metadata": {
+      "/CreationDate": "D:20060703091001-07'00'",
+      "/Author": "Russell Investment Group",
+      "/Creator": "PScript5.dll Version 5.2.2",
+      "/Producer": "Acrobat Distiller 7.0 (Windows)",
+      "/ModDate": "D:20060915162509-06'00'",
+      "/Title": "Russell 1000 Index Membership List - June 30, 2006",
+      "/Subject": "Russell Indexes membership list",
+      "/Keywords": "index,indexes,russell 1000,large-cap,1000,membership"
+    },
+    "num_pages": 9
+  },
+  {
+    "year": "2007",
+    "filename": "2007.pdf",
+    "format": "PDF",
+    "filesize_bytes": 269822,
+    "exact_dates_found": [
+      "AS OF JUNE 22, 2007",
+      "AS OF JUNE 24, 2005",
+      "JUNE 22, 2007",
+      "JUNE 24, 2005"
+    ],
+    "document_title": "MEMBERSHIP LIST",
+    "header_snippet": "MEMBERSHIP LIST | AS OF JUNE 24, 2005 | Page 1 of 9 | MMM 3M CO | ABT ABBOTT LABORATORIES | ANF ABERCROMBIE & FITCH",
+    "recon_mentions": [
+      "MEMBERSHIP LIST",
+      "MEMBERSHIP LIST"
+    ],
+    "metadata": {
+      "/CreationDate": "D:20070625124611-07'00'",
+      "/Subject": "Russell Indexes membership list",
+      "/Author": "Russell Investment Group",
+      "/Creator": "PScript5.dll Version 5.2.2",
+      "/Keywords": "\"index,indexes,russell 1000,large-cap,1000,membership\"",
+      "/Producer": "Acrobat Distiller 7.0.5 (Windows)",
+      "/ModDate": "D:20070625141515-07'00'",
+      "/Title": "Russell 1000 Index Membership List - June 22, 2007"
+    },
+    "num_pages": 9
+  },
+  {
+    "year": "2008",
+    "filename": "2008.csv",
+    "format": "CSV",
+    "filesize_bytes": 22151,
+    "exact_dates_found": [],
+    "document_title": "Company,Ticker",
+    "header_snippet": "Company,Ticker | ADC TELECOMMUNICATIONS,ADCT | KILROY REALTY CORP,KRC | AFLAC INC,AFL | KIMBERLY CLARK CORP,KMB",
+    "recon_mentions": [],
+    "metadata": {}
+  },
+  {
+    "year": "2009",
+    "filename": "2009.pdf",
+    "format": "PDF",
+    "filesize_bytes": 1187933,
+    "exact_dates_found": [
+      "6/29/2009"
+    ],
+    "document_title": "As of 6/29/2009   Russell Indexes.",
+    "header_snippet": "As of 6/29/2009   Russell Indexes. | Russell 1000® Index membership list | Company Ticker | 3M CO MMM | AARONS INC AAN | ABBOTT LABORATORIES ABT",
+    "recon_mentions": [
+      "Russell 1000® Index membership list"
+    ],
+    "metadata": {
+      "/CreationDate": "D:20090713094310-07'00'",
+      "/Author": "Russell Investments",
+      "/Creator": "PScript5.dll Version 5.2.2",
+      "/Producer": "Acrobat Distiller 7.0.5 (Windows)",
+      "/ModDate": "D:20091110105636-08'00'",
+      "/Title": "Russell 1000 Membership List"
+    },
+    "num_pages": 13
+  },
+  {
+    "year": "2010",
+    "filename": "2010.pdf",
+    "format": "PDF",
+    "filesize_bytes": 149262,
+    "exact_dates_found": [],
+    "document_title": "As of 06/28/10 Russell Indexes.",
+    "header_snippet": "As of 06/28/10 Russell Indexes. | Russell 1000® Index membership list | Company Ticker | AFLAC INC AFL | AGCO CORP AGCO | AGL RESOURCES INC AGL",
+    "recon_mentions": [
+      "Russell 1000® Index membership list"
+    ],
+    "metadata": {
+      "/CreationDate": "D:20100630125103-08'00'",
+      "/Author": "Russell Investments",
+      "/Creator": "Microsoft Word - RU1000_Membership_List_20100628.doc",
+      "/Producer": "ScanSoft PDF Create! 5",
+      "/ModDate": "D:20100630152214-07'00'",
+      "/Title": "Russell 1000 Membership List"
+    },
+    "num_pages": 11
+  },
+  {
+    "year": "2011",
+    "filename": "2011.pdf",
+    "format": "PDF",
+    "filesize_bytes": 206699,
+    "exact_dates_found": [
+      "06/27/2011"
+    ],
+    "document_title": "As of 06/27/2011 Russell Indexes.",
+    "header_snippet": "As of 06/27/2011 Russell Indexes. | Russell 1000® Index membership list | Company Ticker | AGILENT TECHNOLOGIES IN A | ALCOA INC AA | AARONS INC AAN",
+    "recon_mentions": [
+      "Russell 1000® Index membership list"
+    ],
+    "metadata": {
+      "/Author": "Russell Indexes",
+      "/CreationDate": "D:20110627141815-08'00'",
+      "/Creator": "Microsoft Word - Russell1000_Membership_List_20110627.doc",
+      "/Keywords": "members, constituents",
+      "/ModDate": "D:20110627151629-07'00'",
+      "/Producer": "ScanSoft PDF Create! 6",
+      "/Subject": "List of constituents in the Russell 1000 Index as of June 27, 2011",
+      "/Title": "Russell 1000 Index membership list"
+    },
+    "num_pages": 14
+  },
+  {
+    "year": "2012",
+    "filename": "2012.pdf",
+    "format": "PDF",
+    "filesize_bytes": 133191,
+    "exact_dates_found": [
+      "06/25/2012"
+    ],
+    "document_title": "As of 06/25/2012 Russell Indexes.",
+    "header_snippet": "As of 06/25/2012 Russell Indexes. | Russell 1000® Index membership list | Company Ticker | AFLAC INC AFL | AGCO CORP AGCO | AGL RESOURCES INC GAS",
+    "recon_mentions": [
+      "Russell 1000® Index membership list"
+    ],
+    "metadata": {
+      "/Author": "Russell Indexes",
+      "/CreationDate": "D:20120622114853-08'00'",
+      "/Creator": "Microsoft Word - Russell1000_Membership_List_20120625.doc",
+      "/ModDate": "D:20120622153239-07'00'",
+      "/Producer": "ScanSoft PDF Create! 6",
+      "/Subject": "List of constituents in the Russell 1000 Index as of June 25, 2012",
+      "/Title": "Russell 1000 Index membership list"
+    },
+    "num_pages": 14
+  },
+  {
+    "year": "2013",
+    "filename": "2013.pdf",
+    "format": "PDF",
+    "filesize_bytes": 637206,
+    "exact_dates_found": [
+      "06/28/2013"
+    ],
+    "document_title": "As of 06/28/2013  Russell Indexes.",
+    "header_snippet": "As of 06/28/2013  Russell Indexes. | Russell 1000® Index membership list | Company Ticker | 3D SYSTEMS CORP DDD | 3M CO MMM | AARONS INC AAN",
+    "recon_mentions": [
+      "Russell 1000® Index membership list"
+    ],
+    "metadata": {
+      "/CreationDate": "D:20130927143313Z",
+      "/Author": "Russell Indexes",
+      "/Creator": "Microsoft® Office Word 2007",
+      "/Producer": "Microsoft® Office Word 2007",
+      "/ModDate": "D:20130927164955-07'00'",
+      "/Title": "Russell 1000 Index membership list - 2013 constituents"
+    },
+    "num_pages": 13
+  },
+  {
+    "year": "2014",
+    "filename": "2014.pdf",
+    "format": "PDF",
+    "filesize_bytes": 656239,
+    "exact_dates_found": [
+      "06/27/2014"
+    ],
+    "document_title": "As of 06/27/2014  Russell Indexes.",
+    "header_snippet": "As of 06/27/2014  Russell Indexes. | Russell 1000® Index membership list | Company Ticker | 21ST CENTURY FOX INC FOXA | 3D SYSTEMS CORP DDD | 3M CO MMM",
+    "recon_mentions": [
+      "Russell 1000® Index membership list"
+    ],
+    "metadata": {
+      "/Author": "Russell Indexes",
+      "/CreationDate": "D:20140627105238Z",
+      "/Creator": "Microsoft® Office Word 2007",
+      "/ModDate": "D:20140630074502-07'00'",
+      "/Producer": "Microsoft® Office Word 2007",
+      "/Title": "Russell 1000 Index membership list"
+    },
+    "num_pages": 15
+  },
+  {
+    "year": "2015",
+    "filename": "2015.pdf",
+    "format": "PDF",
+    "filesize_bytes": 775592,
+    "exact_dates_found": [
+      "06/26/2015"
+    ],
+    "document_title": "As of 06/26/2015  Russell Indexes.",
+    "header_snippet": "As of 06/26/2015  Russell Indexes. | Russell 1000® Index membership list | Company Ticker | 21ST CENTURY FOX CL A FOXA | 21ST CENTURY FOX CL B FOX | 3D SYSTEMS CORP DDD",
+    "recon_mentions": [
+      "Russell 1000® Index membership list"
+    ],
+    "metadata": {
+      "/Title": "[CLICK AND TYPE DATE]",
+      "/Author": "lstoner",
+      "/Creator": "Microsoft® Word 2013",
+      "/CreationDate": "D:20150626163750-07'00'",
+      "/ModDate": "D:20150626163750-07'00'",
+      "/Producer": "Microsoft® Word 2013"
+    },
+    "num_pages": 15
+  },
+  {
+    "year": "2016",
+    "filename": "2016.pdf",
+    "format": "PDF",
+    "filesize_bytes": 79542,
+    "exact_dates_found": [
+      "June 27, 2016"
+    ],
+    "document_title": "Company",
+    "header_snippet": "Company | Ticker | 21ST CENTURY FOX CL A | FOXA | 21ST CENTURY FOX CL B | FOX",
+    "recon_mentions": [
+      "Membership list",
+      "Membership list",
+      "Membership list",
+      "Membership list"
+    ],
+    "metadata": {
+      "/Title": "USMembershiplist",
+      "/Author": "",
+      "/Subject": "",
+      "/Creator": "Microsoft Reporting Services 11.0.0.0",
+      "/Producer": "Microsoft Reporting Services PDF Rendering Extension 11.0.0.0",
+      "/CreationDate": "D:20160627131239-07'00'"
+    },
+    "num_pages": 12
+  },
+  {
+    "year": "2017",
+    "filename": "2017.pdf",
+    "format": "PDF",
+    "filesize_bytes": 181551,
+    "exact_dates_found": [
+      "June 26, 2017"
+    ],
+    "document_title": "Company",
+    "header_snippet": "Company | Ticker | 21ST CENTURY FOX CL A | FOXA | 21ST CENTURY FOX CL B | FOX",
+    "recon_mentions": [
+      "Membership list",
+      "Membership list",
+      "Membership list",
+      "Membership list"
+    ],
+    "metadata": {
+      "/Title": "USMembershiplist",
+      "/Author": "",
+      "/Subject": "",
+      "/Creator": "Microsoft Reporting Services 11.0.0.0",
+      "/Producer": "Microsoft Reporting Services PDF Rendering Extension 11.0.0.0",
+      "/CreationDate": "D:20170626094310-07'00'"
+    },
+    "num_pages": 12
+  },
+  {
+    "year": "2018",
+    "filename": "2018.pdf",
+    "format": "PDF",
+    "filesize_bytes": 184079,
+    "exact_dates_found": [
+      "June 25, 2018"
+    ],
+    "document_title": "Company",
+    "header_snippet": "Company | Ticker | 21ST CENTURY FOX CL A | FOXA | 21ST CENTURY FOX CL B | FOX",
+    "recon_mentions": [
+      "Membership list",
+      "Membership list",
+      "Membership list",
+      "Membership list"
+    ],
+    "metadata": {
+      "/Title": "USMembershiplist",
+      "/Author": "",
+      "/Subject": "",
+      "/Creator": "Microsoft Reporting Services 11.0.0.0",
+      "/Producer": "Microsoft Reporting Services PDF Rendering Extension 11.0.0.0",
+      "/CreationDate": "D:20180624223645-07'00'"
+    },
+    "num_pages": 12
+  },
+  {
+    "year": "2019",
+    "filename": "2019.json",
+    "format": "JSON",
+    "filesize_bytes": 498347,
+    "exact_dates_found": [],
+    "document_title": "JSON Document (Keys: ['aaData'])",
+    "header_snippet": "{\"aaData\": [[\"MSFT\", \"MICROSOFT CORP\", \"Information Technology\", \"Equity\", {\"display\": \"$780,723,398.53\", \"raw\": 780723398.53}, {\"display\": \"3.70\", \"raw\": 3.70387}, {\"display\": \"780,723,398.53\", \"raw\": 780723398.53}, {\"display\": \"5,729,239.00\", \"raw\": 5729239}, \"594918104\", \"US5949181045\", \"2588173\"",
+    "recon_mentions": [],
+    "metadata": {}
+  },
+  {
+    "year": "2020",
+    "filename": "2020.pdf",
+    "format": "PDF",
+    "filesize_bytes": 251519,
+    "exact_dates_found": [
+      "June 29, 2020"
+    ],
+    "document_title": "Company",
+    "header_snippet": "Company | Ticker | 10X GENOMICS | TXG | 2U INC | TWOU",
+    "recon_mentions": [
+      "Membership list",
+      "Membership list",
+      "Membership list",
+      "Membership list"
+    ],
+    "metadata": {
+      "/Title": "USMembershiplist",
+      "/Author": "",
+      "/Subject": "",
+      "/Creator": "Microsoft Reporting Services 13.0.0.0",
+      "/Producer": "Microsoft Reporting Services PDF Rendering Extension 13.0.0.0",
+      "/CreationDate": "D:20200629093951-07'00'"
+    },
+    "num_pages": 12
+  },
+  {
+    "year": "2021",
+    "filename": "2021.pdf",
+    "format": "PDF",
+    "filesize_bytes": 253347,
+    "exact_dates_found": [
+      "June 28, 2021"
+    ],
+    "document_title": "Company",
+    "header_snippet": "Company | Ticker | 10X GENOMICS | TXG | 3M COMPANY | MMM",
+    "recon_mentions": [
+      "Membership list",
+      "Membership list",
+      "Membership list",
+      "Membership list"
+    ],
+    "metadata": {
+      "/Title": "USMembershiplist",
+      "/Author": "",
+      "/Subject": "",
+      "/Creator": "Microsoft Reporting Services 13.0.0.0",
+      "/Producer": "Microsoft Reporting Services PDF Rendering Extension 13.0.0.0",
+      "/CreationDate": "D:20210625082910-07'00'"
+    },
+    "num_pages": 13
+  },
+  {
+    "year": "2022",
+    "filename": "2022.pdf",
+    "format": "PDF",
+    "filesize_bytes": 252765,
+    "exact_dates_found": [
+      "June 24, 2022"
+    ],
+    "document_title": "Company",
+    "header_snippet": "Company | Ticker | 10X GENOMICS | TXG | 3M COMPANY | MMM",
+    "recon_mentions": [
+      "Membership list",
+      "Membership list",
+      "Membership list",
+      "Membership list"
+    ],
+    "metadata": {
+      "/Title": "USMembershiplist",
+      "/Author": "",
+      "/Subject": "",
+      "/Creator": "Microsoft Reporting Services 13.0.0.0",
+      "/Producer": "Microsoft Reporting Services PDF Rendering Extension 13.0.0.0",
+      "/CreationDate": "D:20220624063408-07'00'"
+    },
+    "num_pages": 13
+  },
+  {
+    "year": "2023",
+    "filename": "2023.json",
+    "format": "JSON",
+    "filesize_bytes": 504247,
+    "exact_dates_found": [],
+    "document_title": "JSON Document (Keys: ['aaData'])",
+    "header_snippet": "{\"aaData\": [[\"AAPL\", \"APPLE INC\", \"Information Technology\", \"Equity\", {\"display\": \"$2,099,732,341.95\", \"raw\": 2099732341.95}, {\"display\": \"6.76\", \"raw\": 6.7584}, {\"display\": \"2,099,732,341.95\", \"raw\": 2099732341.95}, {\"display\": \"11,168,195.00\", \"raw\": 11168195}, \"037833100\", \"US0378331005\", \"204625",
+    "recon_mentions": [],
+    "metadata": {}
+  },
+  {
+    "year": "2024",
+    "filename": "2024.json",
+    "format": "JSON",
+    "filesize_bytes": 504199,
+    "exact_dates_found": [],
+    "document_title": "JSON Document (Keys: ['aaData'])",
+    "header_snippet": "{\"aaData\": [[\"MSFT\", \"MICROSOFT CORP\", \"Information Technology\", \"Equity\", {\"display\": \"$2,452,226,302.62\", \"raw\": 2452226302.62}, {\"display\": \"6.76\", \"raw\": 6.76471}, {\"display\": \"2,452,226,302.62\", \"raw\": 2452226302.62}, {\"display\": \"5,369,094.00\", \"raw\": 5369094}, \"594918104\", \"US5949181045\", \"25",
+    "recon_mentions": [],
+    "metadata": {}
+  },
+  {
+    "year": "2025",
+    "filename": "2025.xls",
+    "format": "XLS",
+    "filesize_bytes": 3625010,
+    "exact_dates_found": [
+      "May 15, 2000"
+    ],
+    "document_title": "The content contained herein is owned or licensed by BlackRock and/or its third-party information providers and is protected by applicable copyrights, trademarks, service marks, and/or other intellectual property rights. Such content is solely for your personal, non-commercial use. Accordingly, you may not copy, distribute, modify, post, frame or deep link this content. You may download material displayed on this Website for your personal use provided you also retain all copyright and other proprietary notices contained on the materials. Modification or use of the materials for any other purpose violates BlackRock's intellectual property rights.",
+    "header_snippet": "The content contained herein is owned or licensed by BlackRock and/or its third-party information providers and is protected by applicable copyrights, trademarks, service marks, and/or other intellectual property rights. Such content is solely for your personal, non-commercial use. Accordingly, you may not copy, distribute, modify, post, frame or deep link this content. You may download material displayed on this Website for your personal use provided you also retain all copyright and other proprietary notices contained on the materials. Modification or use of the materials for any other purpose violates BlackRock's intellectual property rights. | For standardized performance, click here.  | \nHoldings subject to change. Past distributions not indicative of future distributions. | \nThe published NAV uses systematic fair value to price certain foreign assets after the close of the local markets to the price that might have prevailed as of 4:00 p.m., Eastern time, when the Fund is priced. The Non-Fair Value (NFV) NAV will instead use local closing market prices for those foreign assets and foreign exchange rates as of 4:00 p.m., London time. NFV NAVs generally exclude the impact of systematic fair value and currency rate differences, however under the following limited circumstances may incorporate certain fair value adjustments including: when assets have no price or are suspended on a prolonged basis; where derivatives trade outside of the U.S.; if trading in currency is constrained; and for valuing accounting accruals. NFV NAV is displayed for informational purposes only. Investors cannot transact with the Fund at NFV NAV. | \nTHIS INFORMATION MUST BE PRECEEDED OR ACCOMPANIED BY A PROSPECTUS. INVESTORS SHOULD READ AND CONSIDER IT CAREFULLY BEFORE INVESTING. INVESTING INVOLVE RISK, INCLUDING POSSIBLE LOSS OF PRINCIPAL. | For a current prospectus, click here.  | \nThis information should not be relied upon as research, investment advice, or a recommendation regarding any products, strategies, or any security in particular. This material is strictly for illustrative, educational, or informational purposes and is subject to change. | \nThe iShares Funds are distributed by BlackRock Investments, LLC (together with its affiliates, “BlackRock”).",
+    "recon_mentions": [],
+    "metadata": {}
+  },
+  {
+    "year": "2026",
+    "filename": "2026.xls",
+    "format": "XLS",
+    "filesize_bytes": 3725064,
+    "exact_dates_found": [
+      "09/15/2026",
+      "May 15, 2000"
+    ],
+    "document_title": "The content contained herein is owned or licensed by BlackRock and/or its third-party information providers and is protected by applicable copyrights, trademarks, service marks, and/or other intellectual property rights. Such content is solely for your personal, non-commercial use. Accordingly, you may not copy, distribute, modify, post, frame or deep link this content. You may download material displayed on this Website for your personal use provided you also retain all copyright and other proprietary notices contained on the materials. Modification or use of the materials for any other purpose violates BlackRock's intellectual property rights.",
+    "header_snippet": "The content contained herein is owned or licensed by BlackRock and/or its third-party information providers and is protected by applicable copyrights, trademarks, service marks, and/or other intellectual property rights. Such content is solely for your personal, non-commercial use. Accordingly, you may not copy, distribute, modify, post, frame or deep link this content. You may download material displayed on this Website for your personal use provided you also retain all copyright and other proprietary notices contained on the materials. Modification or use of the materials for any other purpose violates BlackRock's intellectual property rights. | For standardized performance, click here.  | \nHoldings subject to change. Past distributions not indicative of future distributions. | \nThe published NAV uses systematic fair value to price certain foreign assets after the close of the local markets to the price that might have prevailed as of 4:00 p.m., Eastern time, when the Fund is priced. The Non-Fair Value (NFV) NAV will instead use local closing market prices for those foreign assets and foreign exchange rates as of 4:00 p.m., London time. NFV NAVs generally exclude the impact of systematic fair value and currency rate differences, however under the following limited circumstances may incorporate certain fair value adjustments including: when assets have no price or are suspended on a prolonged basis; where derivatives trade outside of the U.S.; if trading in currency is constrained; and for valuing accounting accruals. NFV NAV is displayed for informational purposes only. Investors cannot transact with the Fund at NFV NAV. | \nTHIS INFORMATION MUST BE PRECEEDED OR ACCOMPANIED BY A PROSPECTUS. INVESTORS SHOULD READ AND CONSIDER IT CAREFULLY BEFORE INVESTING. INVESTING INVOLVE RISK, INCLUDING POSSIBLE LOSS OF PRINCIPAL. | For a current prospectus, click here.  | \nThis information should not be relied upon as research, investment advice, or a recommendation regarding any products, strategies, or any security in particular. This material is strictly for illustrative, educational, or informational purposes and is subject to change. | \nThe iShares Funds are distributed by BlackRock Investments, LLC (together with its affiliates, “BlackRock”).",
+    "recon_mentions": [],
+    "metadata": {}
+  },
+  {
+    "year": "2026 (ETF)",
+    "filename": "iwb_holdings_2026-09-30.csv",
+    "format": "CSV",
+    "filesize_bytes": 163489,
+    "exact_dates_found": [
+      "Sep 30, 2026",
+      "May 15, 2000"
+    ],
+    "document_title": "iShares Russell 1000 ETF",
+    "header_snippet": "iShares Russell 1000 ETF | Fund Holdings as of,\"Sep 30, 2026\" | Inception Date,\"May 15, 2000\" | Shares Outstanding,\"116,750,000.00\"",
+    "recon_mentions": [
+      "Fund Holdings as of Sep 30, 2026"
+    ],
+    "metadata": {}
+  }
+]

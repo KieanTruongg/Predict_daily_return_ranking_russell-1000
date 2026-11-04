@@ -18,33 +18,16 @@ import sys, io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 import os, json, re, glob
+from pathlib import Path
 import pandas as pd
 import pypdf
 
-BASE    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-RAW_DIR = os.path.join(BASE, "data", "raw", "universe", "raw")
+BASE = Path(__file__).resolve().parent.parent.parent
+RAW_DIR = BASE / "data" / "raw" / "universe" / "raw_universe"
 
-PARQUET  = os.path.join(BASE, "data", "processed", "daily_ohlcv",
-                        "russell1000_daily_2000_2026.parquet")
-OUT_JSON = os.path.join(BASE, "data", "raw", "universe",
-                        "russell1000_pit_by_year.json")
-OUT_CSV  = os.path.join(BASE, "data", "raw", "universe",
-                        "russell1000_constituents.csv")
-OUT_RPT  = os.path.join(BASE, "data", "raw", "universe",
-                        "extraction_quality_report.csv")
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Load QC universe for validation
-# ──────────────────────────────────────────────────────────────────────────────
-print("Loading QC market data for validation ...")
-df_qc   = pd.read_parquet(PARQUET, columns=["ticker", "year"])
-QC_ALL  = set(df_qc["ticker"].unique())
-# QC tickers per year (for per-year coverage)
-QC_BY_YEAR = {str(y): set(grp["ticker"].unique())
-              for y, grp in df_qc.groupby("year")}
-del df_qc
-print(f"  QC total unique tickers : {len(QC_ALL):,}")
-print(f"  QC years covered        : {sorted(QC_BY_YEAR.keys())}")
+OUT_JSON = BASE / "data" / "raw" / "universe" / "russell1000_pit_by_year.json"
+OUT_CSV  = BASE / "data" / "raw" / "universe" / "russell1000_constituents.csv"
+OUT_RPT  = BASE / "data" / "raw" / "universe" / "extraction_quality_report.csv"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Helper: is_valid_ticker
@@ -216,12 +199,12 @@ def parse_xls(fpath: str) -> set:
 # ──────────────────────────────────────────────────────────────────────────────
 # Main loop
 # ──────────────────────────────────────────────────────────────────────────────
-files = sorted(glob.glob(os.path.join(RAW_DIR, "*")))
+files = sorted(glob.glob(str(RAW_DIR / "*")))
 yearly_tickers = {}
 report_rows    = []
 
 print("\n" + "=" * 80)
-print("IMPROVED PDF EXTRACTION + QC VALIDATION (2000 - 2026)")
+print("STANDALONE RUSSELL 1000 PIT UNIVERSE EXTRACTION (2000 - 2026)")
 print("=" * 80)
 
 for fpath in files:
@@ -274,46 +257,36 @@ for fpath in files:
     if not found:
         continue
 
-    # ── Per-year QC validation ────────────────────────────────────────────────
-    qc_year  = QC_BY_YEAR.get(year, set())
-    matched  = found & qc_year           # in both PIT and QC for that year
-    pit_only = found - qc_year           # in PIT but not QC that year
-    qc_only  = qc_year - found           # in QC but not in PIT
-
-    coverage = len(matched) / len(found) * 100 if found else 0
+    eff_start = f"{year}-07-01"
+    eff_end   = f"{y_int + 1}-06-30"
 
     yearly_tickers[year] = sorted(found)
 
     report_rows.append({
-        "year":          year,
-        "source_type":   era_label,
-        "pit_tickers":   len(found),
-        "qc_tickers":    len(qc_year),
-        "matched":       len(matched),
-        "pit_only":      len(pit_only),
-        "qc_only":       len(qc_only),
-        "coverage_pct":  round(coverage, 1),
+        "year":                  int(year),
+        "source_file":           fname,
+        "source_type":           era_label,
+        "pit_tickers":           len(found),
+        "reconstitution_start":  eff_start,
+        "reconstitution_end":    eff_end,
+        "reconstitution_window": f"[01/07/{year} to 30/06/{y_int + 1}]",
     })
 
-    print(f"  [{year}] {era_label:<22} | PIT={len(found):4d} | QC={len(qc_year):4d} "
-          f"| Match={len(matched):4d} ({coverage:.1f}%) | PIT-only={len(pit_only):3d}")
+    print(f"  [{year}] {era_label:<22} | File: {fname:<10} | PIT Tickers: {len(found):4d} | Window: [01/07/{year} to 30/06/{y_int + 1}]")
 
 # ── Global stats ───────────────────────────────────────────────────────────────
 all_unique = sorted(set().union(*yearly_tickers.values()))
-matched_globally = set(all_unique) & QC_ALL
 print("\n" + "=" * 80)
 print(f"Total years processed    : {len(yearly_tickers)}")
 print(f"Total unique PIT tickers : {len(all_unique):,}")
-print(f"Total QC tickers         : {len(QC_ALL):,}")
-print(f"Globally matched         : {len(matched_globally):,} ({len(matched_globally)/len(all_unique)*100:.1f}%)")
-print(f"Not in QC at all         : {len(all_unique) - len(matched_globally):,}")
 
 # ── Save outputs ──────────────────────────────────────────────────────────────
+OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
+
 with open(OUT_JSON, "w", encoding="utf-8") as f:
     json.dump(yearly_tickers, f, indent=4)
 
 df_out = pd.DataFrame({"Ticker": all_unique})
-df_out["InQC"] = df_out["Ticker"].isin(QC_ALL)
 df_out.to_csv(OUT_CSV, index=False)
 
 df_rpt = pd.DataFrame(report_rows)

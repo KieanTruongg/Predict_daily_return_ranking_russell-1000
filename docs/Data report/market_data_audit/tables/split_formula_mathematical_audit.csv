@@ -1,0 +1,27 @@
+event,ticker,type,split_date,expected_factor,observed_cf_ratio,cf_ratio_error,raw_return_unadjusted,clean_daily_return,return_formula_error,status
+Apple 2:1 Split,AAPL,FORWARD,2000-06-21,0.5,0.500001,1.1e-06,-44.99%,+10.02%,2.5e-06,✅ Khớp đẳng thức 100%
+Apple 2:1 Split,AAPL,FORWARD,2005-02-28,0.5,0.499999,1.4e-06,-49.60%,+0.80%,2.8e-06,✅ Khớp đẳng thức 100%
+Apple 7:1 Split,AAPL,FORWARD,2014-06-09,0.14285714285714285,0.142857,5.7e-08,-85.49%,+1.60%,4.1e-07,✅ Khớp đẳng thức 100%
+Apple 4:1 Split,AAPL,FORWARD,2020-08-31,0.25,0.25,0.0e+00,-74.15%,+3.39%,5.6e-17,✅ Khớp đẳng thức 100%
+Tesla 5:1 Split,TSLA,FORWARD,2020-08-31,0.2,0.2,0.0e+00,-77.49%,+12.57%,1.7e-16,✅ Khớp đẳng thức 100%
+Tesla 3:1 Split,TSLA,FORWARD,2022-08-25,0.3333333333333333,0.333333,3.3e-08,-66.78%,-0.35%,1.0e-07,✅ Khớp đẳng thức 100%
+Nvidia 2:1 Split,NVDA,FORWARD,2000-06-27,0.5,0.499998,2.4e-06,-57.06%,-14.13%,4.1e-06,✅ Khớp đẳng thức 100%
+Nvidia 2:1 Split,NVDA,FORWARD,2006-04-07,0.5,0.499999,6.0e-07,-50.15%,-0.29%,1.2e-06,✅ Khớp đẳng thức 100%
+Nvidia 3:2 Split,NVDA,FORWARD,2007-09-11,0.6666666666666666,0.666667,5.3e-07,-31.92%,+2.13%,8.2e-07,✅ Khớp đẳng thức 100%
+Nvidia 4:1 Split,NVDA,FORWARD,2021-07-20,0.25,0.25,0.0e+00,-75.22%,-0.89%,4.5e-17,✅ Khớp đẳng thức 100%
+Nvidia 10:1 Split,NVDA,FORWARD,2024-06-10,0.1,0.1,0.0e+00,-89.93%,+0.75%,2.5e-17,✅ Khớp đẳng thức 100%
+Amazon 2:1 Split,AMZN,FORWARD,1998-06-02,0.5,0.499998,1.8e-06,-49.06%,+1.89%,3.7e-06,✅ Khớp đẳng thức 100%
+Amazon 3:1 Split,AMZN,FORWARD,1999-01-05,0.3333333333333333,0.333334,6.7e-07,-64.91%,+5.26%,2.1e-06,✅ Khớp đẳng thức 100%
+Amazon 2:1 Split,AMZN,FORWARD,1999-09-02,0.5,0.5,0.0e+00,-49.47%,+1.06%,3.8e-17,✅ Khớp đẳng thức 100%
+Amazon 20:1 Split,AMZN,FORWARD,2022-06-06,0.05,0.05,0.0e+00,-94.90%,+1.99%,8.3e-17,✅ Khớp đẳng thức 100%
+Alphabet 2:1 Split,GOOGL,FORWARD,2014-04-03,0.5,0.5,0.0e+00,-49.65%,+0.70%,1.7e-16,✅ Khớp đẳng thức 100%
+Alphabet 20:1 Split,GOOGL,FORWARD,2022-07-18,0.05,0.05,0.0e+00,-95.12%,-2.46%,4.9e-17,✅ Khớp đẳng thức 100%
+Citigroup 1:10 Reverse Split,C,REVERSE,2011-05-09,10.0,10.0,0.0e+00,+876.99%,-2.30%,3.1e-17,✅ Khớp đẳng thức 100%
+AIG 1:20 Reverse Split,AIG,REVERSE,2009-07-01,20.0,20.0,0.0e+00,+1500.00%,-20.00%,5.6e-17,✅ Khớp đẳng thức 100%
+Axcelis 1:4 Reverse Split,ACLS,REVERSE,2016-07-01,4.0,4.0,0.0e+00,+306.32%,+1.58%,2.8e-17,✅ Khớp đẳng thức 100%
+General Electric 1:8 Reverse Split,GE,REVERSE,2021-08-02,8.0,8.0,3.2e-08,+676.83%,-2.90%,3.9e-09,✅ Khớp đẳng thức 100%
+Chesapeake Energy 1:200 Reverse Split,CHK,REVERSE,2020-04-15,200.0,200.0,0.0e+00,+12371.44%,-37.64%,5.6e-17,✅ Khớp đẳng thức 100%
+California Resources 1:10 Reverse Split,CRC,REVERSE,2016-06-01,10.0,10.0,0.0e+00,+925.00%,+2.50%,8.0e-17,✅ Khớp đẳng thức 100%
+ADC Telecom 1:7 Reverse Split,ADCT,REVERSE,2005-05-10,7.0,7.0,0.0e+00,+620.00%,+2.86%,6.2e-17,✅ Khớp đẳng thức 100%
+Alcoa 1:3 Reverse Split,AA,REVERSE,2016-10-06,3.0,3.0,0.0e+00,+205.58%,+1.86%,1.0e-17,✅ Khớp đẳng thức 100%
+Dynegy 1:5 Reverse Split,DYN,REVERSE,2010-05-25,5.0,5.0,0.0e+00,+391.18%,-1.76%,3.5e-17,✅ Khớp đẳng thức 100%

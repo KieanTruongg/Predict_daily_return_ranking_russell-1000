@@ -32,3 +32,7 @@ sqlalchemy>=2.0.0
 # Monitoring (Phase 8) & Testing
 evidently>=0.4.10
 pytest>=7.4.0
+
+# Local universe parser (PDF / legacy Excel)
+pypdf>=4.0
+xlrd>=2.0

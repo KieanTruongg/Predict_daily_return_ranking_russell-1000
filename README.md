@@ -235,6 +235,8 @@ Chi tiết về cấu trúc và ý nghĩa kinh tế từng cột xem tại [`doc
 
 ## 8. Kiểm thử và phạm vi xác minh
 
+GitHub Actions chạy **code/synthetic tests**, không có kho dữ liệu cục bộ. Dùng `python -m pytest -q -ra --strict-markers -m "not integration"` để chạy cùng phạm vi CI. Các tests cần dữ liệu thật được đánh dấu `integration`; lệnh không lọc marker bên dưới vẫn chạy toàn suite và báo lỗi nếu thiếu input. Xem [hướng dẫn kiểm thử](docs/testing.md).
+
 Lệnh thực thi toàn bộ kiểm thử từ thư mục gốc dự án:
 ```powershell
 python -m pytest -q

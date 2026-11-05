@@ -2,30 +2,59 @@ name: CI Pipeline - Predict Daily Return Rankings
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
-    name: Run Quantitative Unit Tests & Strategy Logic
+    name: Code and synthetic tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.14']
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+      - name: Run code and synthetic tests (no local market data)
+        run: python -m pytest -q -ra --strict-markers -m "not integration" --junitxml=ci-results.xml
+      - name: Report test scope
+        if: always()
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          from xml.etree import ElementTree
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-        cache: 'pip'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Run PyTest Unit Tests
-      run: |
-        python tests/run_tests.py
+          lines = ["## CI test scope", "", "Python: ${{ matrix.python-version }}"]
+          report = Path("ci-results.xml")
+          if report.exists():
+              cases = ElementTree.parse(report).findall(".//testcase")
+              failed = sum(c.find("failure") is not None or c.find("error") is not None for c in cases)
+              skipped = sum(c.find("skipped") is not None for c in cases)
+              lines.append(f"Selected tests: {len(cases)}; failed/error: {failed}; skipped: {skipped}.")
+          else:
+              lines.append("No test report produced; check setup/install/test logs.")
+          lines += ["", "Executed: code/repository contracts and synthetic tests, including temporary Parquet fixtures.",
+                    "Not executed: integration tests requiring local market-data matrices or parser CSV outputs.",
+                    "A green CI run does not validate the full warehouse or approve the feature pilot.",
+                    "Full local suite: `python -m pytest -q --strict-markers`."]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as stream:
+              stream.write("\n".join(lines) + "\n")
+          PY

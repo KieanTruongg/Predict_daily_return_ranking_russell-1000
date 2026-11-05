@@ -16,6 +16,8 @@
 
 Tra [data dictionary](data_dictionary.md) khi cần hiểu cột/mask; tra [DAG](pipeline_dag.md) khi cần thứ tự chạy script.
 
+Xem [kiểm thử local và CI](testing.md) để phân biệt tests chạy trên GitHub với integration cần kho dữ liệu thật.
+
 ## 2. Cấu trúc và vai trò
 
 ```text

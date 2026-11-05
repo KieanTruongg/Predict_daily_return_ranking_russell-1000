@@ -1,3 +1,5 @@
+> Báo cáo artifact raw ngày 2026-11-03, không phải kết luận chất lượng cuối mọi tầng. Diễn giải được cập nhật ngày 2026-11-05. Xem [lineage hiện hành](../../reports/data_pipeline/data_lineage_report.md) và [hướng dẫn từng chặng](../../learning/README.md). Các số dưới là ghi nhận của báo cáo cũ, không được lượt này tái tính từ toàn bộ kho.
+
 # 📑 Báo Cáo Thẩm Định Toàn Diện Dữ Liệu Thị Trường & Độ Phủ PIT Thực Tế
 **Dự án:** Dự Đoán Thứ Hạng Lợi Suất Hàng Ngày (Russell 1000 Daily Return Rankings)  
 **Quy ước kỳ thành viên:** Danh sách năm Y áp dụng từ `01/07/Y` đến `30/06/Y+1` (Không giả lập biến động giữa kỳ).  
@@ -7,7 +9,7 @@
 
 ## 1. Thẩm Định Động Kho Dữ Liệu Gốc (Tier 1: Constituents Market Data)
 
-Toàn bộ chỉ số dưới đây được **tính toán động 100% từ dữ liệu thực tế** (không chèn sẵn kết luận):
+Các chỉ số dưới đây là kết quả đã ghi trong audit ở thời điểm tạo; đối chiếu artifact/code trước khi dùng làm kết luận mới:
 
 * **File Master:** `data/processed/constituents_market_data/russell1000_constituents_daily_ohlcv_1998_2026.parquet`
 * **Tổng số dòng dữ liệu:** `13,147,389` dòng | **Số cột:** `9`
@@ -24,7 +26,7 @@ Toàn bộ chỉ số dưới đây được **tính toán động 100% từ d�
 
 > ⚠️ **Phát hiện quan trọng về trùng lặp `(date, sid)`:**  
 > Có **796,602 dòng** trùng lặp trên cặp `(date, sid)`. Nguyên nhân xuất phát từ **256 cặp đổi tên/mã công ty** (ví dụ: `ABC` đổi thành `COR` Cencora, `FB` đổi thành `META`, `ANTM` đổi thành `ELV`).  
-> QuantConnect trả về cùng chuỗi giá của doanh nghiệp cho cả mã cũ lẫn mã mới. Do đó, hệ thống **bắt buộc phải dùng `membership_mask`** ở Bước ③ để loại bỏ mã bóng ngoài kỳ.
+> QuantConnect trả về cùng chuỗi giá của doanh nghiệp cho cả mã cũ lẫn mã mới. Kho canonical cần xử lý alias và dedup theo identity; membership chọn đối tượng theo thời gian, không thay thế khử trùng. Xem báo cáo identity hiện hành.
 
 ---
 
@@ -74,7 +76,7 @@ Khác với thống kê thô trước đây (chỉ đo sự xuất hiện ít nh
 
 ## 3. Phân Tích Sự Thiếu Hụt (~3.59% Khoảng Trống)
 
-Độ phủ thực tế 96.41% phản ánh chân thực các biến động thị trường tài chính thực tế:
+Độ phủ 96,41% mô tả phép đo và mẫu số của phiên bản này. Các lý do dưới là phân loại/giả thuyết cần đối chiếu từng trường hợp, không tự chứng minh nguyên nhân thực tế:
 1. **Các mã có dữ liệu một phần kỳ (Partial Coverage):** Trung bình mỗi kỳ có **~25 đến 56 mã** có thể do lên sàn giữa kỳ, tạm ngừng giao dịch, hoặc hủy niêm yết/M&A trước khi kết thúc kỳ.
 2. **Các mã không có nến (Zero Bars):** Chỉ có **~15 đến 26 mã mỗi kỳ** hoàn toàn không có dữ liệu, tập trung chủ yếu ở:
    - Các cổ phiếu Class A (`BRK.A`, `JW.A`, `FCE.A`).
@@ -91,3 +93,7 @@ Các bảng dữ liệu kiểm soát đã được cập nhật đầy đủ tro
 3. `tables/zero_bar_constituents_by_period.csv`: Danh sách 512 lượt thành viên-kỳ không có nến.
 4. `tables/batch_execution_summary.csv`: Thống kê 10 batch thu thập từ QC.
 5. `tables/ticker_identity_transitions.csv`: Danh sách 1,668 mã có biến động danh tính SID.
+
+## Đọc coverage đúng phạm vi
+
+Null=0 chỉ xét các dòng hiện có; thiếu cả bar/ngày cần kiểm tra coverage riêng. 96,41% so với source snapshot và 99,66% so với membership đã phân giải là hai mẫu số khác nhau. Không dùng tỷ lệ trên tập đã loại unresolved để tuyên bố toàn bộ nguồn đầy đủ. 2.846 ticker có bar toàn kho khác số mã đủ bar trong từng kỳ hoặc đủ feature/target.

@@ -3,10 +3,10 @@
 # TỪ ĐIỂN DỮ LIỆU DỰ ÁN (PROJECT DATA DICTIONARY)
 ## Russell 1000 Daily Return Rankings Prediction Engine
 
-> **Phiên bản tài liệu**: 2.0 (Institutional Quant Grade)  
+> **Phiên bản tài liệu**: 2.1 — tra cứu dữ liệu và giới hạn  
 > **Cập nhật lần cuối**: 2026-11-04  
-> **Cơ quan ban hành**: Nhóm Kỹ Thuật Dữ Liệu & Nghiên Cứu Định Lượng (Quantitative Research & Data Engineering Team)  
-> **Tình trạng kiểm toán**: Đã đối chiếu tính nhất quán nội bộ và chạy kiểm thử tự động trên dữ liệu thực tế (Internal Consistency Verified)  
+> **Vai trò**: Tài liệu tra cứu dự án; không phải chứng nhận dữ liệu của bên thứ ba  
+> **Tình trạng kiểm toán**: Có kiểm tra nội bộ theo phạm vi báo cáo; chưa xác minh độc lập toàn bộ nguồn  
 > **Phân vùng dữ liệu**: 
 > - **Khởi tạo đặc trưng (Feature Warm-up)**: 1998-01-02 đến 2000-06-30 (630 phiên NYSE)
 > - **Tập phát triển (Development Set)**: 2000-07-01 đến 2023-12-29 (5,911 phiên NYSE — Dùng cho EDA, Feature Engineering & Huấn luyện)
@@ -50,7 +50,7 @@
 
 ## 1. TỔNG QUAN KIẾN TRÚC KHO DỮ LIỆU
 
-Hệ thống kho dữ liệu của dự án được tổ chức theo kiến trúc phân tầng (Multi-tier Quant Data Lakehouse), đảm bảo tính nguyên vẹn học thuật, giảm thiểu tối đa rủi ro nhìn trước tương lai (Look-ahead Bias) và thiên lệch sống sót (Survivorship Bias) theo chuẩn mực tổ chức.
+Kho được chia raw/canonical/adjusted/matrices để truy nguồn và kiểm tra từng bước. Thiết kế giảm một số rủi ro bias; các giới hạn về ngày snapshot, mapping và quality vẫn cần được ghi nhận.
 
 ```
 [iShares Russell 1000 Snapshots]      [QuantConnect LEAN Raw Exports]      [Raw Corporate Actions]
@@ -92,36 +92,33 @@ Hệ thống kho dữ liệu của dự án được tổ chức theo kiến tr�
 
 ## PHẦN 0: NGUỒN DỮ LIỆU THÔ (RAW DATA SOURCES)
 
-### 0.1. Danh Sách Thành Viên iShares Russell 1000 Snapshots (PDF & JSON)
-- **Đường dẫn lưu trữ**:
-  - Tệp PDF gốc: `data/raw/universe/raw_universe/{YYYY}.pdf` (28 tệp từ năm 2000 đến 2026).
-  - Tệp JSON theo năm: `data/raw/universe/by_year/russell1000_{YYYY}.json`.
-  - Tệp JSON tổng hợp: `data/raw/universe/russell1000_pit_by_year.json`.
-- **Cơ quan phát hành**: BlackRock / iShares Trust (Quỹ ETF iShares Russell 1000 - IWB).
-- **Thời điểm chốt danh mục**: Cuối tháng 6 hàng năm (Annual Reconstitution). Danh mục có hiệu lực chính thức từ ngày 01 tháng 07 năm $Y$ đến ngày 30 tháng 06 năm $Y+1$ (riêng kỳ 2026 kéo dài đến 30/10/2026 theo phạm vi dữ liệu).
-- **Quy mô thành viên**: Mỗi kỳ gồm từ 995 đến 1,025 mã chứng khoán (dao động quanh 1,000 do các công ty có nhiều lớp cổ phiếu biểu quyết như GOOG/GOOGL, FOX/FOXA, BRK.B).
-- **Báo cáo thẩm định chất lượng bóc tách**: `data/raw/universe/extraction_quality_report.csv` — xác nhận tỷ lệ bóc tách đạt 100%, không bị mất sót ký tự đặc biệt hay mã cổ phiếu đa lớp.
+### 0.1. Universe theo năm
 
-### 0.2. Nến Thô QuantConnect LEAN OHLCV (10 Tập Tin Nén Batch ZIP)
-- **Đường dẫn lưu trữ**: `data/raw/market_data/russell_market_batch_01_of_10.zip` đến `batch_10_of_10.zip`.
-- **Động cơ xuất dữ liệu**: QuantConnect Research Environment sử dụng thư viện LEAN Algorithmic Trading Engine.
-- **Cơ chế định danh chứng khoán**: Hệ thống mã định danh chứng khoán duy nhất QuantConnect Security Identifier (SID) — một chuỗi ký tự cơ số 36 (base-36) gồm 12 ký tự mã hóa loại tài sản, thị trường niêm yết (NYSE/NASDAQ/AMEX), ngày niêm yết đầu tiên và số thứ tự phát hành (ví dụ: `AAPL R735QTJ8XC9X`).
-- **Phân vùng bên trong tệp ZIP**:
-  - `raw/year={YYYY}.csv`: Chứa dữ liệu giao dịch hàng ngày của các mã trong batch theo từng năm.
-  - `audit/{batch_name}_status.csv`: Thống kê số lượng mã yêu cầu thành công, mã không có dữ liệu và mã lỗi.
-  - `audit/{batch_name}_identity.csv`: Bảng ánh xạ giữa Ticker yêu cầu, Ticker QuantConnect phân giải và SID tương ứng.
+- Nguồn parser: `data/raw/universe/raw_universe/`, gồm 27 file theo năm (PDF/CSV/JSON/XML-XLS), không phải 28 PDF.
+- Output JSON năm trong `by_year/`, JSON tổng hợp `russell1000_pit_by_year.json` và CSV tổng hợp/extraction report.
+- Nguồn có tài liệu chỉ số và holdings ETF; không tự coi mọi holdings là danh sách chính thức chỉ số.
+- Quy ước áp dụng [01/07/Y,30/06/Y+1] là xấp xỉ nghiên cứu, chưa xác minh ngày hiệu lực chính thức mỗi năm. Xem [source inventory](reports/data_pipeline/universe_source_inventory.csv), đặc biệt ngày ứng viên trong nguồn 2026 muộn hơn tháng 7.
+- Extraction report hiện ghi source_file/source_type/số ticker/khoảng áp dụng, không có chứng nhận độ chính xác trích xuất 100% hoặc coverage thị trường 99,42%.
 
-### 0.3. Sự Kiện Doanh Nghiệp Thô (Corporate Actions Splits & Dividends)
-- **Đường dẫn lưu trữ**:
-  - Chia tách cổ phiếu (Splits): `data/processed/constituents_market_data/corporate_actions/russell1000_splits_1998_2026.csv`.
-  - Cổ tức tiền mặt (Dividends): `data/processed/constituents_market_data/corporate_actions/russell1000_dividends_1998_2026.csv`.
-- **Trường dữ liệu chính**:
-  - Splits: `date` (Ex-Date), `original_ticker`, `symbol`, `sid`, `split_factor` (Tỷ lệ chia tách, ví dụ 0.5 cho tỷ lệ 2:1), `reference_price` (Giá tham chiếu phiên liền trước).
-  - Dividends: `date` (Ex-Date), `original_ticker`, `symbol`, `sid`, `dividend_amount` (Số tiền cổ tức tiền mặt trên mỗi cổ phiếu tính bằng USD), `reference_price`.
+### 0.2. Nến Raw trong 10 ZIP
 
-### 0.4. Bảng Cứu Hộ Ticker Rỗng (Empty Ticker Final Resolution)
-- **Đường dẫn lưu trữ**: `data/raw/market_data/empty_ticker_final_resolution.csv`.
-- **Mục đích pháp y**: Xử lý triệt để các mã cổ phiếu trong quá khứ bị QuantConnect trả về trường `ticker` rỗng do lỗi metadata nội bộ của LEAN đối với các thực thể đã hủy niêm yết (Delisted/Bankruptcy), phân giải chính xác danh tính qua CUSIP và SID vĩnh viễn.
+- Input: `data/raw/market_data/russell_market_batch_01_of_10.zip` đến batch 10.
+- Mỗi ZIP hiện có 29 CSV: `raw/year=YYYY/batch_XX_of_10.csv`; ba audit: `audit/batch_XX_of_10_status.csv`, `_identity.csv`, `_summary.json`.
+- Raw columns: date, original_ticker, qc_ticker, sid, open, high, low, close, volume.
+- SID được coi là khóa định danh nguồn; không suy base/độ dài/ý nghĩa ngày từ chuỗi trong tài liệu này. Ticker không phải khóa vĩnh viễn.
+- Script 03 hợp nhất status/identity vào thư mục processed; summary giữ trong ZIP phục vụ đối chiếu metadata.
+
+### 0.3. Corporate actions
+
+- CSV nguồn hiện đặt trong `data/processed/constituents_market_data/corporate_actions/`; vị trí này không có nghĩa nội dung đã được pipeline điều chỉnh.
+- Splits dùng date, original_ticker, symbol/sid, split_factor, reference_price; dividends dùng dividend_amount theo schema export thực tế.
+- Factor giá S: split 2-for-1 dùng 0,5; reverse 1-for-10 dùng 10. CF nhân trực tiếp các S sau ngày t, không nghịch đảo lần nữa.
+- Code 06 lọc reference_price>0 (4.788→2.391 bản ghi), thêm 5 overrides, audit 2.396. Đây là quy tắc hiện hành, cần metadata/split_type nguồn nếu muốn xác minh phân loại đầy đủ.
+- Xem [báo cáo corporate actions](reports/data_pipeline/step3_corporate_actions_report.md).
+
+### 0.4. Empty ticker resolution
+
+`data/raw/market_data/empty_ticker_final_resolution.csv` là kết quả kiểm tra trước export nếu có. Không tự gọi là bảng sửa lỗi ticker rỗng hoặc phân giải CUSIP đã xác minh. Đối chiếu status trong ZIP và coverage kho cuối; kết quả scan sơ bộ không thay thế audit cuối.
 
 ---
 
@@ -271,7 +268,7 @@ Hệ thống kho dữ liệu của dự án được tổ chức theo kiến tr�
 | **Tên cột** | `canonical_sid` |
 | **Kiểu dữ liệu** | `large_string` / `object` |
 | **Đơn vị tính** | Mã định danh chứng khoán chính quy (Canonical Security Identifier) |
-| **Ý nghĩa kinh tế** | Mã định danh thực thể chứng khoán tối cao đã qua kiểm toán danh tính tại Step 2A. Khắc phục triệt để hiện tượng phân mảnh dữ liệu: loại bỏ 796,602 lượt quan sát dư thừa do trùng alias, nối mượt (stitch) 752 mã tạm ` 2T` vào SID vĩnh viễn với khoảng cách gián đoạn $\le 10$ ngày, và giữ độc lập 94 mã 2T có khoảng cách thời gian lớn nhằm ngăn chặn hợp nhất nhầm các công ty khác nhau. |
+| **Ý nghĩa kinh tế** | Mã định danh thực thể chứng khoán tối cao đã qua kiểm toán danh tính tại Step 2A. Khắc phục triệt để hiện tượng phân mảnh dữ liệu: loại bỏ 796,602 lượt quan sát dư thừa do trùng alias, nối theo policy (stitch) 752 mã tạm ` 2T` vào SID vĩnh viễn với khoảng cách gián đoạn $\le 10$ ngày, và giữ độc lập 94 mã 2T có khoảng cách thời gian lớn nhằm ngăn chặn hợp nhất nhầm các công ty khác nhau. |
 | **Công thức** | Ánh xạ từ `sid` thô qua từ điển `canonical_security_mapping.csv`. |
 | **Ý nghĩa NaN** | 0 dòng NaN (100% có mã hợp lệ trong tập 3,711 Canonical SIDs). |
 | **Xử lý biên** | Cùng với `date`, tạo thành Khóa chính phức hợp (Composite Primary Key) duy nhất tuyệt đối của toàn bộ kho dữ liệu. |
@@ -359,7 +356,7 @@ Hệ thống kho dữ liệu của dự án được tổ chức theo kiến tr�
 | **Tên cột** | `cumulative_split_factor` |
 | **Kiểu dữ liệu** | `double` (float64) |
 | **Đơn vị tính** | Hệ số nhân tỷ lệ (Backward Adjustment Multiplier / Dimensionless Ratio) |
-| **Ý nghĩa kinh tế** | Hệ số chia tách dồn tích lùi liên tục theo thời gian (Backward Cumulative Split Factor) $CF_{i,t}$. Được thiết kế để quy đổi toàn bộ mức giá trong quá khứ về mặt bằng tương đương với 1 cổ phiếu tại thời điểm hiện tại mà không làm sai lệch quy mô kinh tế của danh mục. Hệ số này được tính toán độc lập với việc ngày xảy ra sự kiện chia tách có nến giao dịch hay không (Continuous Event Calendar qua thuật toán `np.searchsorted`). Thống kê thực nghiệm: Min = 0.0021 (cho các mã chia tách thuận lũy kế nhiều lần như NVDA, AAPL), Trung vị = 1.0, Max = 1,178,947.39 (cho các mã chia tách ngược liên tục). Tích hợp đầy đủ 5 sự kiện Reverse Splits bị QuantConnect bỏ sót (CORR_001 đến CORR_005). |
+| **Ý nghĩa kinh tế** | Hệ số chia tách dồn tích lùi liên tục theo thời gian (Backward Cumulative Split Factor) $CF_{i,t}$. Được thiết kế để quy đổi toàn bộ mức giá trong quá khứ về mặt bằng tương đương với 1 cổ phiếu tại thời điểm hiện tại mà không làm sai lệch quy mô kinh tế của danh mục. Hệ số này được tính toán độc lập với việc ngày xảy ra sự kiện chia tách có nến giao dịch hay không (Continuous Event Calendar qua thuật toán `np.searchsorted`). Tích hợp đầy đủ 5 sự kiện Reverse Splits được bổ sung từ corrections của dự án (CORR_001 đến CORR_005). |
 | **Công thức** | Cho chuỗi sự kiện chia tách với hệ số $s_{i,\tau}$ tại ngày chốt quyền $\tau$: $$CF_{i,t} = \prod_{\tau > t} s_{i,\tau}$$ Trong đó, tại phiên giao dịch mới nhất $T$, $CF_{i,T} = 1.0$. Với một sự kiện chia tách tỷ lệ 2:1 diễn ra vào ngày $\tau$, hệ số $s = 0.5$, toàn bộ các phiên $t < \tau$ nhận $CF_{i,t} = CF_{i,\tau} \times 0.5$. Với sự kiện chia tách ngược 1:200 của CHK ngày 15/04/2020, $s = 200.0$, toàn bộ các phiên trước đó nhận $CF = CF \times 200.0$. |
 | **Ý nghĩa NaN** | 0 dòng NaN (Mặc định 1.0 cho các mã không có sự kiện chia tách). |
 | **Xử lý biên** | Giữ nguyên độ chính xác nguyên bản của kiểu số thực Float64, nghiêm cấm làm tròn thập phân để tránh làm sai lệch phép thử đẳng thức lợi suất toán học. |
@@ -447,9 +444,9 @@ Hệ thống kho dữ liệu của dự án được tổ chức theo kiến tr�
 | **Tên cột** | `daily_return` |
 | **Kiểu dữ liệu** | `double` (float64) |
 | **Đơn vị tính** | Tỷ lệ phần trăm biến động giá (Dimensionless Ratio / Decimal Return) |
-| **Ý nghĩa kinh tế** | Tỷ suất sinh lời theo giá đóng cửa điều chỉnh chia tách (Split-Adjusted Price Return) giữa phiên hiện tại $t$ và phiên trước đó $t-1$. Phản ánh sự thay đổi giá trị tài sản thuần của nhà đầu tư chỉ xuất phát từ biến động giá trên thị trường. Thống kê thực nghiệm trên tập Development sạch: Quan sát hợp lệ = 5,610,691 phiên-mã; Trung bình (Mean) = +0.0379%/ngày; Trung vị (Median) = +0.0355%/ngày; Biến động ngày (Daily Volatility) = 2.6530% (độ lệch chuẩn gộp stock-day, không phải volatility danh mục); Hệ số bất đối xứng (Skewness) = +0.5634; Hệ số nhọn vượt chuẩn (Excess Kurtosis) = 66.88 (phân phối đuôi dày nhưng hợp lý, triệt tiêu hoàn toàn con số sai 3.4M của pipeline cũ); Tối thiểu = -94.97% (biến cố sụp đổ thật có hồ sơ SEC); Tối đa = +227.87% (quan sát MFA còn cần đối chiếu độc lập mức giá và diễn giải sự kiện). |
+| **Ý nghĩa kinh tế** | Tỷ suất sinh lời theo giá đóng cửa điều chỉnh chia tách (Split-Adjusted Price Return) giữa phiên hiện tại $t$ và phiên trước đó $t-1$. Phản ánh sự thay đổi giá trị tài sản thuần của nhà đầu tư chỉ xuất phát từ biến động giá trên thị trường. Thống kê thực nghiệm trên tập Development sạch: Quan sát hợp lệ = 5,610,691 phiên-mã; Trung bình (Mean) = +0.0379%/ngày; Trung vị (Median) = +0.0355%/ngày; Biến động ngày (Daily Volatility) = 2.6530% (độ lệch chuẩn gộp stock-day, không phải volatility danh mục); Hệ số bất đối xứng (Skewness) = +0.5634; Hệ số nhọn vượt chuẩn (Excess Kurtosis) = 66.88 (phân phối đuôi dày nhưng hợp lý, giảm các bất thường đã được ghi nhận ở pipeline trước); Tối thiểu = -94.97% (biến cố sụp đổ thật có hồ sơ SEC); Tối đa = +227.87% (quan sát MFA còn cần đối chiếu độc lập mức giá và diễn giải sự kiện). |
 | **Công thức** | $$daily\_return_{i,t} = \frac{adj\_close_{i,t} - adj\_close_{i,t-1}}{adj\_close_{i,t-1}}$$ |
-| **Ý nghĩa NaN** | Có đúng 3,742 dòng NaN (chiếm 0.0306%): bao gồm đúng 3,711 phiên giao dịch đầu tiên của mỗi `canonical_sid` (không có phiên liền trước $t-1$ để tính return), cộng với đúng 31 phiên bị cách ly có chủ đích bởi tầng Quality Flags và Spin-offs (CORR_006 đến CORR_013). |
+| **Ý nghĩa NaN** | NaN xuất hiện theo coverage/quality của phiên bản dữ liệu (chiếm 0.0306%): bao gồm đúng 3,711 phiên giao dịch đầu tiên của mỗi `canonical_sid` (không có phiên liền trước $t-1$ để tính return), cộng với đúng 31 phiên bị cách ly có chủ đích bởi tầng Quality Flags và Spin-offs (CORR_006 đến CORR_013). |
 | **Xử lý biên** | Khi một mã cổ phiếu bị cách ly do nến lỗi hoặc chia tách công ty con, giá trị return được ép cưỡng bức thành NaN để bảo vệ thuật toán học máy khỏi bị tối ưu hóa theo các số liệu rác. |
 
 #### 19. `total_return`
@@ -458,10 +455,10 @@ Hệ thống kho dữ liệu của dự án được tổ chức theo kiến tr�
 | **Tên cột** | `total_return` |
 | **Kiểu dữ liệu** | `double` (float64) |
 | **Đơn vị tính** | Tỷ lệ phần trăm tổng lợi suất (Decimal Total Return Ratio) |
-| **Ý nghĩa kinh tế** | Tỷ suất sinh lời tổng cộng bao gồm cả cổ tức tiền mặt được tái đầu tư (Total Return with Reinvested Dividends). Phản ánh đầy đủ nhất lợi ích kinh tế của cổ đông nắm giữ cổ phiếu qua ngày chốt quyền chia cổ tức. |
+| **Ý nghĩa kinh tế** | Lợi suất ngày cộng phần dividend theo ex-date và cùng đơn vị giá điều chỉnh. Chưa mô phỏng payment date, thuế, tái đầu tư thực tế hoặc mọi phân phối tài sản như spin-off. |
 | **Công thức** | $$total\_return_{i,t} = \frac{adj\_close_{i,t} + adj\_dividend_{i,t} - adj\_close_{i,t-1}}{adj\_close_{i,t-1}} = daily\_return_{i,t} + \frac{adj\_dividend_{i,t}}{adj\_close_{i,t-1}}$$ |
-| **Ý nghĩa NaN** | Có đúng 3,742 dòng NaN (hoàn toàn tương đồng với `daily_return`). |
-| **Xử lý biên** | Đã được kiểm thử độ khớp đẳng thức toán học (Identity Test) đạt tỷ lệ chính xác tuyệt đối 100% trên toàn bộ các mã chia cổ tức lớn như XOM, JNJ, T, JPM, AAPL. |
+| **Ý nghĩa NaN** | Có thể thiếu do phiên đầu, gap hoặc quality flags; đối chiếu artifact tại lần chạy, không áp số đếm của phiên bản cũ. |
+| **Xử lý biên** | Đối chiếu đẳng thức số học trong audit theo phạm vi đã ghi; không chứng minh mọi dividend/nguồn giá đã được xác minh độc lập. |
 
 #### 20. `trading_session_gap`
 | Thuộc tính | Giá trị chi tiết |
@@ -571,59 +568,15 @@ Toàn bộ các ma trận 2D trong thư mục `data/processed/matrices/` đều 
 | 25 | `matrix_dates_index.parquet` | 7252 x 1 | `datetime64[us]` | Trục chỉ mục | Danh sách 7,252 ngày giao dịch NYSE chính thức từ 1998-01-02 đến 2026-10-30. Tên cột: `date`. | Step 4-10, Chuẩn hóa chỉ mục hàng |
 | 26 | `matrix_columns_sids.parquet` | 3711 x 1 | `string` | Trục chỉ mục | Danh sách 3,711 Canonical SIDs chính quy được sắp xếp theo thứ tự bảng chữ cái. Tên cột: `canonical_sid`. | Step 4-10, Chuẩn hóa chỉ mục cột |
 
-### 3.3. Cơ Chế Phân Cấp & Tách Biệt Mặt Nạ (Decoupled Masking Architecture)
+### 3.3. Masks: kho dữ liệu và tính features
 
-Để đảm bảo tính nhất quán toán học, ngăn ngừa rò rỉ thông tin tương lai và bảo toàn dữ liệu khởi động (*warm-up*), hệ thống phân tách rõ 3 tầng mặt nạ trong quy trình tính toán:
+- Membership: tập đối tượng đã chọn theo segment mapping tại T; strict/resolved có policy khác nhau. Không tự đồng nhất với toàn bộ source universe chưa phân giải.
+- Valid data: membership AND điều kiện close/volume/phiên liên tiếp/20 bars tích lũy/quality. Đây là điều kiện dữ liệu, không chứng nhận khớp lệnh hoặc đủ lookback cho mọi feature.
+- Valid label: thêm điều kiện T+1 và purge; có thông tin tương lai, chỉ dành nhãn. `label ⊆ data ⊆ membership` là invariant trong thiết kế masks hiện tại.
+- Bar quality: loader tạo từ close dương/có dữ liệu và không bad/spinoff, độc lập membership. Dùng làm sạch input để giữ lịch sử trước ngày gia nhập. Mỗi feature vẫn kiểm tra finite, miền high/low/volume và cửa sổ theo hợp đồng riêng.
+- Tính feature trước rồi lọc membership tại output T; không dùng label mask lọc X. RSI có trạng thái seed/reset riêng.
 
-```
-[ Dữ liệu giá/khối lượng/return thô ]
-                 │
-                 ▼
-     ┌──────────────────────┐
-     │  bar_quality_mask    │  <-- ĐỘC LẬP 100% VỚI MEMBERSHIP.
-     │ (Sạch bad tick,      │      Giữ nguyên lịch sử giao dịch trước ngày gia nhập rổ
-     │  spinoff, missing)   │      để phục vụ warm-up (ví dụ 252d momentum / volatility).
-     └──────────┬───────────┘
-                 │
-                 ▼ (Ép các ô lỗi thành NaN trước khi tính toán)
-     ┌──────────────────────┐
-     │ Feature Calculation  │  <-- Tính toán trượt (Rolling Window W, min_periods = W).
-     │ (Rolling Window W)   │      Nếu có bất kỳ bar lỗi nào trong cửa sổ lookback,
-     │                      │      kết quả rolling tự động ra NaN (Quality-Window Hygiene).
-     └──────────┬───────────┘
-                 │
-                 ▼
-     ┌──────────────────────┐
-     │   membership_mask    │  <-- Áp dụng DUY NHẤT tại ngày đầu ra T.
-     │  (Russell 1000 PIT)  │      Nếu ngày T là thành viên và đã có đủ warm-up sạch,
-     │                      │      tính được feature ngay tại Ngày 1 gia nhập rổ!
-     └──────────┬───────────┘
-                 │
-                 ▼
-     [ Ma trận Feature sạch X_t ]
-```
-
-#### Chi Tiết 3 Tầng Mặt Nạ:
-1. **Tầng 1 — Bar Quality Mask (`bar_quality_mask`)**:
-   - Được định nghĩa thuần túy ở tầng giao dịch thị trường, hoàn toàn độc lập với danh mục Russell 1000:
-     $$Q_{i,t} = (adj\_close_{i,t} > 0) \land \neg is\_bad\_data\_period_{i,t} \land \neg is\_spinoff\_discontinuity_{i,t}$$
-   - **Tác dụng**: Làm sạch các ma trận dữ liệu đầu vào trước khi đưa vào hàm rolling. Mọi phiên có $Q_{i,t} == \text{False}$ bị ép thành `NaN`. Nhờ đó, bất kỳ cửa sổ rolling nào đi qua phiên lỗi sẽ tự động ra `NaN`, triệt tiêu hoàn toàn nguy cơ bar lỗi làm bẩn giá trị các ngày sau.
-   - **Bảo tồn Warm-up**: Vì độc lập với membership, các phiên giao dịch hợp lệ của cổ phiếu trước ngày chính thức vào rổ Russell 1000 vẫn giữ nguyên giá trị thật, cho phép cổ phiếu có đủ lịch sử lookback ngay tại ngày đầu tiên vào rổ.
-2. **Tầng 2 — Membership Mask (`membership_mask.parquet`)**:
-   - Thể hiện tư cách thành viên Russell 1000 Point-In-Time (True cells: 6,333,323):
-     $$M_{i,t} = \mathbb{I}\left(t \in [\text{effective\_start\_date}_{i}, \text{effective\_end\_date}_{i}] \land t \ge 2000\text{-}07\text{-}01 \land \text{is\_included}_{i} == \text{True}\right)$$
-   - **Tác dụng**: Áp dụng duy nhất tại ngày đầu ra $T$. Chứng khoán ngoài rổ tại ngày $T$ nhận giá trị `NaN`.
-3. **Tầng 3 — Valid Label Mask (`valid_label_mask.parquet`)**:
-   - Đại diện cho việc có thanh nến hợp lệ tại ngày $T$ và phiên tiếp theo $T+1$ có giá, khối lượng và lợi suất sạch (True cells: 6,308,873):
-     $$L_{i,t} = D_{i,t} \land (adj\_close_{i,t+1} > 0) \land (adj\_volume_{i,t+1} > 0) \land is\_consecutive_{i,t+1} \land \text{finite}(daily\_return_{i,t+1}) \land (t \notin \text{PurgeDates})$$
-   - **Cách ly tuyệt đối**: Mặt nạ này phụ thuộc vào thông tin của phiên $T+1$, do đó **TUYỆT ĐỐI KHÔNG ĐƯỢC DÙNG ĐỂ LỌC ĐẦU VÀO ĐẶC TRƯNG $X_t$**. Nó chỉ được dùng để xác định các cặp $(X_t, y_{t+1})$ hợp lệ khi huấn luyện và đánh giá mô hình học máy.
-
-*Lưu ý về `valid_data_mask`*: Đây là mặt nạ giao điểm kỹ thuật tại ngày $T$ ($D_{i,t} = M_{i,t} \land Q_{i,t} \land \dots$, True cells: 6,311,822). Nó dùng để xác định trạng thái sẵn sàng giao dịch tại ngày $T$, không dùng làm bộ lọc chuỗi thời gian đầu vào vì sẽ cắt đứt lịch sử warm-up trước ngày gia nhập rổ.
-
-#### Quan Hệ Phân Cấp Tập Con Tại Ngày T:
-Đối với các mặt nạ giao điểm tại ngày $T$, hệ thống duy trì quan hệ tập con nghiêm ngặt:
-$$\text{Valid Label Mask} \subseteq \text{Valid Data Mask} \subseteq \text{Membership Mask}$$
-- **Kiểm toán vi phạm phân cấp**: Đạt tỷ lệ 0 vi phạm (0 cell `Valid Data > Membership`, 0 cell `Valid Label > Valid Data`).
+Xem [matrices/masks và ví dụ](reports/data_pipeline/step4_matrices_masks_report.md), [features v1](specifications/features_v1.md).
 
 ### 3.4. Cơ Chế Purge Ranh Giới Phát Triển & Ngoài Mẫu
 Để tuân thủ tuyệt đối nguyên tắc **Zero Data Snooping**, hệ thống thực hiện cưỡng bức làm sạch (Purging) tại hai mốc ranh giới:
@@ -658,132 +611,19 @@ Tệp lưu trữ: `docs/Data report/market_data_audit/tables/market_data_correct
 
 ---
 
-### 4.2. Hồ Sơ Pháp Y Chi Tiết 13 Sự Kiện (CORR_001 đến CORR_013)
+### 4.2. Corrections và mức bằng chứng
 
-```
-========================================================================================================================
-                                    DANH MỤC 13 CA ĐIỀU TRA PHÁP Y DỮ LIỆU
-========================================================================================================================
-[NHÓM 1: REVERSE SPLITS BỊ THIẾU TẠI TẦNG CORPORATE ACTIONS]
-CORR_001 | CHK  | 2020-04-15 | Reverse Split 1:200 | Return sửa từ +12,371.4% về -37.64% | SEC Form 8-K Item 3.03
-CORR_002 | CRC  | 2016-06-01 | Reverse Split 1:10  | Return sửa từ +925.0% về +2.50%    | SEC Form 8-K Item 5.03
-CORR_003 | ADCT | 2005-05-10 | Reverse Split 1:7   | Return sửa từ +620.0% về +2.86%    | SEC Form 8-K Item 5.03
-CORR_004 | AA   | 2016-10-06 | Reverse Split 1:3   | Return sửa từ +205.6% về +1.86%    | SEC Form 8-K Item 8.01
-CORR_005 | DYN  | 2010-05-25 | Reverse Split 1:5   | Return sửa từ +391.18% về -1.76%   | SEC Form 8-K Item 5.03
+13 dòng trong bảng input chia thành 5 split overrides (CHK, CRC, ADCT, AA, DYN), 4 spin-off bị cách ly (KSU, SSP, COMS, PENN), 4 khoảng nghi dữ liệu lỗi (MKL, SABR, LOW, CPTH). Không phải mọi dòng đều sửa giá hoặc đều có bằng chứng độc lập cùng mức.
 
-[NHÓM 2: CÁCH LY BƯỚC NHẢY GIÁ TÁCH CÔNG TY CON (SUBSIDIARY SPIN-OFFS)]
-CORR_006 | KSU  | 2000-07-13 | Tách Stilwell Financial Inc.          | Cách ly sụt giảm giả -96.66% về NaN | SEC Form 8-K
-CORR_007 | SSP  | 2008-07-01 | Tách Scripps Networks Interactive     | Cách ly sụt giảm giả -92.67% về NaN | SEC Form 8-K
-CORR_008 | COMS | 2000-07-28 | Tách Palm Inc. (Tỷ lệ 1.4832)         | Cách ly sụt giảm giả -79.99% về NaN | SEC Form 8-K
-CORR_009 | PENN | 2013-11-04 | Tách Gaming and Leisure Properties    | Cách ly sụt giảm giả -76.68% về NaN | SEC Form 8-K
+`evidence_source` là chuỗi nguồn mà hồ sơ đã ghi, chưa phải chứng minh nhóm đã truy và kiểm tra từng tài liệu. Một số mô tả chưa có URL/accession và chuỗi giá trong forensic ledger bị mất ký tự. Không khẳng định đã đối chiếu Bloomberg/CRSP/NYSE tape khi chưa có artifact truy được. Không suy diễn tên công ty từ ticker CPTH nếu chưa xác minh identity.
 
-[NHÓM 3: CÁCH LY NẾN LỖI NHÀ CUNG CẤP & XUNG ĐỘT MÃ (BAD TICKS & TICKER COLLISION)]
-CORR_010 | MKL  | 2010-04-19 đến 2010-04-27 | Nến rác chèn sai $26.10 cho mã $380 | Cách ly crash -93.1% & rebound +1,364.5%
-CORR_011 | SABR | 2020-03-20 | Print rác $0.50 vào Triple Witching Close        | Cách ly drop -86.91% & rebound +630.0%
-CORR_012 | LOW  | 2008-06-10 đến 2008-06-17 | Xung đột mã preferred $0.60 với LOW | Cách ly spike +229.7% & drop -67.8%
-CORR_013 | CPTH | 2001-02-02 đến 2001-02-14 | Báo giá thanh khoản rác trong Trading Halt| Cách ly fake jumps +288% & +135.6%
-========================================================================================================================
-```
+Chi tiết công thức, số đếm và chính sách trong [corporate actions](reports/data_pipeline/step3_corporate_actions_report.md); EDA và MFA trong [EDA](reports/data_pipeline/step6_eda_report.md). CSV nguồn giữ nguyên trong lượt sửa tài liệu này.
 
-#### Chi Tiết Từng Sự Kiện:
+### 4.3. Kết quả mô tả không phải chứng nhận chất lượng
 
-##### 1. CORR_001 — Chesapeake Energy Corporation (CHK)
-- **Canonical SID**: `CHK R735QTJ8XC9X` | **Ngày hiệu lực**: `2020-04-15`
-- **Bản chất kinh tế**: Đại hội đồng cổ đông thông qua phương án chia tách cổ phiếu ngược tỷ lệ 1-đổi-200 (1-for-200 Reverse Stock Split) vào ngày 13/04/2020 nhằm đáp ứng tiêu chuẩn duy trì niêm yết của NYSE khi giá cổ phiếu rơi xuống dưới $1.00 ($0.1313 -> $16.375). Cơ sở dữ liệu QuantConnect LEAN bị thiếu sự kiện này, khiến giá thô nhảy vọt 124 lần và tạo ra mức lợi suất giả tạo khổng lồ $+12,371.4\%$. Lợi suất thực tế sau khi điều chỉnh chia tách của phiên giao dịch này là $-37.64\%$.
-- **Căn cứ xác minh**: Hồ sơ SEC Form 8-K nộp ngày 15/04/2020 (Mục 3.03); Thông cáo chia tách cổ phiếu chính thức của sở giao dịch chứng khoán NYSE.
-- **Hành động kỹ thuật**: Chèn trực tiếp sự kiện chia tách ngược với `split_factor = 200.0` vào bảng `russell1000_splits_1998_2026.csv` trước khi chạy thuật toán tính `cumulative_split_factor`.
+Moments CSV ghi 5.610.691 stock-days Development, std gộp 2,653%, skew 0,563, excess kurtosis 66,875, min −94,97%, max +227,87%. Những số này mô tả mẫu đã lọc, không chứng minh toàn kho đúng hoặc model sẽ hội tụ/tạo lợi nhuận.
 
-##### 2. CORR_002 — California Resources Corporation (CRC)
-- **Canonical SID**: `CRC VW1A4C2VJMN9` | **Ngày hiệu lực**: `2016-06-01`
-- **Bản chất kinh tế**: Chia tách cổ phiếu ngược tỷ lệ 1-đổi-10 (1-for-10 Reverse Split) có hiệu lực ngày 01/06/2016 ($0.52 -> $5.58). Tệp factor thô của QuantConnect ghi nhận nhầm hệ số bằng 1.0, tạo ra bước nhảy lợi suất ảo $+925.0\%$. Lợi suất thực tế đã điều chỉnh của phiên là $+2.50\%$.
-- **Căn cứ xác minh**: Hồ sơ SEC Form 8-K nộp ngày 31/05/2016 (Mục 5.03); Bản tin thông báo NYSE Corporate Actions.
-- **Hành động kỹ thuật**: Chèn sự kiện chia tách với `split_factor = 10.0` vào bảng sự kiện chia tách doanh nghiệp.
-
-##### 3. CORR_003 — ADC Telecommunications Inc. (ADCT)
-- **Canonical SID**: `ADCT R735QTJ8XC9X` | **Ngày hiệu lực**: `2005-05-10`
-- **Bản chất kinh tế**: Chia tách ngược tỷ lệ 1-đổi-7 (1-for-7 Reverse Split) ngày 10/05/2005 ($2.30 -> $16.56). Tệp factor của QC bỏ sót sự kiện, tạo ra lợi suất giả $+620.0\%$. Lợi suất thực tế sau khi điều chỉnh là $+2.86\%$.
-- **Căn cứ xác minh**: Hồ sơ SEC Form 8-K nộp ngày 10/05/2005 (Mục 5.03); Bản tin NASDAQ Corporate Actions.
-- **Hành động kỹ thuật**: Chèn sự kiện chia tách với `split_factor = 7.0` vào tầng Corporate Actions.
-
-##### 4. CORR_004 — Alcoa Inc. (AA)
-- **Canonical SID**: `AA R735QTJ8XC9X` | **Ngày hiệu lực**: `2016-10-06`
-- **Bản chất kinh tế**: Chia tách cổ phiếu ngược tỷ lệ 1-đổi-3 (1-for-3 Reverse Split) ngay trước thềm chia tách bộ phận Arconic ($9.40 -> $28.78). Thiếu hệ số chia tách tạo ra lợi suất giả $+205.6\%$, trong khi lợi suất thực tế của phiên là $+1.86\%$.
-- **Căn cứ xác minh**: Hồ sơ SEC Form 8-K nộp ngày 05/10/2016 (Mục 8.01); Bản tin chính thức sở NYSE.
-- **Hành động kỹ thuật**: Chèn sự kiện chia tách với `split_factor = 3.0` vào tầng Corporate Actions.
-
-##### 5. CORR_005 — Dynegy Inc. (DYN)
-- **Canonical SID**: `DYN RRWGXYWP5HET` | **Ngày hiệu lực**: `2010-05-25`
-- **Bản chất kinh tế**: Chia tách cổ phiếu ngược tỷ lệ 1-đổi-5 (1-for-5 Reverse Split) ngày 25/05/2010 ($1.02 -> $5.01). Thiếu hệ số tạo ra bước nhảy giả $+391.18\%$. Lợi suất thực tế của phiên là $-1.76\%$.
-- **Căn cứ xác minh**: Hồ sơ SEC Form 8-K nộp ngày 24/05/2010 (Mục 5.03); NYSE Corporate Action Bulletin.
-- **Hành động kỹ thuật**: Chèn sự kiện chia tách với `split_factor = 5.0` vào tầng Corporate Actions.
-
-##### 6. CORR_006 — Kansas City Southern (KSU)
-- **Canonical SID**: `KSU R735QTJ8XC9X` | **Ngày hiệu lực**: `2000-07-13`
-- **Bản chất kinh tế**: Phân tách thuế miễn trừ (Tax-free Spin-off) đối với công ty quản lý tài sản Stilwell Financial Inc. (nắm giữ quỹ Janus Capital Group). Cổ đông KSU nhận 2 cổ phiếu Stilwell Financial (giao dịch khoảng $43.50/cổ phiếu) cho mỗi 1 cổ phiếu KSU nắm giữ ($2.25 + 2 \times 43.50 = $89.25 so với giá đóng cửa phiên trước $89.44). Tổng tài sản kinh tế của cổ đông được bảo toàn nguyên vẹn, nhưng giá niêm yết của cổ phiếu mẹ KSU rớt từ $89.44 xuống $2.25 (sụt giảm $-96.66\%$) do giá trị tài sản đã được chuyển sang cổ phiếu Stilwell Financial mà dữ liệu nến đơn lẻ không phản ánh được.
-- **Căn cứ xác minh**: Hồ sơ SEC Form 8-K nộp ngày 13/07/2000; Thỏa thuận phân bổ tài sản Stilwell Financial / Janus Capital.
-- **Hành động kỹ thuật**: Cách ly giá trị return ngày 13/07/2000 thành `NaN`; thiết lập `is_spinoff_discontinuity = True`; gán `valid_label_mask = False` tại các ngày 12/07/2000 và 13/07/2000; gán `valid_data_mask = False` ngày 13/07/2000.
-
-##### 7. CORR_007 — The E.W. Scripps Company (SSP)
-- **Canonical SID**: `SSP R735QTJ8XC9X` | **Ngày hiệu lực**: `2008-07-01`
-- **Bản chất kinh tế**: Phân tách mảng truyền hình cáp vào công ty mới niêm yết Scripps Networks Interactive (mã SNI: sở hữu các kênh HGTV, Food Network). Cổ đông nhận 1 cổ phiếu SNI cho mỗi cổ phiếu SSP nắm giữ ($4.04 SSP + ~$42.50 SNI = ~$46.54 so với giá phiên trước $45.50). Giá cổ phiếu đơn lẻ SSP rớt $-92.67\%$ hoàn toàn là do phân chia tài sản công ty mẹ.
-- **Căn cứ xác minh**: Hồ sơ SEC Form 8-K nộp ngày 01/07/2008; Kế hoạch phân chia doanh nghiệp E.W. Scripps.
-- **Hành động kỹ thuật**: Cách ly return ngày 01/07/2008 thành `NaN`; thiết lập `is_spinoff_discontinuity = True`; gán `valid_label_mask = False` tại 30/06/2008 và 01/07/2008.
-
-##### 8. CORR_008 — 3Com Corporation (COMS)
-- **Canonical SID**: `COMS R735QTJ8XC9X` | **Ngày hiệu lực**: `2000-07-28`
-- **Bản chất kinh tế**: Phân tách nhà sản xuất thiết bị hỗ trợ kỹ thuật số cá nhân Palm Inc. Cổ đông 3Com nhận 1.4832 cổ phiếu Palm cho mỗi cổ phiếu 3Com nắm giữ. Giá cổ phiếu đơn lẻ 3Com rớt $-79.99\%$ do giá trị của mảng Palm được tách ra độc lập.
-- **Căn cứ xác minh**: Hồ sơ SEC Form 8-K nộp ngày 27/07/2000; Tỷ lệ phân tách Palm Inc. 1.4832.
-- **Hành động kỹ thuật**: Cách ly return ngày 28/07/2000 thành `NaN`; gán `is_spinoff_discontinuity = True`; gán `valid_label_mask = False` tại 27/07/2000 và 28/07/2000.
-
-##### 9. CORR_009 — Penn National Gaming Inc. (PENN)
-- **Canonical SID**: `PENN R735QTJ8XC9X` | **Ngày hiệu lực**: `2013-11-04`
-- **Bản chất kinh tế**: Phân tách toàn bộ tài sản bất động sản sòng bạc vào quỹ tín thác đầu tư bất động sản Gaming and Leisure Properties (GLPI). Cổ đông nhận 1 cổ phiếu GLPI cho mỗi cổ phiếu PENN. Giá cổ phiếu đơn lẻ PENN rớt $-76.68\%$ do bất động sản được chuyển nhượng sang GLPI.
-- **Căn cứ xác minh**: Hồ sơ SEC Form 8-K nộp ngày 01/11/2013; Bản cáo bạch phân tách GLPI REIT.
-- **Hành động kỹ thuật**: Cách ly return ngày 04/11/2013 thành `NaN`; gán `is_spinoff_discontinuity = True`; gán `valid_label_mask = False` tại 01/11/2013 và 04/11/2013.
-
-##### 10. CORR_010 — Markel Group Inc. (MKL)
-- **Canonical SID**: `MKL R735QTJ8XC9X` | **Thời gian**: `2010-04-19` đến `2010-04-27` (7 phiên giao dịch)
-- **Bản chất kinh tế**: Lỗi chèn dữ liệu nghiêm trọng từ nhà cung cấp: trong khi cổ phiếu phổ thông Markel đang giao dịch liên tục quanh mức $380.00 trên sàn NYSE, hệ thống dữ liệu bị chèn nhầm chuỗi nến rác $26.10 với thanh khoản thấp (4,000 - 14,000 cổ phiếu). Hậu quả tạo ra cú sụp đổ nhân tạo $-93.1\%$ vào ngày 19/04/2010 và bước nhảy phục hồi ảo $+1,364.5\%$ vào ngày 28/04/2010.
-- **Căn cứ xác minh**: Kiểm toán băng giá lịch sử NYSE Historical Consolidated Tape; Dữ liệu xác thực từ Bloomberg/CRSP.
-- **Hành động kỹ thuật**: Cách ly toàn bộ 7 phiên nến rác và 1 phiên phục hồi; gán `is_bad_data_period = True`; gán `quality_flag = 'QUALITY_FLAG_BAD_TICK'`; đưa toàn bộ return vào trạng thái `NaN`.
-
-##### 11. CORR_011 — Sabre Corporation (SABR)
-- **Canonical SID**: `SABR VPSS70OE3M1X` | **Ngày hiệu lực**: `2020-03-20`
-- **Bản chất kinh tế**: Vào ngày đáo hạn hợp đồng quyền chọn Triple Witching (20/03/2020), cơ sở dữ liệu ghi nhận nhầm một mức giá in sai (Errant Print) $0.50 vào giá đóng cửa của SABR, trong khi cổ phiếu đang giao dịch từ $3.79 đến $4.12 và giá đóng cửa chính thức là $3.70. Lỗi này tạo ra mức sụt giảm giả $-86.91\%$ và cú nảy phục hồi ảo $+630.0\%$ vào phiên kế tiếp 23/03/2020.
-- **Căn cứ xác minh**: Kiểm toán đợt đóng cửa NASDAQ Closing Cross; Báo cáo giao dịch chính thức của Bloomberg và Yahoo Finance.
-- **Hành động kỹ thuật**: Cách ly phiên 20/03/2020 trên `valid_data_mask`; cách ly các ngày 19/03/2020 và 20/03/2020 trên `valid_label_mask`; return gán `NaN`.
-
-##### 12. CORR_012 — Lowe's Companies Inc. (LOW)
-- **Canonical SID**: `LOW R735QTJ8XC9X` | **Thời gian**: `2008-06-10` đến `2008-06-17` (6 phiên giao dịch)
-- **Bản chất kinh tế**: Xung đột mã chứng khoán (Ticker Collision): một mã cổ phiếu ưu đãi hoặc công cụ nợ mất thanh khoản với mức giá $0.60 bị nạp nhầm vào mã cổ phiếu phổ thông LOW (vốn đang giao dịch quanh $22.00 với thanh khoản hơn 10 triệu cổ phiếu/ngày). Biến cố tạo ra bước nhảy giả $+229.7\%$ và cú sụt giả $-67.8\%$.
-- **Căn cứ xác minh**: Kiểm toán hồ sơ niêm yết chính thức sàn NYSE (NYSE Official Record Audit).
-- **Hành động kỹ thuật**: Cách ly toàn bộ 6 phiên giao dịch và phiên phục hồi kế tiếp; gán `quality_flag = 'QUALITY_FLAG_COLLISION'`; return gán `NaN`.
-
-##### 13. CORR_013 — Ciphergen Biosystems Inc. (CPTH)
-- **Canonical SID**: `CPTH RJF8CZIDFLNP` | **Thời gian**: `2001-02-02` đến `2001-02-14`
-- **Bản chất kinh tế**: Hiện tượng báo giá thanh khoản rác trong thời gian cổ phiếu bị đình chỉ giao dịch (Trading Halt Anomaly), giá nhảy thất thường giữa $1.00 và $3.78 trên khối lượng gần như bằng 0 (0 đến 400 cổ phiếu), tạo ra các mức lợi suất ảo $+288.0\%$ và $+135.6\%$.
-- **Căn cứ xác minh**: Kiểm toán nhật ký đình chỉ giao dịch và báo giá của sàn NASDAQ.
-- **Hành động kỹ thuật**: Cách ly toàn bộ khoảng thời gian bị ảnh hưởng; gán `valid_data_mask = False` và `valid_label_mask = False`.
-
----
-
-### 4.3. Bảng Đối Chiếu Thống Kê Trước & Sau Hiệu Chỉnh Dữ Liệu
-
-Bảng dưới đây chứng minh tính ưu việt vượt trội và sự trong sạch học thuật của kho dữ liệu sau kiểm toán pháp y so với các phiên bản lỗi thời trước đây:
-
-| Chỉ số kiểm toán định lượng | Pipeline v1 Cũ (Số liệu lỗi thời) | Pipeline v2 Mới (Sau kiểm toán & sửa lỗi) | Tác động học thuật & Ý nghĩa định lượng |
-|:---|:---:|:---:|:---|
-| **Hệ số nhọn vượt chuẩn (Excess Kurtosis)** | **3,428,210.0** (Vô lý toán học) | **66.88** (Chuẩn định lượng) | Giảm 51,000 lần! Triệt tiêu hoàn toàn các phân phối nhân tạo méo mó, bảo đảm các mô hình học máy (LightGBM/XGBoost/Neural Nets) hội tụ ổn định. |
-| **Lợi suất ngày tối đa (Max Return)** | **+12,371.4%** (CHK) | **+227.87%** (Thị trường thật) | Khử bỏ hoàn toàn bước nhảy giả do thiếu hệ số Reverse Split 1:200 của CHK. |
-| **Lợi suất ngày tối thiểu (Min Return)** | **-99.98%** (Lỗi nến rác) | **-94.97%** (Cú sập kinh tế thật) | Cách ly thành công 4 ca Spin-offs chia tách công ty con, giữ lại các cú sụp đổ thật có hồ sơ SEC đối chiếu. |
-| **Biến động ngày (Daily Volatility)** | Không ổn định / Bị thổi phồng | **2.65%** (Annualized: 42.12%) | Phản ánh chính xác mức độ biến động tự nhiên của nhóm 1,000 cổ phiếu vốn hóa lớn nhất nước Mỹ. |
-| **Hệ số bất đối xứng (Skewness)** | Bị sai lệch cực đoan | **+0.563** | Phù hợp với lý thuyết tài chính vi mô: lợi suất cổ phiếu có độ lệch dương nhẹ do giới hạn lỗ tối đa là -100%. |
-| **Số quan sát hợp lệ (Valid Stock-Days)** | Không kiểm soát ranh giới | **5,610,691 phiên-mã** | Được kiểm định chặt chẽ trên tập Development (2000-07-01 đến 2023-12-29). |
-| **Số mã Canonical SID chính quy** | Bị trùng lặp và phân mảnh | **Đúng 3,711 SIDs** | Khóa chính duy nhất đại diện thực thể, nối 752 lượt mã ` 2T` theo khoảng cách <= 10 ngày lịch từ 4.737 dòng mapping. |
-| **Số phiên giao dịch NYSE chính thức** | Lịch ngày không đồng bộ | **Đúng 7,252 ngày** | Trải dài từ 02/01/1998 đến 30/10/2026 với 0 phiên rò rỉ dữ liệu. |
-| **Mặt nạ ranh giới Out-of-Sample** | Bị rò rỉ (Look-ahead Leakage) | **100% Purged tại 2023-12-29** | Bảo vệ tuyệt đối tính khách quan của tập kiểm thử tương lai OOS 2024–2026. |
-
----
+Std gộp nhân sqrt(252) không phải volatility danh mục. Max MFA chưa được lượt này xác minh mức giá/nguyên nhân độc lập. Giảm tails sau corrections không tự xác nhận mọi mapping/event còn lại. Trường p01 trong script 09 tương ứng phân vị 0,01%, không phải 0,1%.
 
 ### 4.4. Bảng Ánh Xạ Chứng Khoán & Thành Viên Theo Thời Gian (Mapping Tables)
 
@@ -848,25 +688,25 @@ Nhằm đảm bảo tính minh bạch khoa học, toàn bộ quá trình chuẩn
 ### 5.1. Phân Vùng Dữ Liệu Nghiêm Ngặt
 1. **Giai đoạn khởi tạo (Warm-up Period: 1998-01-02 đến 2000-06-30 — 630 phiên)**:
    - Toàn bộ các ô trên `membership_mask.parquet`, `valid_data_mask.parquet` và `valid_label_mask.parquet` đều nhận giá trị `False`.
-   - **Mục đích**: Tích lũy lịch sử trượt (Rolling Lookback Windows) cho các đặc trưng dài hạn (như Momentum 252 ngày, Biến động 60 ngày) đối với các chứng khoán đã niêm yết trước ngày `2000-07-01`. Cần lưu ý rằng cơ chế này giúp bảo tồn lịch sử nhưng không thể bảo đảm 100% đầy đủ cho mọi mã, bởi các cổ phiếu mới phát hành (IPO) hoặc mới niêm yết chưa đủ số phiên lookback vẫn sẽ nhận giá trị `NaN` hợp lệ theo đúng quy tắc `min_periods = W`.
+   - **Mục đích**: Tích lũy lịch sử trượt (Rolling Lookback Windows) cho các đặc trưng dài hạn (như Momentum 252 ngày, Biến động 60 ngày) đối với các chứng khoán đã niêm yết trước ngày `2000-07-01`. Cần lưu ý rằng cơ chế này giúp bảo tồn lịch sử nhưng không thể bảo đảm 100% đầy đủ cho mọi mã, bởi các cổ phiếu mới phát hành (IPO) hoặc mới niêm yết chưa đủ số phiên lookback vẫn sẽ nhận giá trị `NaN` hợp lệ theo hợp đồng lookback riêng cho từng feature.
 2. **Giai đoạn phát triển (Development Period: 2000-07-01 đến 2023-12-29 — 5,911 phiên)**:
    - Dùng cho toàn bộ các hoạt động: Phân tích khám phá dữ liệu (EDA), thiết kế và trích xuất đặc trưng (Feature Engineering), chuẩn hóa dữ liệu, huấn luyện mô hình học máy (Cross-validation) và kiểm thử đối sánh mô hình (Validation).
 3. **Giai đoạn ngoài mẫu (Out-of-Sample: 2024-01-02 đến 2026-10-30 — 711 phiên)**:
    - **Nguyên tắc phương pháp luận**: Tuyệt đối không dùng dữ liệu OOS để khám phá dữ liệu, lựa chọn đặc trưng (feature selection), định hình kiến trúc mô hình hay tinh chỉnh siêu tham số (tuning). Điều này không đồng nghĩa với việc dữ liệu chưa từng được quét qua (vì các bước tiền xử lý hạ tầng đã kiểm tra lịch ngày và schema bảng cho toàn dải 1998–2026).
    - **Cơ chế kỹ thuật**: Thư viện nạp ma trận tích hợp kiểm tra tự động kích hoạt ngoại lệ `OOSFreezeViolationError` nếu có truy vấn vượt quá mốc `2023-12-29` mà không có cờ cho phép chuyên biệt.
 
-### 5.2. Khuyến Nghị Lựa Chọn Biến Mục Tiêu (Target Selection)
-- **Mục tiêu ưu tiên khuyến nghị**: `target_next_return.parquet` quy đổi thành phân vị đồng nhất `target_next_rank` $\in [0, 1]$ trên mặt cắt ngang hàng ngày (Cross-sectional Uniform Rank):
+### 5.2. Biến Mục Tiêu Chính Theo Đặc Tả v1
+- **Mục tiêu nghiên cứu chính đã chốt**: `target_next_return.parquet` quy đổi thành phân vị đồng nhất `target_next_rank` $\in [0, 1]$ trên mặt cắt ngang hàng ngày (Cross-sectional Uniform Rank):
   $$target\_next\_rank_{i,t} = \frac{Rank(r_{i,t+1}) - 1}{N_t - 1}$$
 - **Tính chất toán học & kinh tế**: Xếp hạng phân vị chuẩn hóa thứ hạng vào khoảng $[0, 1]$ (ties không tạo phân phối đều chính xác) trên từng mặt cắt ngang ngày, giúp ổn định thang đo mục tiêu trước các biến động độ phân tán qua các thời kỳ thị trường khác nhau. Tuy nhiên, phép biến đổi thứ tự này không triệt tiêu rủi ro thị trường (Market Beta) hay rủi ro ngành, bởi nó không phải là phép hồi quy trung hòa nhân tố; tương quan giữa các chứng khoán vẫn bị chi phối bởi các biến động hệ thống chung.
 
 ### 5.3. Chính Sách Xử Lý Giá Trị Khuyết Thiếu (NaN Policy) & Bảo Toàn Warm-up
-Khi trích xuất các đặc trưng ứng viên tại Step 7 (sau khi chốt danh mục và định nghĩa chi tiết), quy trình tính toán tuân thủ 3 bước nghiêm ngặt:
+Khi trích xuất các đặc trưng ứng viên tại Step 7 (theo đặc tả v1 đã chốt), quy trình tính toán tuân thủ 3 bước nghiêm ngặt:
 1. **Làm sạch đầu vào (Input Data Hygiene)**:
    - Dữ liệu giá/lợi suất đầu vào bắt buộc được làm sạch bằng `bar_quality_mask` (độc lập với membership): mọi ô có $bar\_quality\_mask == \text{False}$ (bad tick, spinoff jump) bị ép thành `NaN`.
    - **Bảo toàn lịch sử warm-up**: Các phiên giao dịch hợp lệ trước ngày cổ phiếu chính thức vào rổ Russell 1000 được giữ nguyên vẹn để phục vụ warm-up, cho phép tính toán đặc trưng ngay tại Ngày 1 gia nhập rổ.
 2. **Kiểm tra độ đầy đủ của cửa sổ chất lượng (Quality-Window Completeness)**:
-   - Phép tính trượt với cửa sổ $W$ yêu cầu `min_periods = W`. Nếu trong cửa sổ trượt có bất kỳ phiên nào là `NaN` (do bad tick, spinoff hoặc thiếu phiên), giá trị đặc trưng tại phiên $t$ bắt buộc phải nhận giá trị `NaN`.
+   - Áp cửa sổ theo từng công thức: W return thường cần W+1 giá; Parkinson cần W cặp high/low; RSI cần seed/reset trạng thái. Không áp min_periods=W đồng loạt cho mọi input. Cửa sổ đo đi qua dữ liệu lỗi/thiếu không được bắc cầu ngầm.
 3. **Lọc thành viên đầu ra (Output Membership Masking)**:
    - Áp dụng `membership_mask` tại ngày đầu ra $t$. Chứng khoán ngoài rổ tại ngày $t$ nhận giá trị `NaN`.
    - **Cách ly tuyệt đối**: Tuyệt đối không dùng `valid_label_mask` để lọc đầu vào đặc trưng $X_t$.

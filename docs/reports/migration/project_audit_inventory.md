@@ -29,7 +29,7 @@ Trong quá trình khảo sát thực địa tại hệ thống máy chủ Window
   `D:\Learning\HK1_2026-2027\CO3101 - Đồ án tổng hợp - ttnt\Predict_daily_return_rankings`
   *(Nơi lưu trữ metadata của các agent `.agents/teamwork/`)*.
 
-**Quyết định thực thi**: Báo cáo kiểm kê này quét trực tiếp 100% tệp tin trên cây thư mục thực tế tại `D:\A_Learning\...` và được lưu đồng thời tại cả hai thư mục `docs/reports/project_audit_inventory.md` để đảm bảo tính sẵn sàng tối đa cho toàn bộ các subagent tiếp theo.
+**Quyết định thực thi**: Báo cáo kiểm kê này quét trực tiếp 100% tệp tin trên cây thư mục thực tế tại `D:\A_Learning\...` và được lưu đồng thời tại cả hai thư mục `docs/reports/migration/project_audit_inventory.md` để đảm bảo tính sẵn sàng tối đa cho toàn bộ các subagent tiếp theo.
 
 ### 1.2. Tổng Hợp Thống Kê Kiểm Kê
 

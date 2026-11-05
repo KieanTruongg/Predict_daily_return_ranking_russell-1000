@@ -1,9 +1,9 @@
 # 📊 BÁO CÁO EDA TASK 2: NaN PATTERN & UNIVERSE DYNAMICS
 
-> **Script**: [`scripts/05_eda/eda_02_nan_universe_dynamics.py`](../../scripts/05_eda/eda_02_nan_universe_dynamics.py)  
+> **Script**: [`scripts/05_eda/eda_02_nan_universe_dynamics.py`](../../../scripts/archive/05_eda/eda_02_nan_universe_dynamics.py)  
 > **Ngày thực hiện**: 03/10/2026  
 > **Dữ liệu**: `in_sample/close.parquet` (6,021 × 2,852) + `raw/universe/by_year/*.json` (27 năm)  
-> **Biểu đồ**: [`docs/Data report/eda_figures/eda_02_nan_universe_dynamics.png`](eda_figures/eda_02_nan_universe_dynamics.png)
+> **Biểu đồ**: [`docs/Data report/eda_figures/eda_02_nan_universe_dynamics.png`](figures/eda_02_nan_universe_dynamics.png)
 
 ---
 

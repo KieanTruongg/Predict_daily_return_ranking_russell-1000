@@ -302,14 +302,14 @@ Lý do: Turnover 8.84%/năm → universe thay đổi đáng kể sau 5 năm
 
 | File | Nội dung |
 |:---|:---|
-| [`phase1_data_validation_report.md`](phase1_data_validation_report.md) | 9 bài test Phase 1 |
-| [`test_results_report.md`](test_results_report.md) | 16 bài test chi tiết (T1–T9, S1–S7) |
+| [`phase1_data_validation_report.md`](../phase1/phase1_data_validation_report.md) | 9 bài test Phase 1 |
+| [`test_results_report.md`](../phase1/test_results_report.md) | 16 bài test chi tiết (T1–T9, S1–S7) |
 | [`sanity_check_report.md`](sanity_check_report.md) | S1–S7 in_sample checks |
 | [`eda_01_return_distribution_report.md`](eda_01_return_distribution_report.md) | EDA T1 |
 | [`eda_02_nan_universe_report.md`](eda_02_nan_universe_report.md) | EDA T2 |
 | [`t4_feature_store_report.md`](t4_feature_store_report.md) | Feature Store build |
 | [`t5_alpha_benchmark_report.md`](t5_alpha_benchmark_report.md) | Alpha Benchmark IC |
-| [`eda_figures/`](eda_figures/) | Biểu đồ + CSV outputs |
+| [`eda_figures/`](figures/) | Biểu đồ + CSV outputs |
 
 ---
 

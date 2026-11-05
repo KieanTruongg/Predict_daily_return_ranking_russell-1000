@@ -2,7 +2,7 @@
 
 > **Dự án**: Predict Daily Return Rankings — Russell 1000 PIT (2000–2026)  
 > **Giai đoạn**: Phase 2 — Data Sanity Checks (Tiền xử lý trước Feature Engineering)  
-> **Script**: [`scripts/05_eda/sanity_check_in_sample.py`](../../scripts/05_eda/sanity_check_in_sample.py)  
+> **Script**: [`scripts/05_eda/sanity_check_in_sample.py`](../../../scripts/archive/05_eda/sanity_check_in_sample.py)  
 > **Ngày thực hiện**: 03/10/2026  
 > **Dữ liệu đầu vào**: `data/processed/in_sample/` — Ma trận Date × Ticker 6,021 ngày × 2,852 tickers
 

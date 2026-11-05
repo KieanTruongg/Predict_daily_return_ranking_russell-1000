@@ -1,3 +1,5 @@
+> Đọc nhập môn tại [hướng dẫn từng chặng](learning/README.md). Bản mô tả DAG không chứng minh toàn bộ dữ liệu đã tái tạo/đối chiếu thực tế. Script 07 hiện tự dựng segment mapping từ PIT JSON và canonical mapping; bảng temporal do 05 tạo là audit riêng, không phải đầu vào duy nhất của membership. Giới hạn ngày snapshot được ghi tại [lineage](reports/data_pipeline/data_lineage_report.md).
+
 # 🔄 Data Pipeline Directed Acyclic Graph (DAG) & Execution Specification
 
 > **Dự án**: Russell 1000 Daily Return Ranking Prediction Engine  
@@ -52,7 +54,7 @@ Các tập lệnh này chạy 100% độc lập trên máy trạm hoặc máy ch
 | `06_process_corporate_actions_and_adjusted_prices.py` | **6** | Canonical Parquet, Splits, Divs, 13 Hiệu chỉnh | `data/processed/constituents_market_data/russell1000_constituents_daily_ohlcv_adjusted_1998_2026.parquet` (Tier 2 Warehouse) |
 | `04b_generate_comprehensive_step3_audits.py` | **7a** *(Hậu 06)* | Tier 2 Adjusted Warehouse Parquet, PIT JSON | `docs/Data report/market_data_audit/tables/temporal_mapping_heuristic_audit.csv` |
 | `05_rigorous_pit_membership_reconstruction.py` | **7b** *(Hậu 06)* | Tier 2 Adjusted Warehouse Parquet, PIT JSON | `docs/Data report/market_data_audit/tables/universe_constituent_temporal_mapping.csv` |
-| `07_build_2d_matrices_and_masks.py` | **8** | Tier 2 Adjusted Warehouse Parquet, Temporal Mapping CSV | 26 tệp 2D Parquet tại `data/processed/matrices/` |
+| `07_build_2d_matrices_and_masks.py` | **8** | Tier 2 Adjusted Warehouse, PIT JSON, Canonical Mapping CSV | 26 tệp 2D Parquet tại `data/processed/matrices/` |
 | `08_validate_matrices_and_sanity_checks.py` | **9** | 2D Matrices, Tier 2 Adjusted Warehouse | Báo cáo kiểm định Sanity Check 50,000 ô ngẫu nhiên |
 | `09_run_development_eda.py` | **10** | 2D Matrices (lọc tập Development 2000–2023) | Biểu đồ EDA PNG 300 DPI và bảng CSV Moments thống kê |
 | `10_investigate_extreme_returns.py` | **11** | 2D Matrices, Bảng hiệu chỉnh CORR_001..CORR_013 | Bảng kiểm toán Top 50 +/- return cực đoan |
@@ -60,117 +62,38 @@ Các tập lệnh này chạy 100% độc lập trên máy trạm hoặc máy ch
 
 ---
 
-## 3. 📊 ĐỒ THỊ PHỤ THUỘC (DIRECTED ACYCLIC GRAPH — DAG)
-
-Sơ đồ dưới đây thể hiện chính xác luồng dữ liệu và quan hệ phụ thuộc nhân quả giữa các tập lệnh:
+## 3. Đồ thị phụ thuộc thực tế và thứ tự vận hành
 
 ```text
-                                  +---------------------------------------+
-                                  |     data/raw/universe/raw_universe/    |
-                                  |     (27 Snapshot files 2000-2026)     |
-                                  +---------------------------------------+
-                                                      │
-                                                      ▼ [Local CLI]
-                                      [ 01_parse_all_universe.py ]
-                                                      │
-                                                      ├───────────────────────────────────┐
-                                                      ▼                                   ▼
-                                      russell1000_pit_by_year.json           russell1000_constituents.csv
-                                                      │
-                                                      ▼ [QC Cloud]
-                                   [ 02_quantconnect_export_10_batches.py ]
-                                                      │
-                                                      ▼ (Download 10 ZIPs to data/raw/market_data/)
-                                   [ 03_process_10_batches_to_parquet.py ] [Local CLI]
-                                                      │
-                                                      ▼
-                       data/processed/constituents_market_data/
-                       russell1000_constituents_daily_ohlcv_1998_2026.parquet (Master Raw Warehouse)
-                                                      │
-                                                      ▼ [Local CLI]
-                                [ 04_audit_identity_and_build_canonical_mapping.py ]
-                                                      │
-                        ┌─────────────────────────────┴─────────────────────────────┐
-                        ▼                                                           ▼
-         canonical_security_mapping.csv                   russell1000_constituents_daily_ohlcv_canonical_1998_2026.parquet
-                        │                                                           │
-                        │        +--------------------------------------------------+
-                        │        │
-                        │        │  [QC Cloud]
-                        │        ├────────────────► [ 05_quantconnect_export_corporate_actions.py ]
-                        │        │                                    │
-                        │        │                                    ▼ (Extract splits.csv, dividends.csv)
-                        │        │                  data/processed/constituents_market_data/corporate_actions/
-                        │        │                                    │
-                        │        ▼                                    ▼
-                        │   +-----------------------------------------------------------+
-                        └──►| 06_process_corporate_actions_and_adjusted_prices.py       | [Local CLI]
-                            | (Injects 13 corrections, backward split CF, total return) |
-                            +-----------------------------------------------------------+
-                                                      │
-                                                      ▼
-                       data/processed/constituents_market_data/
-                       russell1000_constituents_daily_ohlcv_adjusted_1998_2026.parquet (Tier 2 Adjusted Warehouse)
-                                                      │
-                        ┌─────────────────────────────┴─────────────────────────────┐
-                        │                                                           │
-                        ▼ [Local CLI]                                               ▼ [Local CLI]
-  [ 04b_generate_comprehensive_step3_audits.py ]             [ 05_rigorous_pit_membership_reconstruction.py ]
-  (Thẩm định heuristic & đối soát Bước 3)                    (Tái thiết lập Point-In-Time 6 cấp độ bằng chứng)
-                        │                                                           │
-                        ▼                                                           ▼
-    docs/Data report/market_data_audit/tables/                  docs/Data report/market_data_audit/tables/
-    temporal_mapping_heuristic_audit.csv                        universe_constituent_temporal_mapping.csv
-                        │                                                           │
-                        └─────────────────────────────┬─────────────────────────────┘
-                                                      │
-                                                      ▼ [Local CLI]
-                                     [ 07_build_2d_matrices_and_masks.py ]
-                                     (7,252 dates x 3,711 SIDs, 3 masks, Purge 2023-12-29)
-                                                      │
-                                                      ▼
-                                       data/processed/matrices/ (26 Parquet files)
-                                                      │
-                        ┌─────────────────────────────┼─────────────────────────────┐
-                        ▼                             ▼                             ▼
-        [ 08_validate_matrices...py ]     [ 09_run_development_eda.py ]     [ 10_investigate_extreme...py ]
-        (Sanity check 50,000 ô)           (Moments, Dispersion, Deciles)    (Top 50 returns & SEC 8-K)
-                        │                             │                             │
-                        └─────────────────────────────┼─────────────────────────────┘
-                                                      │
-                                                      ▼ [Local CLI]
-                                   [ build_comprehensive_project_report.py ]
-                                                      │
-                                                      ▼
-                           docs/Data report/institutional_pipeline_report.html
+01 parse universe → 02 QC scan/export → 03 merge ZIP → 04 canonical mapping
+                                                   │
+universe → 05 QC export corporate actions           │
+                 │                                 │
+                 └──── CSV events + corrections ───┤
+                                                   ▼
+                                               06 adjusted
+                                                   │
+                           ┌───────────────────────┼──────────────────┐
+                           ▼                       ▼                  ▼
+                      04b audit               05 rigorous       07 matrices
+                           │                       │                  │
+                     heuristic CSV            temporal CSV     segment CSV,
+                                                                 masks/targets
+                                                                     │
+                                                          08 sanity / 09 EDA
+                                                                     │
+                                                              10 investigation
 ```
 
----
+Đồ thị trên là quan hệ input/output; 04b và 05 rigorous là nhánh audit từ adjusted + universe. Script 07 hiện đọc PIT JSON, canonical mapping, adjusted warehouse để trực tiếp dựng `universe_constituent_segments_mapping.csv` và masks. Không mô tả temporal CSV của 05 là đầu vào duy nhất của membership.
 
-## 4. 🔍 BẢN CHẤT QUAN HỆ PHỤ THUỘC GIỮA BƯỚC 04b, 05 VÀ 06
+Có thể vận hành 04b/05 trước 07 để đọc audit rồi mới tạo matrices, nhưng đó là checkpoint quy trình, không phải mọi CSV của nhánh audit đều là data dependency của 07. Corrections CSV là input cần chuẩn bị/đối chiếu, không tự có chỉ nhờ chạy export QC.
 
-Một điểm cốt lõi trong pipeline cần được làm sáng tỏ là sự khác biệt giữa **tiền tố đánh số tập lệnh** và **thứ tự thực thi thực tế**:
+## 4. Vì sao 06 phải có trước 04b và 05 rigorous?
 
-### 4.1. Tại sao Bước 04b và Bước 05 (Rigorous) lại phụ thuộc vào Bước 06?
+Hai script audit này đọc adjusted warehouse do 06 tạo. Số tên 04b/05 không có nghĩa chúng chạy trước 06. Đọc tên file, input và output thực, không chỉ sắp xếp số thứ tự.
 
-Mặc dù mang tên bắt đầu bằng `04b` và `05`, hai script:
-- `04b_generate_comprehensive_step3_audits.py`
-- `05_rigorous_pit_membership_reconstruction.py`
-
-**ĐỀU TIÊU THỤ (CONSUME)** kho dữ liệu giá điều chỉnh Tier 2:
-```text
-data/processed/constituents_market_data/russell1000_constituents_daily_ohlcv_adjusted_1998_2026.parquet
-```
-
-Tệp Parquet này **chỉ được tạo ra sau khi Script 06 kết thúc thành công**. 
-
-Lý do về mặt nghiệp vụ định lượng:
-1. **Kiểm tra độ phủ thực tế (Active Trading Coverage)**: Để xác định một mã cổ phiếu thành viên Russell 1000 có thực sự giao dịch trong chu kỳ thường niên $[01/07/Y \text{ đến } 30/06/Y+1]$ hay không, hệ thống phải đối soát chéo từng ngày giao dịch thực tế đối với dữ liệu giá đã được khử trùng, gán nhãn Canonical SIDs, và điều chỉnh đầy đủ corporate actions từ Bước 06.
-2. **Xác minh 6 cấp độ bằng chứng (6 Evidence Levels)**: Script 05 đối chiếu các trường hợp thay đổi mã (ticker change), sáp nhập (M&A), hoặc giao dịch dưới dạng placeholder `' 2T'` trên chuỗi dữ liệu giá liên tục của Bước 06 để phân loại chính xác mức độ tin cậy của quyền thành viên Point-In-Time.
-3. **Thứ tự thực thi chuẩn**:
-   $$\mathbf{01} \longrightarrow \mathbf{02} \longrightarrow \mathbf{03} \longrightarrow \mathbf{04} \longrightarrow \mathbf{05\ (QC\ Export)} \longrightarrow \mathbf{06} \longrightarrow \mathbf{(04b\ \&\ 05\ Rigorous)} \longrightarrow \mathbf{07} \longrightarrow \mathbf{08} \longrightarrow \mathbf{09} \longrightarrow \mathbf{10}$$
-
----
+Khi sửa factor hoặc quality policy ở upstream, xác định downstream phải tái tạo và đối chiếu lại. Không chạy lại toàn bộ mặc định, cũng không vá một bảng return rồi coi các artifact khác đã đồng bộ.
 
 ## 5. 🛡️ PHÂN ĐỊNH QUYỀN SỞ HỮU BẢNG AUDIT ĐẦU RA (SCHEMA SEPARATION)
 
@@ -277,7 +200,7 @@ Predict_daily_return_rankings/
 
 ### 7.3. Điều Chỉnh Sự Kiện Doanh Nghiệp & Tái Đầu Tư Cổ Tức (Corporate Actions)
 - **Phương pháp**:
-  - Áp dụng thuật toán tìm kiếm lùi (`np.searchsorted`) trên hệ số chia tách để bảo toàn tính đơn điệu của hệ số điều chỉnh.
+  - Áp dụng thuật toán tìm kiếm lùi (`np.searchsorted`) trên hệ số chia tách để ánh xạ hệ số tích lũy theo ngày sự kiện (không mặc định đơn điệu khi có cả split và reverse split).
   - Tích hợp bảng hiệu chỉnh pháp y 13 ca dị biệt (CORR_001–CORR_013) nhằm giải quyết các trường hợp chia tách ngược kỷ lục (1:200 ở `CHK`, 1:10 ở `CRC`) và các ca tách công ty con đặc thù (Spinoffs).
   - Tính tổng tỷ suất sinh lời ngày bao gồm cổ tức tiền mặt: $R_{total, t} = \frac{P_t + D_t}{P_{t-1}} - 1$.
-- **Giới hạn thực nghiệm còn lại**: Công thức tổng tỷ suất sinh lời giả định việc tái đầu tư cổ tức tiền mặt diễn ra tức thì tại giá đóng cửa của ngày giao dịch không hưởng quyền mà không chịu thuế thu nhập doanh nghiệp (tax drag) hoặc chi phí giao dịch trượt giá (slippage/friction).
+- **Giới hạn thực nghiệm còn lại**: Đây là phép đo ghi nhận dividend theo ex-date trong dữ liệu, chưa mô phỏng sổ tiền mặt theo payment date, thuế hoặc chi phí/khả năng tái đầu tư thực tế.

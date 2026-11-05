@@ -1,4 +1,4 @@
-> **Kế hoạch lịch sử, đã được thay thế ngày 2026-11-05.** Không dùng các công thức, số phiên hoặc kết luận trong tài liệu này làm đặc tả triển khai hiện hành. Xem [features v1](../specifications/features_v1.md) và [target/timing v1](../specifications/target_and_timing_v1.md). Nội dung dưới giữ để truy lịch sử đề xuất.
+> **Kế hoạch lịch sử, đã được thay thế ngày 2026-11-05.** Không dùng các công thức, số phiên hoặc kết luận trong tài liệu này làm đặc tả triển khai hiện hành. Xem [features v1](../../specifications/features_v1.md) và [target/timing v1](../../specifications/target_and_timing_v1.md). Nội dung dưới giữ để truy lịch sử đề xuất.
 
 # Báo Cáo Kỹ Thuật Bước 7: Kế Hoạch & Bản Đặc Tả Kỹ Nghệ Đặc Trưng Định Lượng (Feature Engineering Specification & Implementation Plan)
 
@@ -18,7 +18,7 @@
 
 Báo cáo này công bố toàn bộ tài liệu đặc tả thiết kế kỹ thuật định lượng chuẩn mực tổ chức (Institutional Quant Grade) thuộc Bước 7 trong quy trình 10 bước của dự án. 
 
-Dựa trên kết quả khám phá dữ liệu (EDA) và kiểm toán pháp y tại Bước 6 (`docs/reports/step6_eda_report.md`), dự án đã xác định hai thách thức nền tảng trong dữ liệu chuỗi thời gian tài chính:
+Dựa trên kết quả khám phá dữ liệu (EDA) và kiểm toán pháp y tại Bước 6 (`docs/reports/data_pipeline/step6_eda_report.md`), dự án đã xác định hai thách thức nền tảng trong dữ liệu chuỗi thời gian tài chính:
 1. **Phân phối lợi suất có độ nhọn dư (Excess Kurtosis) lên tới 66.88 và tồn tại các cú sốc cực đoan từ $-94.97\%$ đến $+227.87\%$**: Các hàm mất mát truyền thống (như Mean Squared Error - MSE) sẽ bị sụp đổ hoặc phân kỳ do hiện tượng nổ gradient.
 2. **Độ phân tán chéo (Cross-Sectional Dispersion) biến thiên liên tục theo chu kỳ vĩ mô**: Từ $1.45\%$ trong các năm thị trường bình lặng (2013, 2017) lên tới $4.17\% - 9.80\%$ trong các năm khủng hoảng (2000, 2008, 2020), đòi hỏi mô hình phải học trên một không gian mục tiêu và không gian đặc trưng có tính ổn định phân phối (Distributional Stationarity).
 

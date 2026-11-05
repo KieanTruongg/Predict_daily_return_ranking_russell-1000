@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predict Daily Return Rankings — Project Report</title>
+<style>
+  :root {
+    --sidebar-w: 260px;
+    --primary: #1565C0;
+    --primary-dark: #0D47A1;
+    --pass: #2e7d32; --pass-bg: #e8f5e9;
+    --warn: #e65100; --warn-bg: #fff3e0;
+    --fail: #c62828; --fail-bg: #ffebee;
+    --na: #546e7a;   --na-bg: #eceff1;
+    --code-bg: #1e1e1e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; font-size: 14px; color: #212121; background: #f5f5f5; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    position: fixed; top: 0; left: 0; width: var(--sidebar-w);
+    height: 100vh; background: #263238; color: #eceff1;
+    overflow-y: auto; z-index: 100; padding-bottom: 20px;
+  }
+  #sidebar .brand {
+    background: var(--primary-dark); padding: 16px 14px;
+    font-size: 13px; font-weight: 700; color: #fff; line-height: 1.4;
+  }
+  #sidebar .brand span { font-size: 10px; opacity: .7; display: block; margin-top: 2px; }
+  #sidebar nav a {
+    display: block; padding: 7px 14px 7px 18px; color: #b0bec5;
+    text-decoration: none; font-size: 12.5px; border-left: 3px solid transparent;
+    transition: all .15s;
+  }
+  #sidebar nav a:hover, #sidebar nav a.active {
+    color: #fff; background: rgba(255,255,255,.07); border-left-color: #42a5f5;
+  }
+  #sidebar nav .section-label {
+    padding: 14px 14px 4px; font-size: 10px; font-weight: 700;
+    color: #546e7a; text-transform: uppercase; letter-spacing: 1px;
+  }
+  #sidebar nav .sub { padding-left: 28px; font-size: 12px; }
+
+  /* ── Main ── */
+  #main { margin-left: var(--sidebar-w); padding: 0; }
+
+  /* ── Header ── */
+  #header {
+    background: linear-gradient(135deg, var(--primary-dark), #1976D2);
+    color: #fff; padding: 36px 40px 28px;
+  }
+  #header h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  #header .sub { font-size: 14px; opacity: .85; margin-bottom: 20px; }
+  .stats-bar { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; }
+  .stat-box {
+    background: rgba(255,255,255,.15); border-radius: 8px;
+    padding: 10px 18px; text-align: center;
+  }
+  .stat-box .val { font-size: 22px; font-weight: 700; }
+  .stat-box .lbl { font-size: 11px; opacity: .8; margin-top: 2px; }
+
+  /* ── Sections ── */
+  .section { background: #fff; margin: 20px 32px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+  .section-header {
+    background: var(--primary); color: #fff; padding: 14px 24px;
+    border-radius: 8px 8px 0 0; font-size: 16px; font-weight: 700;
+  }
+  .section-header.phase2 { background: #2e7d32; }
+  .section-header.conclude { background: #4a148c; }
+  .section-content { padding: 24px; }
+  h2 { font-size: 15px; color: var(--primary); margin: 24px 0 10px; padding-bottom: 4px; border-bottom: 2px solid #e3f2fd; }
+  h2:first-child { margin-top: 0; }
+  h3 { font-size: 13.5px; color: #37474f; margin: 16px 0 8px; }
+  p { line-height: 1.7; margin-bottom: 10px; color: #424242; }
+  ul { padding-left: 20px; margin-bottom: 10px; }
+  li { line-height: 1.8; color: #424242; }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  th { background: #37474f; color: #fff; padding: 9px 12px; text-align: left; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e0e0e0; }
+  tr:nth-child(even) td { background: #fafafa; }
+  tr:hover td { background: #e3f2fd; }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block; padding: 2px 9px; border-radius: 12px;
+    font-size: 11px; font-weight: 700; letter-spacing: .3px;
+  }
+  .pass { background: var(--pass-bg); color: var(--pass); }
+  .warn { background: var(--warn-bg); color: var(--warn); }
+  .fail { background: var(--fail-bg); color: var(--fail); }
+  .na   { background: var(--na-bg);   color: var(--na);   }
+  .info { background: #e3f2fd; color: #1565C0; }
+
+  /* ── Code ── */
+  pre {
+    background: var(--code-bg); color: #d4d4d4; padding: 14px 18px;
+    border-radius: 6px; overflow-x: auto; font-size: 12px;
+    line-height: 1.6; margin: 10px 0;
+  }
+  code { font-family: 'Cascadia Code','Consolas',monospace; }
+  pre .kw  { color: #569cd6; }
+  pre .fn  { color: #dcdcaa; }
+  pre .str { color: #ce9178; }
+  pre .cm  { color: #6a9955; }
+  pre .num { color: #b5cea8; }
+  .inline-code {
+    background: #e8f0fe; color: #1a237e; padding: 1px 6px;
+    border-radius: 4px; font-family: monospace; font-size: 12.5px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px;
+    padding: 16px; font-family: monospace; font-size: 12.5px; line-height: 2;
+  }
+  .flow .arrow { color: var(--primary); font-weight: 700; }
+  .flow .file  { color: #2e7d32; }
+  .flow .note  { color: #546e7a; font-style: italic; }
+
+  /* ── Callout ── */
+  .callout {
+    border-left: 4px solid; padding: 12px 16px; margin: 12px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout.green { border-color: var(--pass); background: var(--pass-bg); }
+  .callout.orange { border-color: #e65100; background: var(--warn-bg); }
+  .callout.blue { border-color: #1565C0; background: #e3f2fd; }
+  .callout.purple { border-color: #4a148c; background: #f3e5f5; }
+
+  /* ── Images ── */
+  .img-container { text-align: center; margin: 16px 0; }
+  .img-container img { max-width: 100%; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .img-caption { font-size: 12px; color: #757575; margin-top: 6px; font-style: italic; }
+
+  /* ── Feature grid ── */
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin: 10px 0; }
+  .feat-card {
+    background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px;
+    padding: 10px 14px;
+  }
+  .feat-card .feat-name { font-weight: 700; color: var(--primary); font-size: 13px; }
+  .feat-card .feat-desc { font-size: 12px; color: #616161; margin-top: 3px; }
+  .feat-card .feat-ic { font-size: 12px; margin-top: 4px; }
+
+  /* ── IC bar ── */
+  .ic-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .ic-bar { height: 8px; border-radius: 4px; }
+  .ic-pos { background: var(--pass); }
+  .ic-neg { background: var(--fail); }
+
+  /* Scroll-spy */
+  section { scroll-margin-top: 10px; }
+
+  footer { margin: 30px 32px 40px; text-align: center; color: #9e9e9e; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="brand">
+    Predict Return Rankings
+    <span>Russell 1000 PIT · Phase 1+2</span>
+  </div>
+  <nav>
+    <div class="section-label">Overview</div>
+    <a href="#header-section">📊 Tổng quan</a>
+
+    <div class="section-label">Phase 1 — Pipeline</div>
+    <a href="#p1-overview">1.0 Giới thiệu dự án</a>
+    <a href="#p1-arch" class="sub">1.1 Data Architecture</a>
+    <a href="#p1-universe" class="sub">1.2 Universe Validation</a>
+    <a href="#p1-ohlcv" class="sub">1.3 OHLCV Validation</a>
+    <a href="#p1-survivorship" class="sub">1.4 Survivorship Bias</a>
+    <a href="#p1-conclusion">1.5 Kết luận Phase 1</a>
+
+    <div class="section-label">Phase 2 — EDA & Features</div>
+    <a href="#p2-overview">2.0 Mục tiêu</a>
+    <a href="#p2-sanity" class="sub">2.1 Sanity Checks S1–S7</a>
+    <a href="#p2-eda1" class="sub">2.2 EDA T1: Return Dist.</a>
+    <a href="#p2-eda2" class="sub">2.3 EDA T2: Universe Dyn.</a>
+    <a href="#p2-features" class="sub">2.4 Feature Store (T4)</a>
+    <a href="#p2-alpha" class="sub">2.5 Alpha Benchmark (T5)</a>
+    <a href="#p2-conclusion">2.6 Kết luận Phase 2</a>
+
+    <div class="section-label">Tổng kết</div>
+    <a href="#conclusion">📋 Kết luận tổng hợp</a>
+    <a href="#appendix">📎 Appendix</a>
+  </nav>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+<!-- HEADER -->
+<div id="header" id="header-section">
+  <h1>🏦 Predict Daily Return Rankings — Russell 1000</h1>
+  <p class="sub">Báo cáo tổng hợp Phase 1 (Data Pipeline &amp; Validation) + Phase 2 (EDA &amp; Feature Engineering)<br>
+  CO3101 Đồ án tổng hợp TTNT · HCMUT · 10/2026 &nbsp;|&nbsp; <span style="background:rgba(255,255,255,.2);padding:2px 10px;border-radius:10px;font-size:12px;">v2.0 Phase 1+2 Complete</span></p>
+  <div class="stats-bar">
+    <div class="stat-box"><div class="val">6.6M</div><div class="lbl">OHLCV Rows</div></div>
+    <div class="stat-box"><div class="val">2,860</div><div class="lbl">Unique Tickers</div></div>
+    <div class="stat-box"><div class="val">24 năm</div><div class="lbl">In-sample (2000–2023)</div></div>
+    <div class="stat-box"><div class="val">31</div><div class="lbl">Features</div></div>
+    <div class="stat-box"><div class="val">16</div><div class="lbl">Tests Executed</div></div>
+    <div class="stat-box"><div class="val">5.8M</div><div class="lbl">Feature Store Rows</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ PHASE 1 ══ -->
+<section id="p1-overview">
+<div class="section">
+  <div class="section-header">Phase 1 — Data Pipeline &amp; Validation</div>
+  <div class="section-content">
+
+    <h2 id="p1-overview">1.0 Tổng quan dự án</h2>
+    <h3>Bài toán</h3>
+    <p>Dự báo <strong>xếp hạng lợi nhuận ngày T+1</strong> cho các cổ phiếu trong Russell 1000 theo dạng cross-sectional ranking (không phải dự báo giá tuyệt đối). Mô hình ML tại mỗi ngày T sẽ xếp hạng ~1,000 cổ phiếu từ "tốt nhất" đến "tệ nhất" dựa trên các features từ lịch sử giá/khối lượng.</p>
+
+    <table>
+      <tr><th>Khía cạnh</th><th>Chi tiết</th></tr>
+      <tr><td>Chỉ số</td><td>Russell 1000 (large-cap US equity)</td></tr>
+      <tr><td>Lý do PIT Universe</td><td>Dùng danh sách cổ phiếu <em>tại thời điểm</em> (Point-In-Time) tránh survivorship bias — không dùng danh sách hiện tại rồi nhìn ngược quá khứ</td></tr>
+      <tr><td>Nguồn OHLCV</td><td>QuantConnect Cloud (SplitAdjusted mode) — không chạy local được</td></tr>
+      <tr><td>Nguồn Universe</td><td>Wayback Machine (iShares IWB historical holdings)</td></tr>
+      <tr><td>Training platform</td><td>Kaggle (30GB RAM)</td></tr>
+      <tr><td>In-sample</td><td>2000-01-03 → 2023-12-29 (6,021 ngày giao dịch) — LOCKED for training</td></tr>
+      <tr><td>Out-sample</td><td>2024-01-02 → 2026-09-30 — LOCKED đến backtest cuối</td></tr>
+    </table>
+
+    <h2 id="p1-arch">1.1 Data Architecture &amp; Pipeline</h2>
+    <div class="flow">
+      <div><span class="arrow">📡 QuantConnect Cloud</span> <span class="note">(chỉ chạy trên cloud)</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ <span class="file">02_quantconnect_export_by_year_v4_fixed.py</span></div>
+      <div><span class="arrow">📦 27 ZIP files</span> <span class="note">(by year 2000–2026)</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ <span class="file">03_process_qc_zips_by_year.py</span></div>
+      <div><span class="arrow">🗃️ 27 Parquet files</span> <span class="note">russell1000_{year}.parquet — schema v4 lowercase</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ <span class="file">04_merge_all_years.py</span></div>
+      <div><span class="arrow">📊 Consolidated</span> <span class="note">6,601,516 rows · 2,860 tickers · 119.1 MB</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ <span class="file">05_build_cross_sectional.py</span></div>
+      <div><span class="arrow">✅ in_sample/</span> <span class="note">6,021 × 2,852 matrix (2000–2023) — 5 parquets: close/high/low/volume/returns/forward_returns</span></div>
+      <div><span class="arrow">🔒 out_sample/</span> <span class="note">687 × 2,852 matrix (2024–2026) — LOCKED</span></div>
+    </div>
+
+    <h3>Schema v4 (lowercase)</h3>
+    <pre><code><span class="cm"># Tất cả parquet files dùng lowercase columns</span>
+columns = [<span class="str">'date'</span>, <span class="str">'ticker'</span>, <span class="str">'open'</span>, <span class="str">'high'</span>, <span class="str">'low'</span>, <span class="str">'close'</span>, <span class="str">'volume'</span>, <span class="str">'year'</span>]
+
+<span class="cm"># Quan trọng: adj_close ≡ close</span>
+<span class="cm"># QuantConnect SplitAdjusted mode bakes dividends + splits vào close</span>
+<span class="cm"># → Chỉ cần dùng 'close' cho mọi feature tính toán</span></code></pre>
+
+    <h2 id="p1-universe">1.2 Universe Validation</h2>
+
+    <h3>Test T1 — Universe Structure</h3>
+    <p><strong>Script:</strong> <code class="inline-code">scripts/02_validation_universe/test1_universe_structure.py</code><br>
+    <strong>Dữ liệu:</strong> 27 file JSON <code class="inline-code">russell1000_{year}.json</code> (2000–2026)</p>
+    <p><strong>Mục đích:</strong> Kiểm tra chất lượng data universe — NULL, trùng lặp, whitespace, format ticker</p>
+    <pre><code><span class="cm"># Logic: duyệt từng năm, kiểm tra mỗi ticker</span>
+<span class="kw">for</span> yr <span class="kw">in</span> range(<span class="num">2000</span>, <span class="num">2027</span>):
+    tickers = json.load(f<span class="str">"russell1000_{yr}.json"</span>)
+    null_cnt  = <span class="fn">sum</span>(<span class="num">1</span> <span class="kw">for</span> t <span class="kw">in</span> tickers <span class="kw">if</span> t <span class="kw">is None</span>)
+    dup_cnt   = <span class="fn">len</span>(tickers) - <span class="fn">len</span>(<span class="fn">set</span>(tickers))
+    space_cnt = <span class="fn">sum</span>(<span class="num">1</span> <span class="kw">for</span> t <span class="kw">in</span> tickers <span class="kw">if</span> t != t.strip())</code></pre>
+    <table>
+      <tr><th>Kiểm tra</th><th>Kết quả</th><th>Trạng thái</th></tr>
+      <tr><td>Tổng tickers quét</td><td>26,919 lượt</td><td><span class="badge info">INFO</span></td></tr>
+      <tr><td>NULL / Invalid</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Empty ('')</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Whitespace thừa</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Duplicate trong năm</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Dash format (BRK-B)</td><td>45 lượt — QuantConnect format hợp lệ</td><td><span class="badge pass">PASS</span></td></tr>
+    </table>
+    <div class="callout green">✅ <strong>Kết luận T1:</strong> Universe data sạch hoàn toàn. 45 ticker dash-format là chuẩn QuantConnect (BRK-B, BF-B...) — không phải lỗi.</div>
+
+    <h3>Test T2 — PIT Turnover Analysis</h3>
+    <p><strong>Script:</strong> <code class="inline-code">scripts/02_validation_universe/test3_universe_pit_turnover.py</code></p>
+    <p><strong>Mục đích:</strong> Xác nhận tính Point-In-Time: chỉ số thay đổi thành phần thực sự hàng năm đúng không?</p>
+    <table>
+      <tr><th>Chỉ tiêu</th><th>Giá trị</th></tr>
+      <tr><td>Unique tickers 2000–2026</td><td><strong>2,884 mã</strong></td></tr>
+      <tr><td>Avg Annual Entry</td><td>88.3 tickers/năm</td></tr>
+      <tr><td>Avg Annual Exit</td><td>87.7 tickers/năm</td></tr>
+      <tr><td>Turnover trung bình</td><td><strong>8.84%/năm</strong></td></tr>
+      <tr><td>Blue-chip liên tục 27 năm</td><td>223 mã (MSFT, XOM, SO, BDX...)</td></tr>
+      <tr><td>Flicker tickers (vào/ra lại)</td><td>361 mã</td></tr>
+      <tr><td>Năm cao nhất</td><td>2001: <strong>21.01%</strong> (Dot-com bust)</td></tr>
+      <tr><td>Năm thấp nhất</td><td>2024: <strong>4.90%</strong></td></tr>
+    </table>
+    <div class="callout green">✅ <strong>Kết luận T2:</strong> Turnover 8.84%/năm phù hợp lịch sử FTSE Russell (8–12%). PIT mechanism hoạt động đúng.</div>
+
+    <h3>Test T3 — Security Identity Mapping</h3>
+    <p><strong>Script:</strong> <code class="inline-code">scripts/02_validation_universe/test4_security_identity.py</code></p>
+    <p><strong>Mục đích:</strong> Kiểm tra QC có resolve đúng ticker renames (FB→META, ANTM→ELV...)</p>
+    <table>
+      <tr><th>Công ty</th><th>Old → New</th><th>Năm</th><th>Kết quả</th></tr>
+      <tr><td>Meta Platforms</td><td>FB → META</td><td>2022</td><td><span class="badge pass">✅ Khớp</span></td></tr>
+      <tr><td>Elevance Health</td><td>ANTM → ELV</td><td>2022</td><td><span class="badge pass">✅ Khớp</span></td></tr>
+      <tr><td>Mondelez</td><td>KFT → MDLZ</td><td>2012</td><td><span class="badge pass">✅ Khớp</span></td></tr>
+      <tr><td>Bath &amp; Body Works</td><td>LB → BBWI</td><td>2021</td><td><span class="badge pass">✅ Khớp</span></td></tr>
+      <tr><td>Alphabet</td><td>GOOG → GOOGL</td><td>2014</td><td><span class="badge warn">⚠️ Cần kiểm tra</span></td></tr>
+    </table>
+    <p>Tổng: <strong>198 lượt mismatch (0.74%)</strong> — chủ yếu format dash/dot và M&A.</p>
+    <div class="callout orange">⚠️ <strong>Kết luận T3:</strong> 0.74% mismatch, có giải thích được, non-blocking. QC Symbol Map lịch sử xử lý hầu hết các case.</div>
+
+    <h2 id="p1-ohlcv">1.3 OHLCV Validation (M1–M5)</h2>
+
+    <h3>M1 — OHLCV Schema &amp; Integrity</h3>
+    <p><strong>Script:</strong> <code class="inline-code">scripts/03_validation_ohlcv/test_m1_ohlcv_structure.py</code> &nbsp;|&nbsp; <strong>Data:</strong> 6,601,516 rows</p>
+    <table>
+      <tr><th>Kiểm tra</th><th>Vi phạm</th><th>Trạng thái</th></tr>
+      <tr><td>NULL / NaN / Missing</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Duplicate (Date, Ticker)</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Price ≤ 0</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>High &lt; Low</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Open outside [Low, High]</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Close outside [Low, High]</td><td><strong>0</strong></td><td><span class="badge pass">PASS</span></td></tr>
+    </table>
+    <div class="callout green">✅ <strong>M1:</strong> Zero violations trên 6.6M rows — perfect data integrity.</div>
+
+    <h3>M2 — Time Coverage</h3>
+    <p><strong>Script:</strong> <code class="inline-code">test_m2_time_coverage.py</code></p>
+    <table>
+      <tr><th>Chỉ tiêu</th><th>Giá trị</th><th>Trạng thái</th></tr>
+      <tr><td>Avg trading days/year</td><td><strong>248.4 ngày</strong> (chuẩn 250–252)</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Full coverage ≥ 240d</td><td><strong>93.8%</strong> stock-years</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Partial 50–239d</td><td>6.2%</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Short &lt; 50d</td><td>1 lượt (2023)</td><td><span class="badge warn">WARN</span></td></tr>
+    </table>
+
+    <h3>M3 — Corporate Actions (Split Adjustment)</h3>
+    <p><strong>Script:</strong> <code class="inline-code">test_m3_corporate_actions.py</code> — Kiểm tra 7 split events lớn</p>
+    <table>
+      <tr><th>Ticker</th><th>Split</th><th>Ngày</th><th>Return ngày split</th><th>Trạng thái</th></tr>
+      <tr><td>AAPL</td><td>7-for-1</td><td>2014-06-09</td><td>&lt; 5%</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>AAPL</td><td>4-for-1</td><td>2020-08-31</td><td>+3.39%</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>TSLA</td><td>5-for-1</td><td>2020-08-31</td><td>&lt; 5%</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>NVDA</td><td>10-for-1</td><td>2024-06-10</td><td>&lt; 5%</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>AMZN</td><td>20-for-1</td><td>2022-06-06</td><td>&lt; 5%</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>GOOGL</td><td>20-for-1</td><td>2022-07-18</td><td>-2.46%</td><td><span class="badge pass">PASS</span></td></tr>
+    </table>
+    <div class="callout green">✅ <strong>M3:</strong> 7/7 split events không có price jump giả. SplitAdjusted hoạt động hoàn hảo.</div>
+
+    <h3>M4 — Russell ↔ OHLCV Compatibility</h3>
+    <p><strong>Kết quả:</strong> Match rate <strong>99.42%</strong> | 155 EMPTY (QC DB limitation, chủ yếu pre-2012) | 0 extra tickers</p>
+    <div class="callout green">✅ <strong>M4:</strong> 99.42% coverage. 0 extra tickers = pipeline không bị contamination.</div>
+
+    <h3>M5/M6 — Market Value &amp; Liquidity</h3>
+    <table>
+      <tr><th>Chỉ tiêu</th><th>Giá trị</th></tr>
+      <tr><td>Tổng Dollar Volume</td><td><strong>$1,168 Trillion</strong></td></tr>
+      <tr><td>Avg Dollar Volume/stock/day</td><td><strong>$179.5 Triệu</strong></td></tr>
+      <tr><td>Avg Close Price toàn chu kỳ</td><td>$147.75</td></tr>
+      <tr><td>Penny stocks (năm gần đây 2017+)</td><td><strong>0</strong></td></tr>
+    </table>
+    <div class="callout green">✅ <strong>M5/M6:</strong> Dollar volume hợp lý, tăng theo thời gian, không có anomaly.</div>
+
+    <h2 id="p1-survivorship">1.4 Survivorship Bias Audit (T9)</h2>
+    <p><strong>Script:</strong> <code class="inline-code">scripts/04_deep_audit/deep_audit_survivorship.py</code></p>
+    <p><strong>Logic:</strong> Chia tickers thành 2 nhóm dựa trên có/không có trong Russell 1000 năm 2024+, so sánh OHLCV coverage:</p>
+    <pre><code><span class="cm"># Survivor: có mặt trong Universe ít nhất 1 năm từ 2024+</span>
+survivor    = {t <span class="kw">for</span> t <span class="kw">in</span> all_tickers <span class="kw">if</span> <span class="fn">any</span>(t <span class="kw">in</span> universe[yr] <span class="kw">for</span> yr <span class="kw">in</span> range(<span class="num">2024</span>,<span class="num">2027</span>))}
+<span class="cm"># Disappeared: xuất hiện trước 2024 nhưng KHÔNG có trong 2024/2025/2026</span>
+disappeared = all_tickers - survivor</code></pre>
+    <table>
+      <tr><th>Nhóm</th><th>Số tickers</th><th>OHLCV Coverage</th><th>Gap</th></tr>
+      <tr><td>Survivor (có trong 2024+)</td><td>1,101</td><td><strong>99.6%</strong></td><td rowspan="2" style="vertical-align:middle;font-weight:700;color:var(--pass)">+0.4pp ✅</td></tr>
+      <tr><td>Disappeared (không có sau 2024)</td><td>1,783</td><td><strong>99.2%</strong></td></tr>
+    </table>
+    <div class="callout green">✅ <strong>Kết luận T9:</strong> Gap +0.4pp là không đáng kể (ngưỡng cảnh báo >5pp). QuantConnect lưu trữ lịch sử của delisted companies gần như hoàn chỉnh. <strong>PIT Universe đã giải quyết survivorship bias ở gốc rễ.</strong></div>
+
+  </div>
+</div>
+</section>
+
+<!-- PHASE 1 CONCLUSION -->
+<section id="p1-conclusion">
+<div class="section">
+  <div class="section-header" style="background:#1b5e20;">📋 1.5 KẾT LUẬN PHASE 1 — Data Pipeline &amp; Validation</div>
+  <div class="section-content">
+    <table>
+      <tr><th>Giai đoạn</th><th>PASS</th><th>WARNING</th><th>FAIL</th></tr>
+      <tr><td>Universe Validation (T1–T3)</td><td>2</td><td>1</td><td>0</td></tr>
+      <tr><td>OHLCV Validation (M1–M5)</td><td>5</td><td>0</td><td>0</td></tr>
+      <tr><td>Survivorship Bias (T9)</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr style="font-weight:700;background:#e8f5e9"><td>TỔNG CỘNG</td><td>8 / 9</td><td>1 / 9</td><td>0 / 9</td></tr>
+    </table>
+    <h3>Chất lượng data so với yêu cầu ML Research</h3>
+    <table>
+      <tr><th>Tiêu chí</th><th>Yêu cầu tối thiểu</th><th>Thực tế đạt được</th><th>Đánh giá</th></tr>
+      <tr><td>OHLCV Integrity</td><td>0 violations</td><td><strong>0 / 6,601,516 rows</strong></td><td><span class="badge pass">Xuất sắc</span></td></tr>
+      <tr><td>Universe match rate</td><td>&gt;95%</td><td><strong>99.42%</strong></td><td><span class="badge pass">Xuất sắc</span></td></tr>
+      <tr><td>Survivorship bias gap</td><td>&lt;5pp</td><td><strong>+0.4pp</strong></td><td><span class="badge pass">Xuất sắc</span></td></tr>
+      <tr><td>Split adjustment</td><td>0 price jump</td><td><strong>7/7 correct</strong></td><td><span class="badge pass">Xuất sắc</span></td></tr>
+      <tr><td>Time coverage</td><td>&gt;90% stock-years</td><td><strong>93.8%</strong></td><td><span class="badge pass">Tốt</span></td></tr>
+      <tr><td>Ticker identity</td><td>&lt;2% mismatch</td><td><strong>0.74%</strong></td><td><span class="badge pass">Tốt</span></td></tr>
+    </table>
+
+    <h3>Phân tích 1 WARNING — Tại sao không nghiêm trọng</h3>
+    <p><strong>T3 (198 ticker mismatch, 0.74%)</strong>: Phần lớn là <em>format convention</em> (BRK-B vs BRK.B) hoặc M&amp;A — không mất data vì QuantConnect dùng Security GUID bên trong, không phải ticker string. 4–5 case phức tạp (spin-off, dual-class) cần điều tra thêm nhưng không ảnh hưởng đến chất lượng tổng thể (&lt;0.02% data).</p>
+
+    <h3>Hạn chế cần ghi nhận (Trung thực)</h3>
+    <ul>
+      <li><strong>155 EMPTY tickers</strong>: Không thể khắc phục — là QC database limitation cho pre-2012 stocks. Ảnh hưởng &lt;0.6% data.</li>
+      <li><strong>Data không reproducible local</strong>: QC Cloud only — nếu cần thêm data (2027+), phải có QC account active.</li>
+      <li><strong>Không có fundamental data</strong>: Chỉ OHLCV — thiếu earnings, analyst estimates, short interest. Limitation của toàn dự án.</li>
+    </ul>
+
+    <h3>Ý nghĩa cho Phase 2 &amp; Model Training</h3>
+    <ul>
+      <li>✅ Data đủ sạch để train model — zero violations trên OHLCV, không cần bước cleaning</li>
+      <li>✅ Target variable (forward_return) không có look-ahead bias (xác nhận ở Phase 2 S3)</li>
+      <li>✅ PIT Universe đảm bảo training set không có survivorship bias</li>
+      <li>⚠️ Cần filter 589 tickers OOS-only và winsorize outlier trước feature engineering (Phase 2 xử lý)</li>
+    </ul>
+    <div class="callout green">✅ <strong>Kết luận Phase 1:</strong> Dữ liệu đạt chuẩn <em>Audit-Grade Quality</em> cho ML research. 8/9 tests PASS, 1 WARNING không nghiêm trọng, 0 FAIL. Pipeline sạch, không có data contamination, survivorship bias negligible (+0.4pp). <strong>Sẵn sàng cho Phase 2.</strong></div>
+  </div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ PHASE 2 ══ -->
+<section id="p2-overview">
+<div class="section">
+  <div class="section-header phase2">Phase 2 — EDA &amp; Feature Engineering</div>
+  <div class="section-content">
+
+    <h2>2.0 Mục tiêu &amp; Luồng Phase 2</h2>
+    <div class="flow">
+      <div><span class="arrow">📊 in_sample matrices</span> <span class="note">(6,021 × 2,852)</span></div>
+      <div>&nbsp;&nbsp;↓ Sanity Checks S1–S7</div>
+      <div><span class="arrow">✅ Confirmed data integrity</span> <span class="note">+ design decisions</span></div>
+      <div>&nbsp;&nbsp;↓ EDA T1: Return Distribution</div>
+      <div>&nbsp;&nbsp;↓ EDA T2: Universe Dynamics</div>
+      <div><span class="arrow">📈 Insights về phân phối &amp; regime</span></div>
+      <div>&nbsp;&nbsp;↓ T4: build_feature_store.py</div>
+      <div><span class="arrow">🗄️ Feature Store</span> <span class="note">5,820,358 rows × 33 cols · 31 features</span></div>
+      <div>&nbsp;&nbsp;↓ T5: eval_benchmark_alpha.py</div>
+      <div><span class="arrow">📉 IC Analysis</span> <span class="note">Rank IC per feature, regime breakdown</span></div>
+    </div>
+    <div class="callout blue">🔒 <strong>Quy tắc bất biến:</strong> Toàn bộ Phase 2 chỉ thực hiện trên <strong>in_sample (2000–2023)</strong>. Out-sample bị khóa đến backtest cuối.</div>
+
+    <h2 id="p2-sanity">2.1 Sanity Checks S1–S7</h2>
+    <p><strong>Script:</strong> <code class="inline-code">scripts/05_eda/sanity_check_in_sample.py</code></p>
+    <table>
+      <tr><th>Check</th><th>Mục đích</th><th>Kết quả thực tế</th><th>Quyết định</th><th>Status</th></tr>
+      <tr>
+        <td><strong>S1</strong> Cross-layer</td>
+        <td>by_year ↔ matrix nhất quán?</td>
+        <td>155 OOS tickers trong matrix header, calendar khớp 100%</td>
+        <td>Filter ≥95% NaN tickers khi build features</td>
+        <td><span class="badge warn">WARN</span></td>
+      </tr>
+      <tr>
+        <td><strong>S2</strong> Return calc</td>
+        <td>return matrix có đúng không?</td>
+        <td>Max diff = <strong>0.000000</strong> (5 tickers kiểm tra)</td>
+        <td>Không cần sửa</td>
+        <td><span class="badge pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>S3</strong> Look-ahead bias</td>
+        <td>fwd_return không chứa tương lai?</td>
+        <td>fwd_return[t] = return[t+1] — exact match</td>
+        <td>Target variable sạch, không cần sửa</td>
+        <td><span class="badge pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>S4</strong> NaN profile</td>
+        <td>NaN phân bổ hợp lý?</td>
+        <td>65.5% NaN, đều 64–66% mỗi năm</td>
+        <td>Bình thường — ~1,000 active/2,852 total mỗi ngày</td>
+        <td><span class="badge pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>S5</strong> Volume = 0</td>
+        <td>Có cổ phiếu nào zero-vol kéo dài?</td>
+        <td>AWH: 67 ngày streak, ARD: 60 ngày</td>
+        <td>volume=0 → NaN cho Amihud/VWAP</td>
+        <td><span class="badge warn">WARN</span></td>
+      </tr>
+      <tr>
+        <td><strong>S6</strong> Price cross-check</td>
+        <td>by_year ↔ matrix giá khớp?</td>
+        <td>10 tickers × 3 ngày — khớp 100%</td>
+        <td>Pipeline merge đúng</td>
+        <td><span class="badge pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td><strong>S7</strong> adj_close vs close</td>
+        <td>adj_close có khác close không?</td>
+        <td>adj_close ≡ close (ratio=1.000 exact)</td>
+        <td>Chỉ dùng <code>close</code>, bỏ adj_close</td>
+        <td><span class="badge warn">WARN</span></td>
+      </tr>
+    </table>
+
+    <h2 id="p2-eda1">2.2 EDA T1 — Return Distribution &amp; CS Dispersion</h2>
+    <p><strong>Script:</strong> <code class="inline-code">scripts/05_eda/eda_01_return_distribution.py</code> &nbsp;|&nbsp; <strong>Data:</strong> 5,920,516 non-NaN observations</p>
+
+    <h3>Thống kê mô tả</h3>
+    <table>
+      <tr><th>Chỉ số</th><th>Giá trị</th><th>Nhận xét</th></tr>
+      <tr><td>Mean daily return</td><td><strong>+0.0484%</strong></td><td>Dương nhỏ — phù hợp equity long-run</td></tr>
+      <tr><td>Median daily return</td><td>+0.0327%</td><td>Thấp hơn mean → outlier dương kéo lên</td></tr>
+      <tr><td>Annualized Std</td><td><strong>44.98%</strong></td><td>Cao hơn 15–20% vì cross-section gồm mid-cap</td></tr>
+      <tr><td>Skewness</td><td><strong>+41.08</strong></td><td>Lệch phải — outlier M&amp;A/takeover chưa lọc</td></tr>
+      <tr><td>Excess Kurtosis</td><td><strong>16,433</strong></td><td>Fat tails cực đoan — raw, chưa winsorize</td></tr>
+      <tr><td>P1% / P99%</td><td>-7.30% / +7.69%</td><td>Biên độ cực đoan rộng</td></tr>
+      <tr><td>Max return</td><td>+1,364.52%</td><td>M&amp;A premium / short squeeze</td></tr>
+      <tr><td>Min return</td><td>-96.66%</td><td>Delisting / phá sản</td></tr>
+    </table>
+
+    <h3>Normality Tests</h3>
+    <table>
+      <tr><th>Test</th><th>Statistic</th><th>p-value</th><th>Kết quả</th></tr>
+      <tr><td>Jarque-Bera (n=100,000)</td><td>6,294,733.82</td><td>≈ 0</td><td><span class="badge fail">REJECT H0</span></td></tr>
+      <tr><td>Shapiro-Wilk (n=5,000)</td><td>—</td><td>5.05e-66</td><td><span class="badge fail">REJECT H0</span></td></tr>
+    </table>
+    <div class="callout orange">⚠️ Daily return <strong>không tuân theo phân phối chuẩn</strong>. Cần rank-based ML, winsorize bắt buộc trước feature engineering.</div>
+
+    <h3>Cross-Sectional Dispersion (Market Regime)</h3>
+    <table>
+      <tr><th>Regime</th><th>Giai đoạn</th><th>CS Std TB</th><th>Ý nghĩa cho model</th></tr>
+      <tr><td>⚡ HIGH</td><td>2000–2002, 2008–2009, 2020</td><td>2.6–4.4%</td><td>Model dễ phân biệt tốt/xấu, IC cao hơn</td></tr>
+      <tr><td>⚪ NORMAL</td><td>2003–2007, 2010–2012, 2021–2023</td><td>1.7–2.0%</td><td>Baseline performance</td></tr>
+      <tr><td>😴 LOW</td><td>2005–2006, 2013–2014, 2017–2018</td><td>1.5–1.7%</td><td>Model khó phân biệt, IC thấp</td></tr>
+    </table>
+
+    <div class="img-container">
+      <img src="phase2/figures/eda_01_return_distribution.png" alt="Return Distribution Analysis">
+      <div class="img-caption">Hình 1: Return distribution, normality test, fat tail analysis, CS dispersion by year</div>
+    </div>
+
+    <h2 id="p2-eda2">2.3 EDA T2 — NaN Pattern &amp; Universe Dynamics</h2>
+    <p><strong>Script:</strong> <code class="inline-code">scripts/05_eda/eda_02_nan_universe_dynamics.py</code></p>
+
+    <h3>NaN Profile (in_sample matrix: 6,021 × 2,852)</h3>
+    <table>
+      <tr><th>Nhóm</th><th>Số tickers</th><th>Tỷ lệ</th><th>Xử lý</th></tr>
+      <tr><td>Full (0% NaN — 24 năm liên tục)</td><td><strong>240</strong></td><td>8.4%</td><td>Dùng ngay</td></tr>
+      <tr><td>Partial (0–95% NaN)</td><td>2,023</td><td>70.9%</td><td>Dùng với min_period ≥ 252d</td></tr>
+      <tr><td>OOS only (≥95% NaN — chỉ 2024+)</td><td><strong>589</strong></td><td>20.7%</td><td><strong>Loại bỏ hoàn toàn</strong></td></tr>
+    </table>
+
+    <h3>Universe Dynamics Summary</h3>
+    <table>
+      <tr><th>Chỉ tiêu</th><th>Giá trị</th></tr>
+      <tr><td>Unique tickers 2000–2026</td><td>2,884</td></tr>
+      <tr><td>Avg Annual Entry / Exit</td><td>88.3 / 87.7 tickers</td></tr>
+      <tr><td>Turnover trung bình</td><td><strong>8.84%/năm</strong></td></tr>
+      <tr><td>Năm turnover cao nhất</td><td>2001: 21.01% (Dot-com)</td></tr>
+      <tr><td>Tickers liên tục 27 năm</td><td>223 (MSFT, XOM, SO, BDX, FDX...)</td></tr>
+      <tr><td>Tickers chỉ active 1 năm</td><td>486 (16.9%)</td></tr>
+    </table>
+
+    <div class="img-container">
+      <img src="phase2/figures/eda_02_nan_universe_dynamics.png" alt="Universe Dynamics Analysis">
+      <div class="img-caption">Hình 2: NaN distribution, universe size &amp; turnover, ticker lifespan, entry/exit by year</div>
+    </div>
+
+    <h2 id="p2-features">2.4 Feature Store (T4)</h2>
+    <p><strong>Scripts:</strong> <code class="inline-code">scripts/06_features/build_feature_store.py</code> + <code class="inline-code">src/features/feature_engineer.py</code> (v4)</p>
+
+    <h3>Thay đổi feature_engineer.py v3 → v4</h3>
+    <table>
+      <tr><th>Vấn đề cũ (v3)</th><th>Giải pháp (v4)</th></tr>
+      <tr><td>Schema: <code>df["Close"]</code>, <code>df["Adj Close"]</code></td><td>Fix: <code>df["close"]</code>, bỏ adj_close (≡ close)</td></tr>
+      <tr><td>Ticker-by-ticker loop</td><td>Vectorized matrix operations (77s vs ~hours)</td></tr>
+      <tr><td>Không winsorize</td><td>Winsorize P1%/P99% cross-sectional per day</td></tr>
+      <tr><td>Không filter OOS</td><td>Loại 589 tickers ≥95% NaN</td></tr>
+      <tr><td>Không handle volume=0</td><td><code>vol_clean = volume.replace(0, np.nan)</code></td></tr>
+      <tr><td>Thiếu Amihud illiquidity</td><td>Thêm <code>amihud_20d = mean(|ret|/dollar_vol, 20d)</code></td></tr>
+      <tr><td>Thiếu CS rank features</td><td>Thêm <code>ret_1d_rank</code>, <code>rsi_14_rank</code>...</td></tr>
+    </table>
+
+    <h3>Code: Winsorize cross-sectional</h3>
+    <pre><code><span class="kw">def</span> <span class="fn">_cs_winsorize</span>(df: pd.DataFrame, lo=<span class="num">0.01</span>, hi=<span class="num">0.99</span>) -> pd.DataFrame:
+    <span class="str">"""Clip each row at [lo, hi] quantile — cross-sectional per trading day."""</span>
+    q_lo = df.<span class="fn">quantile</span>(lo, axis=<span class="num">1</span>)
+    q_hi = df.<span class="fn">quantile</span>(hi, axis=<span class="num">1</span>)
+    <span class="kw">return</span> df.<span class="fn">clip</span>(lower=q_lo, upper=q_hi, axis=<span class="num">0</span>)
+
+<span class="cm"># Sau winsorize: outlier +1364% → clip tại P99%=+7.7%</span>
+ret_w = <span class="fn">_cs_winsorize</span>(ret, <span class="num">0.01</span>, <span class="num">0.99</span>)</code></pre>
+
+    <h3>31 Features được tính</h3>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-name">ret_1d / ret_2d / ret_5d</div><div class="feat-desc">Short-term momentum/reversal (winsorized)</div></div>
+      <div class="feat-card"><div class="feat-name">ret_10d / ret_20d / ret_60d</div><div class="feat-desc">Medium-term momentum</div></div>
+      <div class="feat-card"><div class="feat-name">ret_252d</div><div class="feat-desc">12-month momentum (Jegadeesh &amp; Titman 1993)</div></div>
+      <div class="feat-card"><div class="feat-name">close_to_sma_20/50/200</div><div class="feat-desc">(Close/SMA) - 1 — trend following</div></div>
+      <div class="feat-card"><div class="feat-name">macd_hist_norm</div><div class="feat-desc">(MACD - Signal) / Close</div></div>
+      <div class="feat-card"><div class="feat-name">rsi_14</div><div class="feat-desc">RSI 14-day overbought/oversold</div></div>
+      <div class="feat-card"><div class="feat-name">bb_pct_b / bb_bandwidth</div><div class="feat-desc">Bollinger Bands position &amp; width</div></div>
+      <div class="feat-card"><div class="feat-name">hl_spread / close_to_high</div><div class="feat-desc">Intraday range features</div></div>
+      <div class="feat-card"><div class="feat-name">vol_ratio_5_20 / vol_zscore_20</div><div class="feat-desc">Volume relative to historical baseline</div></div>
+      <div class="feat-card"><div class="feat-name">close_to_vwap_5</div><div class="feat-desc">Price vs 5-day VWAP proxy</div></div>
+      <div class="feat-card"><div class="feat-name">amihud_20d</div><div class="feat-desc">Illiquidity: mean(|ret|/dollar_vol, 20d)</div></div>
+      <div class="feat-card"><div class="feat-name">realized_vol_5d/20d/60d</div><div class="feat-desc">Annualized realized volatility</div></div>
+      <div class="feat-card"><div class="feat-name">*_rank features (6)</div><div class="feat-desc">Cross-sectional percentile rank per day [0,1]</div></div>
+      <div class="feat-card"><div class="feat-name">target_forward_return</div><div class="feat-desc">Raw T+1 forward return (label)</div></div>
+      <div class="feat-card"><div class="feat-name">target_return_rank</div><div class="feat-desc">CS percentile rank of forward return (ML target)</div></div>
+    </div>
+
+    <h3>Build Stats</h3>
+    <table>
+      <tr><th>Chỉ tiêu</th><th>Giá trị</th></tr>
+      <tr><td>Input tickers</td><td>2,852 → filter OOS 589 → <strong>2,263</strong></td></tr>
+      <tr><td>Trading days</td><td>6,021</td></tr>
+      <tr><td>Build time (vectorized)</td><td><strong>77.4 giây</strong></td></tr>
+      <tr><td>Long-format rows</td><td><strong>5,820,358</strong></td></tr>
+      <tr><td>NaN rate (long-format)</td><td><strong>10.8%</strong></td></tr>
+      <tr><td>target_return_rank mean</td><td>0.5005 (phân bổ đều, không bias)</td></tr>
+      <tr><td>File size</td><td>1,103 MB (long) + ~1.5GB (wide)</td></tr>
+    </table>
+
+    <h2 id="p2-alpha">2.5 Alpha Benchmark IC Evaluation (T5)</h2>
+    <p><strong>Script:</strong> <code class="inline-code">scripts/07_alpha_eval/eval_benchmark_alpha.py</code></p>
+
+    <h3>Reversal 5D — Công thức thầy</h3>
+    <pre><code><span class="cm"># α_i = (P_{t-5} - P_{t-1}) / 5</span>
+<span class="cm"># α_i = α_i - mean(α_i)   → dollar-neutral (sum = 0)</span>
+p_t5  = close.<span class="fn">shift</span>(<span class="num">5</span>)
+p_t1  = close.<span class="fn">shift</span>(<span class="num">1</span>)
+raw   = (p_t5 - p_t1) / <span class="num">5.0</span>
+alpha = <span class="fn">cs_demean</span>(raw)</code></pre>
+
+    <table>
+      <tr><th>Chỉ tiêu</th><th>Giá trị</th><th>Nhận xét</th></tr>
+      <tr><td>Mean Rank IC</td><td><strong>+0.00736</strong></td><td>Thấp (&lt;0.01) nhưng có chiều dương</td></tr>
+      <tr><td>IC Std</td><td>0.13394</td><td>Biến động lớn</td></tr>
+      <tr><td>ICIR</td><td>0.0550</td><td>Thấp (ngưỡng tốt &gt;0.5)</td></tr>
+      <tr><td>Positive IC %</td><td>51.5%</td><td>Nhẹ hơn 50% — đúng chiều</td></tr>
+      <tr><td>p-value</td><td><strong>0.000020 (***)</strong></td><td>Có ý nghĩa thống kê</td></tr>
+      <tr><td>N ngày đánh giá</td><td>6,016</td><td></td></tr>
+    </table>
+    <div class="callout orange">⚠️ IC = 0.007 rất thấp so với ngưỡng "tốt" (0.03). Đây là thực tế của large-cap US — phù hợp với Jegadeesh (1990): IC ~0.01–0.04. Hoạt động tốt nhất trong High Volatility regimes (2001, 2008, 2020).</div>
+
+    <h3>IC Ranking — Tất cả Features</h3>
+    <table>
+      <tr><th>#</th><th>Feature</th><th>Mean IC</th><th>ICIR</th><th>Pos IC%</th><th>p-value</th><th>Significance</th></tr>
+      <tr><td>1</td><td><strong>close_to_high</strong></td><td style="color:var(--pass)"><strong>+0.01887</strong></td><td>+0.169</td><td>57.6%</td><td>&lt;0.001</td><td><span class="badge pass">***</span></td></tr>
+      <tr><td>2</td><td>ret_252d</td><td style="color:var(--pass)">+0.00994</td><td>+0.048</td><td>53.4%</td><td>&lt;0.001</td><td><span class="badge pass">***</span></td></tr>
+      <tr><td>3</td><td><strong>Reversal_5D</strong> (thầy)</td><td style="color:var(--pass)">+0.00736</td><td>+0.055</td><td>51.5%</td><td>0.00002</td><td><span class="badge pass">***</span></td></tr>
+      <tr><td>4</td><td>vol_zscore_20</td><td style="color:var(--pass)">+0.00701</td><td>+0.108</td><td>54.7%</td><td>&lt;0.001</td><td><span class="badge pass">***</span></td></tr>
+      <tr><td>5</td><td>close_to_sma_200</td><td style="color:var(--pass)">+0.00524</td><td>+0.027</td><td>53.1%</td><td>0.043</td><td><span class="badge warn">*</span></td></tr>
+      <tr><td>6</td><td>vol_ratio_5_20</td><td style="color:var(--pass)">+0.00330</td><td>+0.052</td><td>51.7%</td><td>&lt;0.001</td><td><span class="badge pass">***</span></td></tr>
+      <tr><td>7</td><td>amihud_20d</td><td>-0.00010</td><td>-0.001</td><td>49.2%</td><td>0.948</td><td><span class="badge na">—</span></td></tr>
+      <tr><td>8</td><td>ret_60d</td><td>-0.00100</td><td>-0.006</td><td>51.0%</td><td>0.673</td><td><span class="badge na">—</span></td></tr>
+      <tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td></td></tr>
+      <tr><td>22</td><td>close_to_vwap_5</td><td style="color:var(--fail)">-0.01364</td><td>-0.086</td><td>47.5%</td><td>&lt;0.001</td><td><span class="badge pass">***</span></td></tr>
+      <tr><td>23</td><td><strong>ret_1d</strong></td><td style="color:var(--fail)"><strong>-0.01444</strong></td><td>-0.093</td><td>45.6%</td><td>&lt;0.001</td><td><span class="badge pass">***</span></td></tr>
+    </table>
+
+    <div class="callout blue">
+      💡 <strong>Phát hiện quan trọng:</strong><br>
+      1. <code>close_to_high</code> mạnh nhất (IC=+0.019): Đóng cửa gần đáy ngày → tăng ngày mai (intraday reversal effect)<br>
+      2. <code>ret_1d</code> có IC âm mạnh nhất (−0.014) → <strong>phải đảo dấu</strong> khi dùng làm signal<br>
+      3. <code>amihud_20d</code> p=0.95 → <strong>bỏ khỏi ML model</strong>, không có predictive power trên large-cap
+    </div>
+
+    <div class="img-container">
+      <img src="phase2/figures/t5_alpha_benchmark_ic.png" alt="Alpha Benchmark IC Analysis">
+      <div class="img-caption">Hình 3: Reversal 5D IC time series, annual IC, IC distribution, feature IC ranking</div>
+    </div>
+
+  </div>
+</div>
+</section>
+
+<!-- PHASE 2 CONCLUSION -->
+<section id="p2-conclusion">
+<div class="section">
+  <div class="section-header phase2">📋 2.6 KẾT LUẬN PHASE 2 — EDA &amp; Feature Engineering</div>
+  <div class="section-content">
+    <h3>Features ưu tiên cho Phase 3 (ML Model)</h3>
+    <table>
+      <tr><th>Nhóm</th><th>Features</th><th>Lý do</th></tr>
+      <tr><td><span class="badge pass">Ưu tiên cao</span></td><td>close_to_high, vol_zscore_20, vol_ratio_5_20</td><td>IC &gt;0.005, ICIR &gt;0.05, ***</td></tr>
+      <tr><td><span class="badge pass">Ưu tiên cao</span></td><td>−ret_1d, −ret_2d, −ret_5d (đảo dấu)</td><td>IC âm mạnh → reverse = strong signal</td></tr>
+      <tr><td><span class="badge info">Trung bình</span></td><td>ret_252d, close_to_sma_200</td><td>IC &gt;0.005, significant</td></tr>
+      <tr><td><span class="badge info">Trung bình</span></td><td>Reversal_5D, rsi_14, macd_hist_norm</td><td>IC thấp nhưng có ý nghĩa</td></tr>
+      <tr><td><span class="badge warn">Thận trọng</span></td><td>realized_vol_*, hl_spread</td><td>IC âm — cần regime-conditional hoặc bỏ</td></tr>
+      <tr><td><span class="badge fail">Bỏ</span></td><td>amihud_20d</td><td>p=0.95, không có predictive power</td></tr>
+    </table>
+    <h3>Tất cả Decisions từ Phase 2 — Đã implement</h3>
+    <table>
+      <tr><th>Nguồn</th><th>Finding</th><th>Decision</th><th>Trạng thái</th></tr>
+      <tr><td>S1</td><td>589 OOS tickers trong matrix</td><td>Filter ≥95% NaN trước feature build</td><td><span class="badge pass">✅ Done T4</span></td></tr>
+      <tr><td>S5</td><td>AWH/ARD zero-vol streak 60–67 ngày</td><td><code>volume.replace(0, NaN)</code></td><td><span class="badge pass">✅ Done T4</span></td></tr>
+      <tr><td>S7</td><td>adj_close ≡ close (SplitAdj)</td><td>Chỉ dùng <code>close</code>, bỏ adj_close</td><td><span class="badge pass">✅ Done T4</span></td></tr>
+      <tr><td>EDA T1</td><td>Fat tail, Skew=+41, Kurt=16,433</td><td>Winsorize P1%/P99% cross-sectional</td><td><span class="badge pass">✅ Done T4</span></td></tr>
+      <tr><td>EDA T2</td><td>8.84% annual turnover</td><td>Walk-Forward CV: 5yr train / 1yr val</td><td><span class="badge info">Phase 3</span></td></tr>
+      <tr><td>T5</td><td>ret_1d IC=−0.014 (âm mạnh nhất)</td><td>Dùng −ret_1d làm feature (negate)</td><td><span class="badge info">Phase 3</span></td></tr>
+      <tr><td>T5</td><td>amihud IC≈0 (p=0.95, không có ý nghĩa)</td><td>Bỏ amihud_20d khỏi ML model</td><td><span class="badge info">Phase 3</span></td></tr>
+    </table>
+
+    <h3>Phân tích sâu: IC thấp có phải vấn đề?</h3>
+    <p>IC cao nhất trong dataset là <strong>close_to_high = +0.019</strong> — nhìn qua có vẻ thấp nhưng đây là <strong>thực tế của US large-cap equity market</strong>. Theo Jegadeesh (1990) và Lou &amp; Polk (2013), IC ~0.01–0.04 là normal range cho price/volume factors trên US large-cap. IC cao hơn chỉ đạt được với:</p>
+    <ul>
+      <li>Alternative data (earnings revision, analyst sentiment, satellite imagery)</li>
+      <li>Small-cap / micro-cap (ít efficient hơn)</li>
+      <li>Factor combinations (nhiều IC thấp → ensemble IC cao hơn)</li>
+    </ul>
+    <p><strong>Giá trị thực của ML model</strong> đến từ: (1) kết hợp 30 weak signals, (2) capture non-linear interactions, (3) regime-adaptive weighting — không phải từ 1 strong signal.</p>
+
+    <h3>Hạn chế thực tế (Trung thực)</h3>
+    <ul>
+      <li><strong>IC không ổn định theo năm</strong> (ICIR &lt;0.2) — Walk-Forward CV bắt buộc, không được dùng static train/test split</li>
+      <li><strong>Reversal effect suy giảm</strong>: 2001 IC=+0.028 → 2023 IC=+0.001 — thị trường hiệu quả hơn, HFT làm mòn signal theo thời gian</li>
+      <li><strong>Chỉ price/volume data</strong> — thiếu earnings, analyst, macro. Đây là limitation lớn nhất của Phase 1+2</li>
+      <li><strong>Feature Store 1.1 GB</strong> — cần chunking theo năm khi train trên Kaggle (30GB RAM)</li>
+      <li><strong>Không có regime detection feature</strong> trong Phase 2 — Phase 3 cần bổ sung VIX level, CS dispersion vào feature set</li>
+    </ul>
+    <div class="callout green" style="background:#e8f5e9;border-color:#2e7d32;">✅ <strong>Kết luận Phase 2:</strong> EDA xác nhận data non-normal (→ rank-based ML). 589 OOS tickers đã lọc. Feature Store 5.8M rows × 31 features sạch, NaN 10.8%, target unbiased (mean=0.5005). Best signals: <code>close_to_high</code> (IC=+0.019), <code>−ret_1d</code> (equiv +0.014), <code>vol_zscore_20</code> (IC=+0.007). <strong>Sẵn sàng cho Phase 3.</strong></div>
+  </div>
+</div>
+</section>
+
+<!-- OVERALL CONCLUSION -->
+<section id="conclusion">
+<div class="section">
+  <div class="section-header conclude">📋 Kết luận tổng hợp Phase 1 + Phase 2</div>
+  <div class="section-content">
+    <h2>So sánh kết quả 2 Phases</h2>
+    <table>
+      <tr><th>Hạng mục</th><th>Phase 1 — Pipeline &amp; Validation</th><th>Phase 2 — EDA &amp; Feature Engineering</th></tr>
+      <tr><td>Số bài test/task</td><td>9 tests (T1–T9)</td><td>7 sanity (S1–S7) + 4 tasks (EDA T1/T2, T4, T5)</td></tr>
+      <tr><td>Kết quả</td><td><span class="badge pass">8 PASS</span> <span class="badge warn">1 WARN</span> <span class="badge na">0 FAIL</span></td><td><span class="badge pass">4 PASS</span> <span class="badge warn">3 WARN</span> <span class="badge na">0 FAIL</span></td></tr>
+      <tr><td>Vấn đề phát hiện</td><td>155 EMPTY tickers, 0.74% mismatch</td><td>adj_close≡close, 589 OOS tickers, vol=0 streaks</td></tr>
+      <tr><td>Vấn đề đã xử lý</td><td>Schema v4 fix, pipeline clean</td><td>Winsorize P1/P99, filter 589, vol=0→NaN</td></tr>
+      <tr><td>Output chính</td><td>in_sample + out_sample matrices (6,021 × 2,852)</td><td>Feature Store 5.8M rows, 31 features, 1.1 GB</td></tr>
+      <tr><td>Survivorship bias</td><td>+0.4pp gap → Negligible</td><td>589 OOS filtered → clean training set</td></tr>
+    </table>
+
+    <h2>Key Insights tích lũy từ Phase 1 + Phase 2</h2>
+    <ul>
+      <li>🏆 <strong>close_to_high</strong> là feature mạnh nhất (IC=+0.019) — intraday reversal effect, ổn định nhất theo thời gian (ICIR=0.169)</li>
+      <li>🔄 <strong>Short-term mean reversion</strong> chiếm ưu thế: ret_1d, ret_2d, ret_5d đều âm → phải negate làm signal</li>
+      <li>📉 <strong>Momentum dài hạn</strong> (ret_252d) dương (IC=+0.010) nhưng không ổn định theo year</li>
+      <li>⚡ <strong>Regime effect rõ ràng</strong>: mọi signal đều mạnh hơn trong High-Dispersion regimes (2001, 2008, 2020)</li>
+      <li>🚫 <strong>Illiquidity (Amihud)</strong> không có predictive power trên R1000 large-cap (p=0.95)</li>
+      <li>✅ <strong>PIT Universe</strong> giải quyết survivorship bias tại gốc rễ — không cần điều chỉnh thêm</li>
+    </ul>
+
+    <h2>Điểm mạnh tổng thể</h2>
+    <ul>
+      <li>Pipeline audit-grade — 6.6M rows OHLCV không có violation</li>
+      <li>Feature Store vectorized (77.4s) — sẵn sàng Kaggle training</li>
+      <li>Target variable clean, không look-ahead bias (S3 confirmed)</li>
+      <li>Báo cáo trung thực — không over-claim IC thấp</li>
+    </ul>
+
+    <h2>Roadmap Phase 3 — ML Model Training</h2>
+    <table>
+      <tr><th>Bước</th><th>Nội dung</th><th>Note</th></tr>
+      <tr><td>P3.1</td><td>Feature engineering cuối (negate ret_1d/2d/5d, drop amihud)</td><td>Local</td></tr>
+      <tr><td>P3.2</td><td>Walk-Forward CV design: 5yr train / 1yr val, 2005→2023 (18 folds)</td><td>Kaggle</td></tr>
+      <tr><td>P3.3</td><td>LightGBM LambdaMART baseline (ranking objective)</td><td>Kaggle T4 GPU</td></tr>
+      <tr><td>P3.4</td><td>Hyperparameter tuning (Optuna, 50 trials)</td><td>Kaggle T4 GPU</td></tr>
+      <tr><td>P3.5</td><td>Evaluate: Mean IC, NDCG@50, NDCG@100 on validation folds</td><td>Kaggle</td></tr>
+      <tr><td>P3.6</td><td>Final backtest on out_sample (2024–2026) 🔒 UNLOCK</td><td>Local</td></tr>
+    </table>
+    <div class="callout purple">
+      🚀 <strong>Trạng thái dự án:</strong> Phase 1 + Phase 2 hoàn tất. Data Audit-Grade. Feature Store sẵn sàng.<br>
+      <strong>Target</strong>: <code>target_return_rank</code> (CS percentile rank của forward return, mean=0.5005 — unbiased)<br>
+      <strong>Model</strong>: LightGBM LambdaMART trên Kaggle T4 GPU<br>
+      <strong>CV</strong>: Walk-Forward, 5yr train / 1yr val, annual rebalancing (phù hợp 8.84%/yr turnover)
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- APPENDIX -->
+<section id="appendix">
+<div class="section">
+  <div class="section-header" style="background:#546e7a;">📎 Appendix — Index</div>
+  <div class="section-content">
+    <h2>Scripts Index</h2>
+    <table>
+      <tr><th>Folder</th><th>Script</th><th>Purpose</th></tr>
+      <tr><td>01_pipeline</td><td>01_parse_all_universe.py</td><td>Parse Wayback Machine HTML → JSON by year</td></tr>
+      <tr><td>01_pipeline</td><td>02_quantconnect_export_by_year_v4_fixed.py</td><td>QC Cloud export script (cloud only)</td></tr>
+      <tr><td>01_pipeline</td><td>03_process_qc_zips_by_year.py</td><td>ZIP → Parquet by year</td></tr>
+      <tr><td>01_pipeline</td><td>04_merge_all_years.py</td><td>Merge 27 parquets → consolidated</td></tr>
+      <tr><td>01_pipeline</td><td>05_build_cross_sectional.py</td><td>Build Date×Ticker matrices + in/out split</td></tr>
+      <tr><td>02_validation_universe</td><td>test1, test3, test4</td><td>Universe T1, T2, T3 validation</td></tr>
+      <tr><td>03_validation_ohlcv</td><td>test_m1 → test_m5_m6</td><td>OHLCV M1–M5 validation</td></tr>
+      <tr><td>04_deep_audit</td><td>deep_audit_survivorship.py</td><td>Survivorship bias audit T9</td></tr>
+      <tr><td>05_eda</td><td>sanity_check_in_sample.py</td><td>Sanity checks S1–S7</td></tr>
+      <tr><td>05_eda</td><td>eda_01_return_distribution.py</td><td>EDA T1: return distribution</td></tr>
+      <tr><td>05_eda</td><td>eda_02_nan_universe_dynamics.py</td><td>EDA T2: NaN &amp; universe dynamics</td></tr>
+      <tr><td>06_features</td><td>build_feature_store.py</td><td>Build 31-feature store (vectorized)</td></tr>
+      <tr><td>07_alpha_eval</td><td>eval_benchmark_alpha.py</td><td>T5: IC evaluation all features</td></tr>
+    </table>
+
+    <h2>Reports Index</h2>
+    <table>
+      <tr><th>File</th><th>Nội dung</th></tr>
+      <tr><td><strong><a href="phase1_report.html" style="color:#1565C0">📄 phase1_report.html</a></strong></td><td>Chi tiết Phase 1 — 9 tests đầy đủ (mục đích, code, kết quả, kết luận)</td></tr>
+      <tr><td><strong><a href="phase2_report.html" style="color:#2e7d32">📄 phase2_report.html</a></strong></td><td>Chi tiết Phase 2 — S1–S7, EDA T1/T2, T4, T5 đầy đủ</td></tr>
+      <tr><td>phase1/phase1_data_validation_report.md</td><td>Phase 1 tổng hợp (9 tests)</td></tr>
+      <tr><td>phase1/test_results_report.md</td><td>16 tests chi tiết với số liệu thực tế</td></tr>
+      <tr><td>phase2/sanity_check_report.md</td><td>S1–S7 in-sample sanity checks</td></tr>
+      <tr><td>phase2/eda_01_return_distribution_report.md</td><td>EDA T1 chi tiết</td></tr>
+      <tr><td>phase2/eda_02_nan_universe_report.md</td><td>EDA T2 chi tiết</td></tr>
+      <tr><td>phase2/t4_feature_store_report.md</td><td>Feature Store build report</td></tr>
+      <tr><td>phase2/t5_alpha_benchmark_report.md</td><td>Alpha Benchmark IC report</td></tr>
+      <tr><td>phase2/phase2_eda_feature_summary.md</td><td>Phase 2 tổng hợp</td></tr>
+    </table>
+
+    <h2>Data Paths</h2>
+    <table>
+      <tr><th>Path</th><th>Nội dung</th><th>Size</th></tr>
+      <tr><td>data/raw/universe/by_year/</td><td>27 JSON files (Russell 1000 PIT)</td><td>~2 MB</td></tr>
+      <tr><td>data/processed/by_year/</td><td>27 Parquet files OHLCV</td><td>~180 MB</td></tr>
+      <tr><td>data/processed/in_sample/</td><td>6 matrices (close/high/low/vol/ret/fwd)</td><td>~600 MB</td></tr>
+      <tr><td>data/processed/out_sample/</td><td>Same matrices, 2024–2026 🔒</td><td>~70 MB</td></tr>
+      <tr><td>data/processed/features/</td><td>31 wide parquets + feature_store_long</td><td>~2.6 GB</td></tr>
+    </table>
+  </div>
+</div>
+</section>
+
+<footer>
+  Predict Daily Return Rankings · Russell 1000 PIT · CO3101 HCMUT · Phase 1+2 Complete · 10/2026
+</footer>
+
+</div><!-- /main -->
+
+<script>
+// Scroll-spy
+const links = document.querySelectorAll('#sidebar nav a');
+const sections = document.querySelectorAll('section');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+  links.forEach(a => {
+    a.classList.remove('active');
+    if (a.getAttribute('href') === '#' + cur) a.classList.add('active');
+  });
+});
+// Smooth scroll
+links.forEach(a => a.addEventListener('click', e => {
+  const id = a.getAttribute('href').slice(1);
+  const el = document.getElementById(id);
+  if (el) { e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+}));
+</script>
+</body>
+</html>

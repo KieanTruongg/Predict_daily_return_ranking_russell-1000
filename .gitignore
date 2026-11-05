@@ -1,0 +1,51 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# Data files (keep raw large files and downloaded parquet out of git)
+*.zip
+data/*.zip
+data/raw/*.zip
+data/raw/market_data/*
+data/raw/universe/raw/
+data/raw/universe/raw_universe/
+data/raw/universe/*.csv
+data/processed/
+clear/*.zip
+clear/*.parquet
+clear/v1_daily_ohlcv/
+clear/data_v1.zip
+!data/raw/universe/.gitkeep
+!data/raw/universe/by_year/
+!data/raw/universe/russell1000_pit_by_year.json
+!data/raw/market_data/.gitkeep
+!data/processed/in_sample/.gitkeep
+!data/processed/out_sample/.gitkeep
+
+# Outputs and logs
+outputs/figures/*
+outputs/logs/*
+outputs/reports/*
+!outputs/figures/.gitkeep
+!outputs/logs/.gitkeep
+!outputs/reports/.gitkeep
+
+# OS specific
+.DS_Store
+Thumbs.db

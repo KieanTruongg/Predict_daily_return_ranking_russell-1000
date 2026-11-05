@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Phase 1 Report — Data Pipeline & Validation</title>
+<style>
+:root{--side:260px;--blue:#1565C0;--dblue:#0D47A1;--green:#2e7d32;--gbg:#e8f5e9;--orange:#e65100;--obg:#fff3e0;--red:#c62828;--rbg:#ffebee;--gray:#546e7a;--gbg2:#eceff1;--code:#1e1e1e;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',sans-serif;font-size:14px;color:#212121;background:#f0f2f5;}
+/* Sidebar */
+#sb{position:fixed;top:0;left:0;width:var(--side);height:100vh;background:#263238;overflow-y:auto;z-index:100;}
+#sb .brand{background:var(--dblue);padding:14px;font-size:12px;font-weight:700;color:#fff;line-height:1.5;}
+#sb .brand span{font-size:10px;opacity:.7;display:block;}
+#sb a{display:block;padding:6px 14px 6px 16px;color:#b0bec5;text-decoration:none;font-size:12px;border-left:3px solid transparent;transition:all .15s;}
+#sb a:hover,#sb a.act{color:#fff;background:rgba(255,255,255,.07);border-left-color:#42a5f5;}
+#sb .lbl{padding:12px 14px 3px;font-size:9px;font-weight:700;color:#546e7a;text-transform:uppercase;letter-spacing:1px;}
+#sb .sub{padding-left:26px;font-size:11.5px;}
+/* Main */
+#main{margin-left:var(--side);}
+/* Header */
+#hdr{background:linear-gradient(135deg,var(--dblue),#1976D2);color:#fff;padding:32px 40px 24px;}
+#hdr h1{font-size:22px;font-weight:700;margin-bottom:6px;}
+#hdr p{font-size:13px;opacity:.85;line-height:1.6;}
+.tag{background:rgba(255,255,255,.2);padding:2px 10px;border-radius:10px;font-size:11px;margin-top:8px;display:inline-block;}
+.qbar{display:flex;gap:16px;flex-wrap:wrap;margin-top:18px;}
+.qb{background:rgba(255,255,255,.15);border-radius:8px;padding:9px 16px;text-align:center;}
+.qb .v{font-size:20px;font-weight:700;}
+.qb .l{font-size:10px;opacity:.8;margin-top:1px;}
+/* Cards */
+.card{background:#fff;margin:18px 28px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.1);overflow:hidden;}
+.card-hdr{padding:13px 22px;font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px;}
+.card-hdr.blue{background:var(--blue);}
+.card-hdr.green{background:var(--green);}
+.card-hdr.orange{background:var(--orange);}
+.card-hdr.conclude{background:#4a148c;}
+.card-body{padding:22px;}
+h2{font-size:14.5px;color:var(--blue);margin:22px 0 9px;padding-bottom:4px;border-bottom:2px solid #e3f2fd;}
+h2:first-child{margin-top:0;}
+h3{font-size:13px;color:#37474f;margin:14px 0 7px;font-weight:600;}
+p{line-height:1.75;margin-bottom:9px;color:#424242;}
+ul,ol{padding-left:20px;margin-bottom:9px;}
+li{line-height:1.85;color:#424242;}
+/* Badges */
+.b{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:700;}
+.pass{background:var(--gbg);color:var(--green);}
+.warn{background:var(--obg);color:var(--orange);}
+.fail{background:var(--rbg);color:var(--red);}
+.na{background:var(--gbg2);color:var(--gray);}
+.inf{background:#e3f2fd;color:var(--blue);}
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+th{background:#37474f;color:#fff;padding:9px 11px;text-align:left;}
+td{padding:7px 11px;border-bottom:1px solid #e0e0e0;}
+tr:nth-child(even) td{background:#fafafa;}
+tr:hover td{background:#e3f2fd;}
+/* Code */
+pre{background:var(--code);color:#d4d4d4;padding:13px 16px;border-radius:6px;overflow-x:auto;font-size:12px;line-height:1.65;margin:10px 0;}
+code{font-family:'Cascadia Code','Consolas',monospace;}
+.kw{color:#569cd6;}.fn{color:#dcdcaa;}.st{color:#ce9178;}.cm{color:#6a9955;}.nu{color:#b5cea8;}.tp{color:#4ec9b0;}
+ic{background:#e8f0fe;color:#1a237e;padding:1px 5px;border-radius:4px;font-family:monospace;font-size:12.5px;}
+/* Callout */
+.co{border-left:4px solid;padding:11px 15px;margin:11px 0;border-radius:0 6px 6px 0;font-size:13.5px;line-height:1.65;}
+.co.g{border-color:var(--green);background:var(--gbg);}
+.co.o{border-color:var(--orange);background:var(--obg);}
+.co.b{border-color:var(--blue);background:#e3f2fd;}
+.co.p{border-color:#4a148c;background:#f3e5f5;}
+/* Flow */
+.flow{background:#f8f9fa;border:1px solid #dee2e6;border-radius:6px;padding:14px;font-family:monospace;font-size:12px;line-height:2.1;}
+.flow .ar{color:var(--blue);font-weight:700;}
+.flow .fi{color:var(--green);}
+.flow .nt{color:#78909c;font-style:italic;}
+/* Meta row */
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px;}
+.meta-item{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:5px;padding:4px 10px;font-size:12px;}
+.meta-item strong{color:#1565C0;}
+/* Image */
+.img-w{text-align:center;margin:14px 0;}
+.img-w img{max-width:100%;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.img-cap{font-size:11px;color:#757575;margin-top:5px;font-style:italic;}
+/* Test section */
+.test-block{border:1px solid #e0e0e0;border-radius:8px;margin:16px 0;overflow:hidden;}
+.test-title{padding:10px 16px;font-weight:700;font-size:14px;display:flex;align-items:center;gap:10px;}
+.test-title.pass-hdr{background:#e8f5e9;}
+.test-title.warn-hdr{background:#fff3e0;}
+.test-body{padding:16px;}
+/* Grid */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:10px 0;}
+.kpi{background:#f5f5f5;border-radius:6px;padding:12px 14px;border-left:4px solid var(--blue);}
+.kpi .kv{font-size:20px;font-weight:700;color:var(--blue);}
+.kpi .kl{font-size:11px;color:#757575;margin-top:2px;}
+footer{margin:28px 28px 40px;text-align:center;color:#9e9e9e;font-size:12px;}
+</style>
+</head>
+<body>
+<div id="sb">
+  <div class="brand">Phase 1 — Data Pipeline<span>Pipeline &amp; Validation Report</span></div>
+  <nav>
+    <div class="lbl">Tổng quan</div>
+    <a href="#overview">📊 Giới thiệu dự án</a>
+    <a href="#arch">🏗️ Data Architecture</a>
+    <div class="lbl">Universe Validation</div>
+    <a href="#t1" class="sub">T1 Universe Structure</a>
+    <a href="#t2" class="sub">T2 PIT Turnover</a>
+    <a href="#t3" class="sub">T3 Security Identity</a>
+    <div class="lbl">OHLCV Validation</div>
+    <a href="#m1" class="sub">M1 Schema &amp; Integrity</a>
+    <a href="#m2" class="sub">M2 Time Coverage</a>
+    <a href="#m3" class="sub">M3 Corporate Actions</a>
+    <a href="#m4" class="sub">M4 Russell↔OHLCV</a>
+    <a href="#m5" class="sub">M5/M6 Market Value</a>
+    <div class="lbl">Survivorship</div>
+    <a href="#t9">T9 Survivorship Bias</a>
+    <div class="lbl">Kết luận</div>
+    <a href="#conclude">📋 Tổng kết Phase 1</a>
+  </nav>
+</div>
+
+<div id="main">
+<div id="hdr">
+  <h1>📊 Phase 1 — Data Pipeline &amp; Validation Report</h1>
+  <p>Predict Daily Return Rankings · Russell 1000 PIT (2000–2026) · CO3101 HCMUT<br>
+  Ngày thực hiện: 01/10/2026 – 03/10/2026</p>
+  <div class="tag">Phase 1 Complete — 9 Tests Executed</div>
+  <div class="qbar">
+    <div class="qb"><div class="v">9</div><div class="l">Tests Run</div></div>
+    <div class="qb"><div class="v">8 ✅</div><div class="l">PASS</div></div>
+    <div class="qb"><div class="v">1 ⚠️</div><div class="l">WARNING</div></div>
+    <div class="qb"><div class="v">0 ❌</div><div class="l">FAIL</div></div>
+    <div class="qb"><div class="v">6.6M</div><div class="l">Rows Validated</div></div>
+    <div class="qb"><div class="v">99.42%</div><div class="l">Match Rate</div></div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<section id="overview">
+<div class="card">
+  <div class="card-hdr blue">1.0 Tổng quan dự án</div>
+  <div class="card-body">
+    <h2>Bài toán</h2>
+    <p>Dự án xây dựng mô hình ML để <strong>dự báo xếp hạng lợi nhuận ngày T+1</strong> của các cổ phiếu trong Russell 1000 theo dạng <em>cross-sectional ranking</em>. Mô hình không dự báo giá hay lợi nhuận tuyệt đối, mà chỉ xếp thứ tự "cổ phiếu nào sẽ outperform/underperform so với các cổ phiếu khác trong cùng ngày giao dịch".</p>
+    <div class="g2">
+      <div class="kpi"><div class="kv">Russell 1000</div><div class="kl">Large-cap US equity universe, ~$35T market cap</div></div>
+      <div class="kpi"><div class="kv">PIT Universe</div><div class="kl">Point-In-Time — tránh survivorship bias tận gốc</div></div>
+      <div class="kpi"><div class="kv">2000–2026</div><div class="kl">27 năm dữ liệu OHLCV lịch sử</div></div>
+      <div class="kpi"><div class="kv">Kaggle GPU</div><div class="kl">Training platform (T4 free 30h/week)</div></div>
+    </div>
+
+    <h2>Tại sao cần Phase 1</h2>
+    <p>Trước khi train bất kỳ model nào, cần đảm bảo dữ liệu <strong>sạch, đúng, không có look-ahead bias</strong>. Các vấn đề dữ liệu nếu không phát hiện sẽ dẫn đến:</p>
+    <ul>
+      <li><strong>Survivorship bias</strong>: Chỉ train trên các cổ phiếu "sống sót" → model overfit với winners</li>
+      <li><strong>Look-ahead bias</strong>: Target variable chứa thông tin tương lai → back-test giả tạo tốt</li>
+      <li><strong>Schema error</strong>: Column names sai → code feature engineering bị lỗi âm thầm</li>
+      <li><strong>Data integrity issue</strong>: High &lt; Low, Price ≤ 0 → features tính sai</li>
+    </ul>
+
+    <h2>Data Lock Rule</h2>
+    <div class="co b">🔒 <strong>Quy tắc bất biến:</strong> <ic>data/processed/out_sample/</ic> (2024–2026) bị khóa hoàn toàn — không đọc, không xem trong Phase 1/2. Chỉ mở khi backtest cuối cùng.</div>
+  </div>
+</div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="arch">
+<div class="card">
+  <div class="card-hdr blue">1.1 Data Architecture &amp; Pipeline</div>
+  <div class="card-body">
+    <h2>Pipeline Flow</h2>
+    <div class="flow">
+      <div><span class="ar">📡 Nguồn Trích xuất 3 Thời kỳ (Eras):</span> PDF Scan cổ (2000-2007) · Digital PDF (2008-2018) · iShares IWB ETF / FTSE Web (2019-2026) → <span class="fi">01_parse_all_universe.py</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Output: <span class="fi">data/raw/universe/by_year/russell1000_{year}.json</span> (27 files)</div>
+      <div class="nt">&nbsp;&nbsp;&nbsp;   Contains: list of ~1000 tickers active in that year (Sau đợt Reconstitution Thứ Sáu cuối tháng 6)</div>
+      <br>
+      <div><span class="ar">🛡️ Point-In-Time (PIT) Mask Engine:</span> <span class="fi">src/data/pit_universe.py</span> <span class="b pass">[MỚI]</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Tính reconstitution_date(year) chính xác từng năm → Khắc phục 100% Look-ahead bias trong H1</div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Output: universe_mask Boolean (6,021 × 2,263) kiểm soát tư cách thành viên đúng từng ngày giao dịch</div>
+      <br>
+      <div><span class="ar">☁️ QuantConnect Cloud</span> → <span class="fi">02_quantconnect_export_by_year_v4_fixed.py</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Output: <span class="fi">data/raw/qc_zips/{year}.zip</span> (27 ZIPs)</div>
+      <div class="nt">&nbsp;&nbsp;&nbsp;   Script chạy trên QC Cloud IDE, không thể chạy local</div>
+      <br>
+      <div><span class="fi">03_process_qc_zips_by_year.py</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Output: <span class="fi">data/processed/by_year/russell1000_{year}.parquet</span> (27 files)</div>
+      <div class="nt">&nbsp;&nbsp;&nbsp;   Schema v4: lowercase columns (date, ticker, open, high, low, close, volume)</div>
+      <br>
+      <div><span class="fi">04_merge_all_years.py</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Output: <span class="fi">data/processed/daily_ohlcv/russell1000_daily_2000_2026.parquet</span></div>
+      <div class="nt">&nbsp;&nbsp;&nbsp;   6,601,516 rows · 2,860 unique tickers · 119.1 MB</div>
+      <br>
+      <div><span class="fi">05_build_cross_sectional.py</span></div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Output: <span class="fi">data/processed/in_sample/</span> → 6 matrices (6,021 × 2,852)</div>
+      <div>&nbsp;&nbsp;&nbsp;↓ Output: <span class="fi">data/processed/out_sample/</span> → 6 matrices (687 × 2,852) 🔒</div>
+    </div>
+
+    <h2>Schema v4 (Lowercase)</h2>
+    <pre><code><span class="cm"># Tất cả Parquet files sau processing đều dùng lowercase columns</span>
+<span class="cm"># Đây là thay đổi quan trọng từ schema cũ (Close, Adj Close, High, Low, Volume)</span>
+columns = {
+    <span class="st">'date'</span>: <span class="tp">datetime</span>,     <span class="cm"># Trading date</span>
+    <span class="st">'ticker'</span>: <span class="tp">str</span>,        <span class="cm"># QuantConnect symbol (e.g., "AAPL", "BRK-B")</span>
+    <span class="st">'open'</span>: <span class="tp">float64</span>,      <span class="cm"># Open price (SplitAdjusted)</span>
+    <span class="st">'high'</span>: <span class="tp">float64</span>,      <span class="cm"># High price (SplitAdjusted)</span>
+    <span class="st">'low'</span>: <span class="tp">float64</span>,       <span class="cm"># Low price (SplitAdjusted)</span>
+    <span class="st">'close'</span>: <span class="tp">float64</span>,     <span class="cm"># Close price (SplitAdjusted, INCLUDES dividends)</span>
+    <span class="st">'volume'</span>: <span class="tp">float64</span>,    <span class="cm"># Trading volume</span>
+    <span class="st">'year'</span>: <span class="tp">int</span>            <span class="cm"># Partition year</span>
+}
+<span class="cm"># LƯU Ý: adj_close ≡ close (SplitAdjusted mode bakes dividends into close)</span>
+<span class="cm"># → KHÔNG CẦN adj_close trong Feature Engineering</span></code></pre>
+
+    <h2>Matrix Format (in_sample/)</h2>
+    <pre><code><span class="cm"># 6 file parquet trong data/processed/in_sample/</span>
+<span class="cm"># Mỗi file: Index = Date (6,021 rows), Columns = Ticker (2,852 cols)</span>
+<span class="cm"># NaN = cổ phiếu không active trong ngày đó</span>
+close           = pd.read_parquet(<span class="st">"in_sample/close.parquet"</span>)          <span class="cm"># shape (6021, 2852)</span>
+high            = pd.read_parquet(<span class="st">"in_sample/high.parquet"</span>)
+low             = pd.read_parquet(<span class="st">"in_sample/low.parquet"</span>)
+volume          = pd.read_parquet(<span class="st">"in_sample/volume.parquet"</span>)
+returns         = pd.read_parquet(<span class="st">"in_sample/returns.parquet"</span>)        <span class="cm"># close.pct_change()</span>
+forward_returns = pd.read_parquet(<span class="st">"in_sample/forward_returns.parquet"</span>)<span class="cm"># returns.shift(-1)</span></code></pre>
+
+    <div class="co g">✅ <strong>Thiết kế đúng:</strong> Matrix format cho phép vectorized cross-sectional operations — tính feature cho 2,000+ tickers cùng lúc thay vì loop từng ticker (nhanh hơn ~100x).</div>
+  </div>
+</div>
+</section>
+
+<!-- T1 -->
+<section id="t1">
+<div class="card">
+  <div class="card-hdr blue">T1 — Universe Structure Test <span class="b pass" style="margin-left:auto;">✅ PASS</span></div>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/02_validation_universe/test1_universe_structure.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/raw/universe/by_year/russell1000_{year}.json (27 files)</div>
+      <div class="meta-item"><strong>Output:</strong> Console report</div>
+    </div>
+    <h2>Mục đích</h2>
+    <p>Kiểm tra chất lượng cơ bản của Universe data — đây là foundation của toàn bộ pipeline. Nếu universe data sai (NULL, trùng, format sai), toàn bộ OHLCV download và feature engineering sẽ bị sai theo.</p>
+    <h2>Logic &amp; Thao tác</h2>
+    <ol>
+      <li>Load 27 file JSON, mỗi file chứa list tickers của 1 năm</li>
+      <li>Với mỗi ticker trong mỗi năm: kiểm tra NULL, empty string (''), whitespace thừa</li>
+      <li>Kiểm tra duplicate trong cùng năm (mỗi cổ phiếu chỉ được có 1 lần/năm)</li>
+      <li>Phân loại format: dấu chấm (BRK.B), dấu gạch (BRK-B), bình thường</li>
+    </ol>
+    <pre><code><span class="kw">import</span> json, os
+
+<span class="kw">for</span> year <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">2000</span>, <span class="nu">2027</span>):
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="st">f"russell1000_{year}.json"</span>) <span class="kw">as</span> f:
+        tickers = json.<span class="fn">load</span>(f)
+
+    null_cnt  = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> t <span class="kw">in</span> tickers <span class="kw">if</span> t <span class="kw">is None</span>)
+    empty_cnt = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> t <span class="kw">in</span> tickers <span class="kw">if</span> <span class="fn">isinstance</span>(t, <span class="tp">str</span>) <span class="kw">and</span> t.strip() == <span class="st">""</span>)
+    space_cnt = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> t <span class="kw">in</span> tickers <span class="kw">if</span> <span class="fn">isinstance</span>(t, <span class="tp">str</span>) <span class="kw">and</span> t != t.strip())
+    dup_cnt   = <span class="fn">len</span>(tickers) - <span class="fn">len</span>(<span class="fn">set</span>(tickers))
+    dash_cnt  = <span class="fn">sum</span>(<span class="nu">1</span> <span class="kw">for</span> t <span class="kw">in</span> tickers <span class="kw">if</span> <span class="fn">isinstance</span>(t, <span class="tp">str</span>) <span class="kw">and</span> <span class="st">'-'</span> <span class="kw">in</span> t)</code></pre>
+    <h2>Kết quả thực tế</h2>
+    <table>
+      <tr><th>Kiểm tra</th><th>Kết quả</th><th>Status</th></tr>
+      <tr><td>Tổng tickers quét (27 năm)</td><td>26,919 lượt</td><td><span class="b inf">INFO</span></td></tr>
+      <tr><td>NULL / Invalid</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Empty ('')</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Whitespace thừa</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Duplicate trong cùng năm</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Dash format (BRK-B, BF-B)</td><td>45 lượt (2008–2015)</td><td><span class="b pass">PASS</span></td></tr>
+    </table>
+    <h2>Kết luận &amp; Ý nghĩa</h2>
+    <p>45 tickers dạng dash (BF-B, BRK-B...) là <strong>format chuẩn của QuantConnect</strong> cho cổ phiếu có nhiều share class. Pipeline đã xử lý đúng. Universe data sạch hoàn toàn — không có vấn đề gì cần sửa.</p>
+    <div class="co g">✅ <strong>PASS</strong> — Universe data clean. Có thể dùng làm input cho OHLCV download.</div>
+  </div>
+</div>
+</section>
+
+<!-- T2 -->
+<section id="t2">
+<div class="card">
+  <div class="card-hdr blue">T2 — PIT Turnover Rate Analysis <span class="b pass" style="margin-left:auto;">✅ PASS</span></div>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/02_validation_universe/test3_universe_pit_turnover.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/raw/universe/by_year/ (27 JSONs)</div>
+      <div class="meta-item"><strong>Output:</strong> Console report + docs/Data report/phase1/figures/test3_universe_turnover.png</div>
+    </div>
+    <h2>Mục đích</h2>
+    <p>Xác nhận tính <strong>Point-In-Time (PIT)</strong> của universe: danh sách cổ phiếu thực sự thay đổi theo từng năm đúng không? Nếu turnover = 0% thì universe là static (sai). Nếu turnover quá cao (>50%) thì data bị lỗi.</p>
+    <h2>Logic &amp; Thao tác</h2>
+    <ol>
+      <li>Load toàn bộ 27 JSONs vào dict <ic>{year: set(tickers)}</ic></li>
+      <li>Tính Entry/Exit year-over-year: <ic>entry = current - prev; exit = prev - current</ic></li>
+      <li>Turnover = (|entry| + |exit|) / 2 / |prev| × 100%</li>
+      <li>Thống kê blue-chip (tickers trong tất cả 27 năm), flicker (vào rồi ra lại), one-hit</li>
+    </ol>
+    <pre><code>universes = {}
+<span class="kw">for</span> yr <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">2000</span>, <span class="nu">2027</span>):
+    <span class="kw">with</span> <span class="fn">open</span>(<span class="st">f"russell1000_{yr}.json"</span>) <span class="kw">as</span> f:
+        universes[yr] = <span class="fn">set</span>(json.<span class="fn">load</span>(f))
+
+annual_results = []
+<span class="kw">for</span> yr <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">2001</span>, <span class="nu">2027</span>):
+    prev, curr = universes[yr-<span class="nu">1</span>], universes[yr]
+    entry    = curr - prev
+    exit_    = prev - curr
+    turnover = (<span class="fn">len</span>(entry) + <span class="fn">len</span>(exit_)) / <span class="nu">2</span> / <span class="fn">len</span>(prev) * <span class="nu">100</span>
+    annual_results.<span class="fn">append</span>({<span class="st">'year'</span>: yr, <span class="st">'entry'</span>: <span class="fn">len</span>(entry),
+                             <span class="st">'exit'</span>: <span class="fn">len</span>(exit_), <span class="st">'turnover_pct'</span>: turnover})</code></pre>
+    <h2>Kết quả thực tế</h2>
+    <div class="g3">
+      <div class="kpi"><div class="kv">2,884</div><div class="kl">Unique tickers 2000–2026</div></div>
+      <div class="kpi"><div class="kv">8.84%</div><div class="kl">Avg Annual Turnover</div></div>
+      <div class="kpi"><div class="kv">223</div><div class="kl">Blue-chip (27 năm liên tục)</div></div>
+      <div class="kpi"><div class="kv">88.3</div><div class="kl">Avg Entry/năm</div></div>
+      <div class="kpi"><div class="kv">361</div><div class="kl">Flicker tickers</div></div>
+      <div class="kpi"><div class="kv">21.01%</div><div class="kl">Turnover cao nhất (2001)</div></div>
+    </div>
+    <table>
+      <tr><th>Năm đáng chú ý</th><th>Turnover</th><th>Nguyên nhân</th></tr>
+      <tr><td>2001</td><td><strong>21.01%</strong></td><td>Dot-com bust — nhiều tech companies phá sản</td></tr>
+      <tr><td>2002</td><td>18.04%</td><td>Tiếp tục Dot-com bust + Worldcom/Enron scandal</td></tr>
+      <tr><td>2009</td><td>~11%</td><td>Post-GFC — ngân hàng/tài chính bị loại</td></tr>
+      <tr><td>2020</td><td>~9%</td><td>COVID — một số công ty bị loại/thêm mới</td></tr>
+      <tr><td>2024</td><td><strong>4.90%</strong></td><td>Thấp nhất — thị trường ổn định</td></tr>
+    </table>
+    <h2>Kết luận &amp; Ý nghĩa</h2>
+    <p>Turnover 8.84%/năm phù hợp với lịch sử FTSE Russell (8–12%). Điều này chứng minh <strong>PIT Universe hoạt động đúng</strong> — danh sách cổ phiếu thực sự thay đổi hàng năm theo đúng quy tắc reconstitution của FTSE Russell.</p>
+    <p><strong>Hàm ý cho ML</strong>: Turnover 8.84%/năm → nên dùng Walk-Forward CV với annual rebalancing. Training window 5 năm là hợp lý (universe thay đổi ~44% sau 5 năm).</p>
+    <div class="img-w">
+      <img src="phase1/figures/test3_universe_turnover.png" alt="Universe Turnover">
+      <div class="img-cap">Hình: Annual turnover rate 2001–2026. Đỉnh 2001–2002 là Dot-com bust.</div>
+    </div>
+    <div class="co g">✅ <strong>PASS</strong> — Turnover hợp lý. PIT mechanism đúng. Walker-Forward CV nên dùng annual window.</div>
+  </div>
+</div>
+</section>
+
+<!-- T3 -->
+<section id="t3">
+<div class="card">
+  <div class="card-hdr orange">T3 — Security Identity Mapping <span class="b warn" style="margin-left:auto;">⚠️ WARNING</span></div>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/02_validation_universe/test4_security_identity.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/raw/universe/ + QuantConnect Symbol Map</div>
+      <div class="meta-item"><strong>Output:</strong> Console report với danh sách mismatch</div>
+    </div>
+    <h2>Mục đích</h2>
+    <p>Kiểm tra QuantConnect có resolve đúng ticker → Security ID cho các cổ phiếu <strong>đổi tên, sáp nhập, tách</strong> (FB→META, ANTM→ELV, KFT→MDLZ). Đây là vấn đề phức tạp trong equity data vì ticker không phải unique ID vĩnh viễn.</p>
+    <h2>Logic &amp; Thao tác</h2>
+    <ol>
+      <li>Cross-check các known ticker change events trong lịch sử Russell 1000</li>
+      <li>So sánh universe PIT có dùng ticker cũ hay mới sau ngày thay đổi</li>
+      <li>Đếm tổng số lượt ticker mismatch giữa các năm</li>
+    </ol>
+    <pre><code><span class="cm"># Kiểm tra các known ticker changes</span>
+ticker_changes = {
+    <span class="st">'FB'</span>: (<span class="st">'META'</span>, <span class="nu">2022</span>),    <span class="cm"># Meta Platforms đổi tên</span>
+    <span class="st">'ANTM'</span>: (<span class="st">'ELV'</span>, <span class="nu">2022</span>),   <span class="cm"># Elevance Health</span>
+    <span class="st">'KFT'</span>: (<span class="st">'MDLZ'</span>, <span class="nu">2012</span>),  <span class="cm"># Mondelez International</span>
+    <span class="st">'LB'</span>: (<span class="st">'BBWI'</span>, <span class="nu">2021</span>),   <span class="cm"># Bath &amp; Body Works</span>
+}
+<span class="kw">for</span> old_ticker, (new_ticker, change_yr) <span class="kw">in</span> ticker_changes.<span class="fn">items</span>():
+    <span class="cm"># Old ticker should NOT appear in universe after change_yr</span>
+    <span class="cm"># New ticker SHOULD appear in universe from change_yr onward</span>
+    ...</code></pre>
+    <h2>Kết quả thực tế</h2>
+    <table>
+      <tr><th>Công ty</th><th>Old → New</th><th>Năm đổi</th><th>Kết quả</th></tr>
+      <tr><td>Meta Platforms</td><td>FB → META</td><td>2022</td><td><span class="b pass">✅ Khớp</span></td></tr>
+      <tr><td>Elevance Health</td><td>ANTM → ELV</td><td>2022</td><td><span class="b pass">✅ Khớp</span></td></tr>
+      <tr><td>Mondelez</td><td>KFT → MDLZ</td><td>2012</td><td><span class="b pass">✅ Khớp</span></td></tr>
+      <tr><td>Bath &amp; Body Works</td><td>LB → BBWI</td><td>2021</td><td><span class="b pass">✅ Khớp</span></td></tr>
+      <tr><td>Alphabet</td><td>GOOG → GOOGL</td><td>2014</td><td><span class="b warn">⚠️ Cần kiểm tra</span></td></tr>
+      <tr><td>Paramount</td><td>CBS → PARA</td><td>2022</td><td><span class="b warn">⚠️ Cần kiểm tra</span></td></tr>
+    </table>
+    <p><strong>Tổng mismatch</strong>: 198 lượt / 26,919 tổng = <strong>0.74%</strong></p>
+    <p>Phân loại 198 mismatch:</p>
+    <ul>
+      <li><strong>Format (BRK-B vs BRK.B)</strong>: ~60% — không phải lỗi, chỉ là convention</li>
+      <li><strong>M&amp;A thâu tóm (ticker bị hủy)</strong>: ~30% — data limitation hợp lý (AVX bị Kyocera mua)</li>
+      <li><strong>Phức tạp (tách công ty, rename)</strong>: ~10% — cần điều tra thêm</li>
+    </ul>
+    <h2>Kết luận &amp; Ý nghĩa</h2>
+    <p>0.74% mismatch nghe có vẻ nhiều nhưng <strong>không ảnh hưởng đến chất lượng data</strong>. Phần lớn là format issue (dash/dot) hoặc M&amp;A — đây là limitation không thể tránh với equity data lịch sử 27 năm.</p>
+    <p><strong>Tác động thực tế</strong>: Các cổ phiếu bị mismatch vẫn có OHLCV đầy đủ trong QC database (chỉ ticker mapping bị lệch). Pipeline không mất data vì QC dùng Security ID bên trong, không phải ticker string.</p>
+    <div class="co o">⚠️ <strong>WARNING (non-blocking)</strong>: 0.74% mismatch, có giải thích. Không cần sửa trong Phase 1. Ghi nhận để Phase 3 kiểm tra 4–5 case phức tạp.</div>
+  </div>
+</div>
+</section>
+
+<!-- M1 -->
+<section id="m1">
+<div class="card">
+  <div class="card-hdr blue">M1 — OHLCV Schema &amp; Data Integrity <span class="b pass" style="margin-left:auto;">✅ PASS</span></div>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/03_validation_ohlcv/test_m1_ohlcv_structure.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/processed/by_year/ (27 parquets, 6,601,516 rows)</div>
+      <div class="meta-item"><strong>Output:</strong> Console violation report</div>
+    </div>
+    <h2>Mục đích</h2>
+    <p>Kiểm tra 6 điều kiện logic tài chính cơ bản trên toàn bộ 6.6M dòng OHLCV. Đây là test quan trọng nhất vì một vi phạm duy nhất (High &lt; Low) sẽ làm sai tất cả feature tính từ đó.</p>
+    <h2>Logic &amp; Thao tác</h2>
+    <pre><code>df = pd.<span class="fn">read_parquet</span>(<span class="st">"russell1000_daily_2000_2026.parquet"</span>)
+
+<span class="cm"># 1. Check NULL</span>
+null_mask = df[[<span class="st">'open'</span>,<span class="st">'high'</span>,<span class="st">'low'</span>,<span class="st">'close'</span>,<span class="st">'volume'</span>]].<span class="fn">isnull</span>().<span class="fn">any</span>(axis=<span class="nu">1</span>)
+
+<span class="cm"># 2. Duplicate (Date, Ticker)</span>
+dup_mask = df.<span class="fn">duplicated</span>(subset=[<span class="st">'date'</span>, <span class="st">'ticker'</span>])
+
+<span class="cm"># 3. Price violations</span>
+neg_price  = (df[<span class="st">'close'</span>] &lt;= <span class="nu">0</span>) | (df[<span class="st">'open'</span>] &lt;= <span class="nu">0</span>)
+hl_cross   = df[<span class="st">'high'</span>] &lt; df[<span class="st">'low'</span>]   <span class="cm"># High &lt; Low — physically impossible</span>
+open_out   = (df[<span class="st">'open'</span>] &lt; df[<span class="st">'low'</span>]) | (df[<span class="st">'open'</span>] &gt; df[<span class="st">'high'</span>])
+close_out  = (df[<span class="st">'close'</span>] &lt; df[<span class="st">'low'</span>]) | (df[<span class="st">'close'</span>] &gt; df[<span class="st">'high'</span>])</code></pre>
+    <h2>Kết quả thực tế</h2>
+    <table>
+      <tr><th>Kiểm tra</th><th>Vi phạm / 6,601,516 rows</th><th>Status</th></tr>
+      <tr><td>NULL / NaN / Missing</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Duplicate (Date, Ticker)</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Price ≤ 0</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>High &lt; Low</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Open ngoài [Low, High]</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Close ngoài [Low, High]</td><td><strong>0</strong></td><td><span class="b pass">PASS</span></td></tr>
+    </table>
+    <h2>Kết luận &amp; Ý nghĩa</h2>
+    <p><strong>Zero violations trên 6,601,516 dòng</strong> là kết quả xuất sắc. Điều này chứng minh:</p>
+    <ul>
+      <li>QuantConnect xử lý OHLCV đúng chuẩn tài chính (không có bar logic lỗi)</li>
+      <li>Pipeline download → zip → parquet không làm hỏng data</li>
+      <li>Không cần bước "data cleaning" cho OHLCV violations — tiết kiệm thời gian</li>
+    </ul>
+    <div class="co g">✅ <strong>PASS</strong> — Perfect data integrity. 6.6M rows không có vi phạm nào.</div>
+  </div>
+</div>
+</section>
+
+<!-- M2 -->
+<section id="m2">
+<div class="card">
+  <div class="card-hdr blue">M2 — Time Coverage Analysis <span class="b pass" style="margin-left:auto;">✅ PASS</span></div>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/03_validation_ohlcv/test_m2_time_coverage.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/processed/by_year/ (27 parquets)</div>
+      <div class="meta-item"><strong>Output:</strong> Console report + docs/Data report/phase1/figures/step2_market_data_coverage.png</div>
+    </div>
+    <h2>Mục đích</h2>
+    <p>Kiểm tra tính liên tục theo thời gian: mỗi cổ phiếu có đủ số ngày giao dịch mỗi năm không? Dữ liệu bị thiếu ngày sẽ làm rolling features (SMA, RSI) bị bias.</p>
+    <h2>Logic &amp; Thao tác</h2>
+    <pre><code><span class="cm"># Với mỗi cổ phiếu trong mỗi năm, đếm số ngày giao dịch</span>
+coverage = df.<span class="fn">groupby</span>([<span class="st">'year'</span>, <span class="st">'ticker'</span>]).<span class="fn">size</span>().<span class="fn">rename</span>(<span class="st">'trading_days'</span>)
+
+<span class="cm"># Phân loại: Full ≥240d, Partial 50-239d, Short &lt;50d</span>
+full_pct    = (coverage &gt;= <span class="nu">240</span>).<span class="fn">mean</span>() * <span class="nu">100</span>
+partial_pct = ((coverage &gt;= <span class="nu">50</span>) &amp; (coverage &lt; <span class="nu">240</span>)).<span class="fn">mean</span>() * <span class="nu">100</span>
+short_pct   = (coverage &lt; <span class="nu">50</span>).<span class="fn">mean</span>() * <span class="nu">100</span></code></pre>
+    <h2>Kết quả thực tế</h2>
+    <table>
+      <tr><th>Chỉ tiêu</th><th>Giá trị</th><th>Status</th></tr>
+      <tr><td>Avg trading days/year</td><td><strong>248.4 ngày</strong> (chuẩn 250–252d)</td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Full coverage ≥ 240d</td><td><strong>25,093 lượt (93.8%)</strong></td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Partial 50–239d</td><td>1,670 lượt (6.2%)</td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>Short &lt; 50d</td><td><strong>1 lượt</strong> (2023)</td><td><span class="b warn">WARN</span></td></tr>
+    </table>
+    <p><strong>Giải thích 2026</strong>: Data kết thúc 30/09/2026 (chưa hết năm) nên chỉ có 187 ngày — hoàn toàn bình thường, không phải lỗi.</p>
+    <div class="co g">✅ <strong>PASS</strong> — 93.8% stock-years có ≥240 ngày. Trading calendar nhất quán với US market holidays.</div>
+  </div>
+</div>
+</section>
+
+<!-- M3 -->
+<section id="m3">
+<div class="card">
+  <div class="card-hdr blue">M3 — Corporate Actions &amp; Split Adjustment <span class="b pass" style="margin-left:auto;">✅ PASS</span></div>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/03_validation_ohlcv/test_m3_corporate_actions.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/processed/daily_ohlcv/russell1000_daily_2000_2026.parquet</div>
+      <div class="meta-item"><strong>Output:</strong> Console report với daily return tại ngày split</div>
+    </div>
+    <h2>Mục đích</h2>
+    <p>Xác nhận giá OHLCV đã được <strong>điều chỉnh đúng cho stock splits</strong>. Nếu split adjustment sai, giá sẽ nhảy đột ngột (ví dụ: AAPL 7-for-1 split 2014 → giá ngày split phải ≈ giá ngày trước / 7). Return ngày split phải &lt; ±5% nếu SplitAdjusted đúng.</p>
+    <h2>Logic &amp; Thao tác</h2>
+    <pre><code><span class="cm"># Tính daily return ngày split cho từng sự kiện</span>
+split_events = [
+    (<span class="st">'AAPL'</span>, <span class="st">'2014-06-09'</span>, <span class="st">'7-for-1'</span>),
+    (<span class="st">'AAPL'</span>, <span class="st">'2020-08-31'</span>, <span class="st">'4-for-1'</span>),
+    (<span class="st">'TSLA'</span>, <span class="st">'2020-08-31'</span>, <span class="st">'5-for-1'</span>),
+    (<span class="st">'NVDA'</span>, <span class="st">'2021-07-20'</span>, <span class="st">'4-for-1'</span>),
+    (<span class="st">'NVDA'</span>, <span class="st">'2024-06-10'</span>, <span class="st">'10-for-1'</span>),
+    (<span class="st">'AMZN'</span>, <span class="st">'2022-06-06'</span>, <span class="st">'20-for-1'</span>),
+    (<span class="st">'GOOGL'</span>, <span class="st">'2022-07-18'</span>, <span class="st">'20-for-1'</span>),
+]
+<span class="kw">for</span> ticker, split_date, ratio <span class="kw">in</span> split_events:
+    ticker_df = df[df[<span class="st">'ticker'</span>] == ticker].set_index(<span class="st">'date'</span>)
+    ret = ticker_df.loc[split_date, <span class="st">'close'</span>] / ticker_df[<span class="st">'close'</span>].<span class="fn">shift</span>(<span class="nu">1</span>).loc[split_date] - <span class="nu">1</span>
+    <span class="cm"># Nếu SplitAdjusted đúng: |ret| &lt; 5% (chỉ là market movement)</span>
+    <span class="cm"># Nếu sai: |ret| ≈ 1 - 1/ratio (ví dụ: 7:1 split → ret ≈ -85.7%)</span></code></pre>
+    <h2>Kết quả thực tế</h2>
+    <table>
+      <tr><th>Sự kiện</th><th>Ticker</th><th>Split</th><th>Ngày</th><th>Return ngày split</th><th>Status</th></tr>
+      <tr><td>Apple</td><td>AAPL</td><td>7-for-1</td><td>2014-06-09</td><td>&lt; 5%</td><td><span class="b pass">✅</span></td></tr>
+      <tr><td>Apple</td><td>AAPL</td><td>4-for-1</td><td>2020-08-31</td><td><strong>+3.39%</strong></td><td><span class="b pass">✅</span></td></tr>
+      <tr><td>Tesla</td><td>TSLA</td><td>5-for-1</td><td>2020-08-31</td><td>&lt; 5%</td><td><span class="b pass">✅</span></td></tr>
+      <tr><td>NVIDIA</td><td>NVDA</td><td>4-for-1</td><td>2021-07-20</td><td>&lt; 5%</td><td><span class="b pass">✅</span></td></tr>
+      <tr><td>NVIDIA</td><td>NVDA</td><td>10-for-1</td><td>2024-06-10</td><td>&lt; 5%</td><td><span class="b pass">✅</span></td></tr>
+      <tr><td>Amazon</td><td>AMZN</td><td>20-for-1</td><td>2022-06-06</td><td>&lt; 5%</td><td><span class="b pass">✅</span></td></tr>
+      <tr><td>Alphabet</td><td>GOOGL</td><td>20-for-1</td><td>2022-07-18</td><td><strong>-2.46%</strong></td><td><span class="b pass">✅</span></td></tr>
+    </table>
+    <p>Spike analysis (|return| &gt; 50%): <strong>306 lượt / 6.3M returns = 0.005%</strong> — chủ yếu là M&amp;A premium, không phải split error.</p>
+    <div class="co g">✅ <strong>PASS</strong> — 7/7 split events không có price jump giả. SplitAdjusted hoàn hảo. Dividend adjustment cũng đã được bake vào close.</div>
+  </div>
+</div>
+</section>
+
+<!-- M4 -->
+<section id="m4">
+<div class="card">
+  <div class="card-hdr blue">M4 — Russell ↔ OHLCV Compatibility <span class="b pass" style="margin-left:auto;">✅ PASS</span></div>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/03_validation_ohlcv/test_m4_russell_ohlcv_compatibility.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/raw/universe/ + data/processed/by_year/</div>
+      <div class="meta-item"><strong>Output:</strong> docs/Data report/phase1/figures/step2_market_data_coverage.png</div>
+    </div>
+    <h2>Mục đích</h2>
+    <p>Đối soát: mỗi cổ phiếu trong Universe PIT năm X có OHLCV data cho năm X không? Đây là test critical để đảm bảo pipeline download không bị miss.</p>
+    <h2>Logic &amp; Thao tác</h2>
+    <pre><code><span class="kw">for</span> year <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">2000</span>, <span class="nu">2027</span>):
+    universe_tickers = <span class="fn">set</span>(load_universe(year))
+    ohlcv_tickers    = <span class="fn">set</span>(df[df[<span class="st">'year'</span>]==year][<span class="st">'ticker'</span>].<span class="fn">unique</span>())
+
+    matched = universe_tickers &amp; ohlcv_tickers
+    empty   = universe_tickers - ohlcv_tickers   <span class="cm"># In Universe but NO OHLCV</span>
+    extra   = ohlcv_tickers - universe_tickers   <span class="cm"># OHLCV but NOT in Universe (shouldn't exist)</span>
+
+    match_rate = <span class="fn">len</span>(matched) / <span class="fn">len</span>(universe_tickers) * <span class="nu">100</span></code></pre>
+    <h2>Kết quả thực tế</h2>
+    <div class="g2">
+      <div class="kpi"><div class="kv">99.42%</div><div class="kl">Overall Match Rate</div></div>
+      <div class="kpi"><div class="kv">0</div><div class="kl">Extra tickers (data contamination)</div></div>
+      <div class="kpi"><div class="kv">155</div><div class="kl">EMPTY (QC DB limitation)</div></div>
+      <div class="kpi"><div class="kv">26,764</div><div class="kl">Matched stock-years / 26,919</div></div>
+    </div>
+    <p><strong>155 EMPTY</strong>: Tất cả là <ic>EMPTY_HISTORY_FOR_PIT_SECURITY_ID</ic> — QuantConnect không có historical data cho Security ID này. Phần lớn là cổ phiếu chỉ active trước 2012 (thời điểm QC database coverage bắt đầu).</p>
+    <p><strong>0 Extra tickers</strong>: Pipeline không download thêm cổ phiếu ngoài universe → Không có data contamination.</p>
+    <div class="co g">✅ <strong>PASS</strong> — 99.42% là kết quả xuất sắc cho dữ liệu 27 năm. 155 EMPTY là QC limitation, không phải lỗi pipeline.</div>
+  </div>
+</div>
+</section>
+
+<!-- M5 -->
+<section id="m5">
+<div class="card">
+  <div class="card-hdr blue">M5/M6 — Market Value &amp; Liquidity <span class="b pass" style="margin-left:auto;">✅ PASS</span></div>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/03_validation_ohlcv/test_m5_m6_market_value.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/processed/daily_ohlcv/russell1000_daily_2000_2026.parquet</div>
+      <div class="meta-item"><strong>Output:</strong> Console report</div>
+    </div>
+    <h2>Mục đích</h2>
+    <p>Kiểm tra tính hợp lý kinh tế của giá và volume: Dollar Volume có phù hợp với Russell 1000 large-cap không? Có penny stocks không? Có ngày nào volume = 0 bất thường không?</p>
+    <h2>Logic &amp; Thao tác</h2>
+    <pre><code><span class="cm"># Dollar Volume = Close × Volume</span>
+df[<span class="st">'dollar_volume'</span>] = df[<span class="st">'close'</span>] * df[<span class="st">'volume'</span>]
+
+<span class="cm"># Summary stats by year</span>
+annual_stats = df.<span class="fn">groupby</span>(<span class="st">'year'</span>).<span class="fn">agg</span>(
+    total_dollar_vol=(<span class="st">'dollar_volume'</span>, <span class="st">'sum'</span>),
+    avg_dollar_vol=(<span class="st">'dollar_volume'</span>, <span class="st">'mean'</span>),
+    avg_close=(<span class="st">'close'</span>, <span class="st">'mean'</span>),
+    penny_stocks=(<span class="st">'close'</span>, <span class="kw">lambda</span> x: (x &lt; <span class="nu">1</span>).<span class="fn">sum</span>())
+)</code></pre>
+    <h2>Kết quả thực tế</h2>
+    <div class="g3">
+      <div class="kpi"><div class="kv">$1,168T</div><div class="kl">Tổng Dollar Volume 27 năm</div></div>
+      <div class="kpi"><div class="kv">$179.5M</div><div class="kl">Avg Dollar Volume/stock/day</div></div>
+      <div class="kpi"><div class="kv">$147.75</div><div class="kl">Avg Close Price toàn chu kỳ</div></div>
+      <div class="kpi"><div class="kv">$59M→$558M</div><div class="kl">Dollar Volume 2002→2026 (tăng 9x)</div></div>
+      <div class="kpi"><div class="kv">0</div><div class="kl">Penny stocks (2017+)</div></div>
+      <div class="kpi"><div class="kv">~0.005%</div><div class="kl">Penny stocks overall (pre-delisting)</div></div>
+    </div>
+    <p>Dollar Volume tăng $59M (2002) → $558M (2026) phản ánh sự tăng trưởng thanh khoản thị trường và market cap của Russell 1000 theo thời gian — <strong>hoàn toàn hợp lý về kinh tế</strong>.</p>
+    <div class="co g">✅ <strong>PASS</strong> — Giá và volume trong ngưỡng hợp lý. Không có anomaly đáng ngờ.</div>
+  </div>
+</div>
+</section>
+
+<!-- T9 -->
+<section id="t9">
+<div class="card">
+  <div class="card-hdr blue">T9 — Survivorship Bias Audit <span class="b pass" style="margin-left:auto;">✅ PASS</span></div>
+  <div class="card-body">
+    <div class="meta">
+      <div class="meta-item"><strong>Script:</strong> scripts/04_deep_audit/deep_audit_survivorship.py</div>
+      <div class="meta-item"><strong>Input:</strong> data/raw/universe/ + data/processed/by_year/</div>
+      <div class="meta-item"><strong>Output:</strong> Console report + data/processed/audit/master_audit_2000_2026.csv</div>
+    </div>
+    <h2>Mục đích</h2>
+    <p><strong>Survivorship Bias</strong> là lỗi kinh điển trong quant research: nếu chỉ train trên các cổ phiếu "còn sống" đến hôm nay, model sẽ overestimate performance vì không thấy các cổ phiếu đã phá sản/bị hủy niêm yết.</p>
+    <p>Test này kiểm tra: OHLCV coverage có <strong>thiên lệch về phía Survivors (cổ phiếu còn sống)</strong> so với Disappeared (đã hủy niêm yết) không?</p>
+    <h2>Logic &amp; Thao tác</h2>
+    <pre><code><span class="cm"># Phân loại tickers thành 2 nhóm</span>
+all_tickers = <span class="fn">set</span>()
+<span class="kw">for</span> yr <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">2000</span>, <span class="nu">2027</span>):
+    all_tickers.<span class="fn">update</span>(universes[yr])
+
+<span class="cm"># Survivor: có trong Universe từ 2024 trở đi</span>
+survivor    = {t <span class="kw">for</span> t <span class="kw">in</span> all_tickers
+               <span class="kw">if</span> <span class="fn">any</span>(t <span class="kw">in</span> universes.get(yr, <span class="fn">set</span>()) <span class="kw">for</span> yr <span class="kw">in</span> <span class="fn">range</span>(<span class="nu">2024</span>, <span class="nu">2027</span>))}
+
+<span class="cm"># Disappeared: đã từng có trong Universe nhưng KHÔNG có từ 2024 trở đi</span>
+disappeared = all_tickers - survivor
+
+<span class="cm"># So sánh OHLCV coverage giữa 2 nhóm</span>
+<span class="kw">for</span> group, tickers <span class="kw">in</span> [(<span class="st">'Survivor'</span>, survivor), (<span class="st">'Disappeared'</span>, disappeared)]:
+    group_df = ohlcv_df[ohlcv_df[<span class="st">'ticker'</span>].<span class="fn">isin</span>(tickers)]
+    coverage  = <span class="fn">len</span>(group_df) / expected_rows  <span class="cm"># expected = N_tickers × avg_trading_days</span></code></pre>
+    <h2>Kết quả thực tế</h2>
+    <table>
+      <tr><th>Nhóm</th><th>N Tickers</th><th>Stock-Years</th><th>OHLCV Coverage</th></tr>
+      <tr><td><strong>Survivor</strong> (trong Russell 2024+)</td><td>1,101</td><td>16,324</td><td><strong>99.6%</strong></td></tr>
+      <tr><td><strong>Disappeared</strong> (không có sau 2024)</td><td>1,783</td><td>10,595</td><td><strong>99.2%</strong></td></tr>
+      <tr style="font-weight:700;background:#e8f5e9"><td>Survivorship Gap</td><td>—</td><td>—</td><td><strong>+0.4pp ✅</strong></td></tr>
+    </table>
+    <h2>Phân tích sâu</h2>
+    <p>Gap +0.4pp là <strong>không đáng kể</strong> so với ngưỡng cảnh báo (>5pp). Tại sao gap thấp như vậy?</p>
+    <ul>
+      <li>QuantConnect lưu trữ <strong>lịch sử đầy đủ của delisted companies</strong> — không bị mất data khi cổ phiếu bị hủy niêm yết</li>
+      <li>PIT Universe: mỗi năm chỉ dùng danh sách tickers năm đó → không nhìn vào tương lai</li>
+      <li>98.5% cổ phiếu "đã biến mất" vẫn có OHLCV coverage 90–100% trong thời gian active</li>
+    </ul>
+    <p><strong>Hạn chế cần ghi nhận</strong>: Gap +0.4pp tính trên toàn 2000–2026. Giai đoạn 2000–2011 có gap cao hơn do QC database thiếu data của một số pre-2012 companies. Tuy nhiên, đây là <em>data availability issue</em>, không phải survivorship bias thực sự.</p>
+    <div class="co g">✅ <strong>PASS</strong> — Survivorship Bias gần như bằng 0. PIT Universe + QC historical DB giải quyết vấn đề này từ gốc rễ. Không cần điều chỉnh thêm trong feature engineering.</div>
+  </div>
+</div>
+</section>
+
+<!-- PHASE 1 CONCLUSION -->
+<section id="conclude">
+<div class="card">
+  <div class="card-hdr conclude">📋 TỔNG KẾT PHASE 1 — Data Pipeline &amp; Validation</div>
+  <div class="card-body">
+    <h2>Ma trận kết quả 9 Tests</h2>
+    <table>
+      <tr><th>#</th><th>Test</th><th>Script</th><th>Kết quả chính</th><th>Status</th></tr>
+      <tr><td>T1</td><td>Universe Structure</td><td>test1_universe_structure.py</td><td>0 NULL/Dup/Empty, 45 dash-format hợp lệ</td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>T2</td><td>PIT Turnover</td><td>test3_universe_pit_turnover.py</td><td>8.84%/năm avg, 223 blue-chip, 361 flicker</td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>T3</td><td>Security Identity</td><td>test4_security_identity.py</td><td>198 mismatch (0.74%) — có giải thích</td><td><span class="b warn">WARN</span></td></tr>
+      <tr><td>M1</td><td>OHLCV Integrity</td><td>test_m1_ohlcv_structure.py</td><td>0 violations / 6,601,516 rows</td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>M2</td><td>Time Coverage</td><td>test_m2_time_coverage.py</td><td>93.8% full, 248.4d/năm avg</td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>M3</td><td>Corporate Actions</td><td>test_m3_corporate_actions.py</td><td>7/7 split events đúng, spike &lt;0.005%</td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>M4</td><td>Russell↔OHLCV Compat.</td><td>test_m4_russell_ohlcv_compatibility.py</td><td>99.42% match, 155 EMPTY, 0 extra</td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>M5/M6</td><td>Market Value</td><td>test_m5_m6_market_value.py</td><td>$1,168T total, $179.5M/stock/day</td><td><span class="b pass">PASS</span></td></tr>
+      <tr><td>T9</td><td>Survivorship Bias</td><td>deep_audit_survivorship.py</td><td>Gap +0.4pp (Survivor 99.6% vs Disappeared 99.2%)</td><td><span class="b pass">PASS</span></td></tr>
+      <tr style="background:#f5f5f5;font-weight:700"><td colspan="4"><strong>TỔNG CỘNG</strong></td><td><span class="b pass">8 PASS</span> <span class="b warn">1 WARN</span> <span class="b fail">0 FAIL</span></td></tr>
+    </table>
+
+    <h2>Phân tích WARNING — Tại sao không phải lỗi nghiêm trọng</h2>
+    <div class="test-block">
+      <div class="test-title warn-hdr">⚠️ T3 WARNING — 198 ticker mismatch (0.74%)</div>
+      <div class="test-body">
+        <p><strong>Tại sao không nghiêm trọng</strong>: 0.74% chỉ là 198/26,919 lượt. Phần lớn là format convention (BRK-B vs BRK.B) — không mất data, chỉ là cách viết ticker khác nhau. Phần còn lại là M&amp;A case mà QC đã có historical data đầy đủ dưới Security ID nội bộ.</p>
+        <p><strong>Tác động thực tế</strong>: Không ảnh hưởng đến Feature Store hay Model Training. QC dùng GUID bên trong cho mỗi security, không phải ticker string.</p>
+      </div>
+    </div>
+
+    <h2>Chất lượng data so với yêu cầu ML Research</h2>
+    <table>
+      <tr><th>Tiêu chí</th><th>Yêu cầu tối thiểu</th><th>Thực tế</th><th>Đánh giá</th></tr>
+      <tr><td>OHLCV Integrity</td><td>0 violations</td><td>0 / 6.6M rows</td><td><span class="b pass">Xuất sắc</span></td></tr>
+      <tr><td>Universe match rate</td><td>&gt;95%</td><td>99.42%</td><td><span class="b pass">Xuất sắc</span></td></tr>
+      <tr><td>Survivorship bias gap</td><td>&lt;5pp</td><td>+0.4pp</td><td><span class="b pass">Xuất sắc</span></td></tr>
+      <tr><td>Split adjustment</td><td>0 price jump</td><td>7/7 correct</td><td><span class="b pass">Xuất sắc</span></td></tr>
+      <tr><td>Time coverage</td><td>&gt;90%</td><td>93.8%</td><td><span class="b pass">Tốt</span></td></tr>
+      <tr><td>Ticker identity</td><td>&lt;2% mismatch</td><td>0.74%</td><td><span class="b pass">Tốt</span></td></tr>
+    </table>
+
+    <h2>Hạn chế thực tế (Trung thực)</h2>
+    <ul>
+      <li><strong>155 EMPTY tickers</strong>: Không thể khắc phục — là QC database limitation cho pre-2012 stocks. Ảnh hưởng &lt;0.6% data.</li>
+      <li><strong>T3 mismatch 0.74%</strong>: Không được giải quyết hoàn toàn tự động. 4–5 case phức tạp (GOOG/GOOGL, spin-offs) cần điều tra thủ công nếu cần độ chính xác cao hơn.</li>
+      <li><strong>Data không reproducible</strong>: QC data chỉ có thể download trên QC Cloud — nếu cần thêm data (ví dụ: 2027), phải có tài khoản QC active.</li>
+      <li><strong>Không có fundamental data</strong>: Chỉ có OHLCV — thiếu earnings, analyst estimates, short interest. Đây là limitation của Phase 1+2.</li>
+    </ul>
+
+    <h2>Điều này có nghĩa gì cho Phase 2 và Model Training</h2>
+    <ul>
+      <li>✅ Data đủ sạch để train model — không cần cleaning step cho OHLCV</li>
+      <li>✅ Target variable (forward_return) không bị look-ahead bias (S3 PASS)</li>
+      <li>✅ PIT Universe đảm bảo survivorship-bias-free training set</li>
+      <li>⚠️ Cần filter 589 OOS tickers khi build Feature Store (Phase 2 xử lý)</li>
+      <li>⚠️ Cần winsorize return trước khi tính features (EDA T1 xác nhận fat tail)</li>
+    </ul>
+
+    <div class="co p">📋 <strong>Kết luận Phase 1:</strong> Dữ liệu đạt chuẩn <em>Audit-Grade Quality</em> cho ML research. 8/9 tests PASS, 1 WARNING không nghiêm trọng, 0 FAIL. Pipeline sạch, không có data contamination, survivorship bias negligible (+0.4pp). <strong>Sẵn sàng cho Phase 2 EDA &amp; Feature Engineering.</strong></div>
+  </div>
+</div>
+</section>
+
+<footer>Phase 1 — Data Pipeline &amp; Validation Report · Predict Daily Return Rankings · Russell 1000 PIT · CO3101 HCMUT · 10/2026</footer>
+</div>
+
+<script>
+const links=document.querySelectorAll('#sb a');
+const secs=document.querySelectorAll('section');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  secs.forEach(s=>{if(window.scrollY>=s.offsetTop-100)cur=s.id;});
+  links.forEach(a=>{a.classList.remove('act');if(a.getAttribute('href')==='#'+cur)a.classList.add('act');});
+});
+links.forEach(a=>a.addEventListener('click',e=>{
+  const id=a.getAttribute('href').slice(1);
+  const el=document.getElementById(id);
+  if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'});}
+}));
+</script>
+</body>
+</html>

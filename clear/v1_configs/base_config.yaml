@@ -1,0 +1,43 @@
+# Master Configuration for Daily Return Rankings Project
+# Adhering to the hedge-fund research methodology
+
+universe:
+  name: "Russell_1000"
+  min_stocks: 500
+  target_stocks: 1000
+  universe_cache_path: "data/raw/universe/russell1000_constituents.csv"
+  fallback_tickers_source: "sp500_plus_large_cap" # ensures immediate availability
+
+data:
+  source: "yahoo_finance"
+  history_years: 11
+  start_date: "2013-01-01"
+  # In-sample vs Out-of-sample split strictly per instructor instructions
+  split_date: "2024-01-01" # All data >= 2024-01-01 is OUT-OF-SAMPLE (strictly locked)
+  end_date: null           # Fetches latest date available
+  raw_storage_dir: "data/raw/market_data"
+  in_sample_dir: "data/processed/in_sample"
+  out_sample_dir: "data/processed/out_sample"
+  price_field_for_return: "Adj Close"
+
+portfolio:
+  initial_capital: 10000000.0  # $10M book size
+  target_leverage: 1.0         # Sum of absolute weights = 1.0 (50% Long, 50% Short)
+  max_weight_per_stock: 0.05   # 5% max single stock exposure
+  dollar_neutral: true         # Sum of weights strictly = 0
+
+backtest:
+  rebalance_frequency: "daily"
+  transaction_cost_bps: 5.0    # 5 bps = 0.05% per side for US large cap
+  risk_free_rate: 0.0          # 0% for dollar-neutral long-short spread
+  annualization_factor: 252
+
+metrics:
+  target_metrics:
+    - "annualized_return"
+    - "annualized_volatility"
+    - "sharpe_ratio"
+    - "rank_ic"
+    - "max_drawdown"
+    - "turnover"
+    - "win_rate"

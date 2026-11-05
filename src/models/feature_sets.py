@@ -12,7 +12,7 @@ FEATURES_V1: 16 ứng viên theo docs/specifications/features_v1.md (chưa có f
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -36,20 +36,32 @@ def available_features(names: List[str] = FEATURES_V1, directory: Optional[Path]
     return [n for n in names if (d / f"{n}.parquet").exists()]
 
 
+def load_feature_matrix(
+    name: str,
+    dates: pd.DatetimeIndex,
+    sids: pd.Index,
+    directory: Optional[Path] = None,
+) -> pd.DataFrame:
+    """Đọc một ma trận feature và căn theo (dates, sids) — bỏ mọi ngày ngoài `dates`."""
+    m = pd.read_parquet((directory or features_dir()) / f"{name}.parquet")
+    m.index = pd.to_datetime(m.index)
+    return m.reindex(index=dates, columns=sids)
+
+
 def load_feature_matrices(
     names: List[str],
     dates: pd.DatetimeIndex,
     sids: pd.Index,
     directory: Optional[Path] = None,
-) -> Dict[str, pd.DataFrame]:
-    """Đọc ma trận feature và cắt/căn theo (dates, sids) — không đọc ngày ngoài `dates`."""
-    d = directory or features_dir()
-    out = {}
-    for n in names:
-        m = pd.read_parquet(d / f"{n}.parquet")
-        m.index = pd.to_datetime(m.index)
-        out[n] = m.reindex(index=dates, columns=sids)
-    return out
+    lazy: bool = False,
+) -> Dict[str, Union[pd.DataFrame, Callable[[], pd.DataFrame]]]:
+    """
+    Đọc nhiều ma trận feature. lazy=True trả về hàm nạp cho từng feature để build_panel
+    đọc lần lượt (16 ma trận ngày × SID cùng lúc tốn vài GB RAM).
+    """
+    if lazy:
+        return {n: (lambda n=n: load_feature_matrix(n, dates, sids, directory)) for n in names}
+    return {n: load_feature_matrix(n, dates, sids, directory) for n in names}
 
 
 def reversal_5d(adj_close: pd.DataFrame, bar_quality_mask: Optional[pd.DataFrame] = None) -> pd.DataFrame:

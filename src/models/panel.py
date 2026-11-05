@@ -14,7 +14,7 @@ Quy ước (docs/specifications/target_and_timing_v1.md):
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -34,7 +34,7 @@ def _aligned(m: pd.DataFrame, ref: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_panel(
-    features: Dict[str, pd.DataFrame],
+    features: Dict[str, Union[pd.DataFrame, Callable[[], pd.DataFrame]]],
     target_next_return: pd.DataFrame,
     valid_label_mask: pd.DataFrame,
     universe_mask: pd.DataFrame,
@@ -43,6 +43,7 @@ def build_panel(
     end: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, List[str]]:
     """
+    `features`: tên → ma trận, hoặc tên → hàm không đối số trả về ma trận (nạp lần lượt, tiết kiệm RAM).
     Trả về (panel, feature_cols). panel gồm: date, canonical_sid, <features>,
     target_next_return, target_next_rank — mỗi dòng là 1 ô valid_label_mask == True.
 
@@ -66,7 +67,8 @@ def build_panel(
     universe = _aligned(universe_mask, ref).fillna(False).astype(bool)
     names = list(features)
     for name in names:
-        f = _aligned(features[name], ref)
+        f = features[name]
+        f = _aligned(f() if callable(f) else f, ref)
         if rank_features:
             f = cross_sectional_rank(f, mask=universe, pct=True) - 0.5
             panel[name] = np.nan_to_num(f.to_numpy(dtype=np.float32)[r_idx, c_idx], nan=0.0)

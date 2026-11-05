@@ -69,7 +69,7 @@ def load_panel(cfg):
     print(f"  ✓ Feature v1 có sẵn: {len(names)}/{len(FEATURES_V1)} {names}")
     if missing:
         print(f"  ⚠️ Chưa có trong data/processed/features: {missing}")
-    feats = load_feature_matrices(names, adj_close.index, adj_close.columns)
+    feats = load_feature_matrices(names, adj_close.index, adj_close.columns, lazy=True)
     feats["reversal_5d"] = reversal_5d(adj_close, bar_quality)
     del adj_close, bar_quality
 
@@ -88,12 +88,16 @@ def main():
     ap.add_argument("--train-years", type=int, default=5)
     ap.add_argument("--expanding", action="store_true", help="train từ đầu Development thay vì rolling")
     ap.add_argument("--embargo-days", type=int, default=5)
+    ap.add_argument("--all-factors", action="store_true",
+                    help="thêm factor:<f> cho từng feature v1 có sẵn (IC đơn biến theo fold)")
     args = ap.parse_args()
     t0 = time.time()
     cfg = load_config()
 
     section("1. LOAD MATRICES + BUILD PANEL")
     panel, features = load_panel(cfg)
+    if args.all_factors:
+        args.models += [f"factor:{f}" for f in features if f"factor:{f}" not in args.models]
 
     section("2. WALK-FORWARD FOLDS")
     folds = make_folds(panel["date"], args.first_val_year, args.last_val_year,

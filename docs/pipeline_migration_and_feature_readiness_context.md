@@ -9,7 +9,7 @@
 
 ## 1. Các Quyết Định Thiết Kế Đã Chốt (Frozen Architectural Decisions)
 
-Các quyết định dưới đây đã được thảo luận, kiểm chứng thực nghiệm và chốt cố định trong kiến trúc phần mềm, không thay đổi tùy tiện trong quá trình phát triển mô hình:
+Các quyết định dưới đây ghi nhận thiết kế hiện hành. Tách rõ phần đã kiểm thử nội bộ và phần còn là giả định; không coi mọi quyết định là bằng chứng thực tế đã xác minh.
 
 ### 1.1. Cấu Trúc Dữ Liệu Tọa Độ 2D (Wide Matrix Grid)
 - Toàn bộ dữ liệu giá, khối lượng, lợi suất và mặt nạ được tổ chức dưới dạng **Ma trận 2D** kích thước cố định:
@@ -37,7 +37,7 @@ Các quyết định dưới đây đã được thảo luận, kiểm chứng t
 eg 	ext{is\_bad\_data\_period} \land 
 eg 	ext{is\_spinoff\_discontinuity}$.
    - Dùng để gán `NaN` vào các ô lỗi của ma trận giá/lợi suất trước khi thực hiện các phép tính trượt (*rolling calculations*).
-   - **Bảo tồn lịch sử warm-up**: Các phiên giao dịch hợp lệ trước ngày cổ phiếu gia nhập Russell 1000 được giữ nguyên vẹn để phục vụ warm-up cho các mã đã niêm yết đủ thời gian. Cần lưu ý rằng cơ chế này không bảo đảm 100% đầy đủ cho mọi mã, bởi các cổ phiếu mới phát hành (IPO) hoặc mới niêm yết chưa đủ số phiên lookback vẫn sẽ nhận giá trị `NaN` hợp lệ theo quy tắc `min_periods = W`.
+   - **Bảo tồn lịch sử warm-up**: Các phiên giao dịch hợp lệ trước ngày cổ phiếu gia nhập Russell 1000 được giữ nguyên vẹn để phục vụ warm-up cho các mã đã niêm yết đủ thời gian. Cần lưu ý rằng cơ chế này không bảo đảm 100% đầy đủ cho mọi mã, bởi các cổ phiếu mới phát hành (IPO) hoặc mới niêm yết chưa đủ số phiên lookback vẫn sẽ nhận giá trị `NaN` hợp lệ theo lookback riêng của từng feature.
 2. **`membership_mask` (Output Mask - Lọc đầu ra tại ngày T)**:
    - Xác định tư cách thành viên rổ chỉ số tại ngày hiện tại $t$.
    - **Chỉ áp dụng tại ngày đầu ra $t$**. Nếu tại ngày $t$, cổ phiếu là thành viên và đã có đủ lịch sử sạch từ các phiên trước đó, đặc trưng được tính toán hợp lệ ngay từ ngày đầu tiên gia nhập rổ.
@@ -50,7 +50,7 @@ eg 	ext{is\_spinoff\_discontinuity}$.
   $$	ext{rank}_{	ext{norm}, i, t} = egin{cases} \dfrac{	ext{rank}_{i, t} - 1}{N_t - 1} & 	ext{khi } N_t > 1 \ 0.5 & 	ext{khi } N_t = 1 \ 	ext{NaN} & 	ext{khi } N_t = 0 \end{cases}$$
 - Đồng hạng (*ties*) mặc định giải quyết bằng phương pháp trung bình (`method='average'`).
 - Các chứng khoán ngoài mặt nạ thành viên hoặc có giá trị khuyết thiếu giữ nguyên `NaN`, tuyệt đối không điền 0 hay hằng số.
-- **Tính chất toán học & rủi ro**: Phép biến đổi thứ tự này chỉ chuẩn hóa phân phối về dạng đều tại từng ngày, **không triệt tiêu rủi ro thị trường (Market Beta) hay rủi ro ngành**. Nó không tương đương với phép hồi quy trung hòa nhân tố; tương quan giữa các chứng khoán vẫn chịu tác động của các biến động hệ thống chung.
+- **Tính chất toán học & rủi ro**: Phép biến đổi thứ tự này chỉ chuẩn hóa thứ hạng về [0,1] tại từng ngày; có ties thì không phải phân phối đều chính xác, **không triệt tiêu rủi ro thị trường (Market Beta) hay rủi ro ngành**. Nó không tương đương với phép hồi quy trung hòa nhân tố; tương quan giữa các chứng khoán vẫn chịu tác động của các biến động hệ thống chung.
 
 ### 1.6. Minh Bạch Hóa Loại Lợi Suất & Giá (Explicit Return/Price Contracts)
 - Các lớp tính đặc trưng yêu cầu chỉ định rõ ràng loại giá/lợi suất đầu vào (ví dụ: `price_type="total_return"` hoặc `price_type="adjusted_close"` trong `TotalReturnMomentumFeature`; `return_type="daily_return"` hoặc `return_type="total_return"` trong `RealizedVolatilityFeature`).
@@ -76,7 +76,7 @@ Hệ thống phân biệt rõ ràng giữa 3 cấp độ thẩm định:
 | **Vệ sinh cửa sổ chất lượng** | Mô phỏng bar lỗi ở giữa chuỗi giá: mọi cửa sổ trượt đi qua bar lỗi đều trả về `NaN`, cửa sổ sau khi thoát khỏi bar lỗi tự động tính toán lại bình thường. | `tests/test_library_fixes.py::test_05` |
 | **Bảo toàn warm-up** | Cổ phiếu có lịch sử giao dịch trước khi vào rổ Russell 1000: tính được đặc trưng hợp lệ ngay tại Ngày 1 gia nhập rổ. Nếu lịch sử warm-up dính bar lỗi thì ngày gia nhập ra `NaN`. | `tests/test_library_fixes.py::test_09, test_10` |
 | **Xóa nhãn ranh giới OOS** | Cơ chế purge ranh giới tại ngày 2023-12-29 xác nhận 100% nhãn bị gán `NaN`, triệt tiêu rò rỉ lợi suất phiên đầu năm 2024 vào tập Development. | `tests/test_library_fixes.py::test_08` |
-| **Thống kê mô tả Development** | 5.610.691 quan sát hợp lệ (2000–2023); Excess Kurtosis giảm từ 3.428.210 xuống **66.88**; Biến động ngày **2.65%**; Max return **+227.87%** (MFA 2020); Min return **-94.97%** (LEH 2008). | `docs/reports/step6_eda_report.md` |
+| **Thống kê mô tả Development** | 5.610.691 quan sát hợp lệ (2000–2023); Excess Kurtosis giảm từ 3.428.210 xuống **66.88**; Biến động ngày **2.65%**; Max return **+227.87%** (MFA 2020); Min return **-94.97%** (LEH 2008). | `docs/reports/data_pipeline/step6_eda_report.md` |
 
 ---
 
@@ -88,7 +88,7 @@ Trong quá trình xây dựng dữ liệu định lượng, một số giả đ�
    - *Bản chất*: Quy ước thành viên cố định từ 01/07 năm $Y$ đến 30/06 năm $Y+1$ là một mô hình xấp xỉ Point-In-Time.
    - *Hạn chế chấp nhận*: Không phản ánh các đợt thêm/bớt đột xuất trong năm (ví dụ: công ty bị thâu tóm giữa kỳ hoặc đợt tái cơ cấu tháng 9/tháng 12).
 2. **Bốn snapshot thiếu ngày chính xác trong hồ sơ lưu trữ:**
-   - Các snapshot của các năm 2001, 2002, 2003, 2004 trên hồ sơ web chỉ lưu năm hoặc tháng mà không ghi rõ ngày. Giả định chấp nhận: áp dụng ngày hiệu lực chuẩn 01/07.
+   - Giữ giả định đã chấp nhận về các snapshot thiếu ngày, nhưng không gán nhầm thành 2001–2004: audit nguồn cục bộ có ngày cho những năm này. Xem [source inventory](reports/data_pipeline/universe_source_inventory.csv) để phân biệt ngày tìm được, ngày chưa rõ và khoảng 01/07 áp dụng theo quy ước. File 2026 có dấu ngày tháng 9 cần đối chiếu với mốc tháng 7; chưa thay dữ liệu trong lượt sửa tài liệu.
 3. **Các ca ghép mã bằng Heuristic (Khoảng cách $\le 10$ ngày dương lịch):**
    - Bảng `canonical_security_mapping.csv` gồm đúng **4.737 dòng $\times$ 7 cột**, ánh xạ về **3.711 Canonical SID duy nhất**.
    - Trong đó có đúng **752 trường hợp mã tạm ` 2T`** được nối vào SID chính dựa trên điều kiện khoảng cách ngày dương lịch $\le 10$ ngày (`gap_calendar_days <= 10`), không phải 10 phiên giao dịch:
@@ -100,7 +100,7 @@ Trong quá trình xây dựng dữ liệu định lượng, một số giả đ�
    - *Quy ước nghiên cứu*: Do kho dữ liệu hiện tại chưa có chuỗi giá độc lập của tài sản được tách ra để điều chỉnh tổng lợi nhuận (*Total Return*), các phiên này được cách ly bằng `is_spinoff_discontinuity = True` và lợi suất gán `NaN`. Cổ phiếu không bị loại khỏi rổ, nhưng các phiên gián đoạn không tham gia vào huấn luyện nhãn.
 5. **Phân cấp độ tin cậy của 13 ca điều chỉnh dữ liệu (`CORR_001` đến `CORR_013`):**
    - *Mức 1 (Văn bản pháp lý cấp cao)*: Các ca reverse split và spinoff có đối chiếu hồ sơ SEC Form 8-K hoặc thông cáo FDIC (CHK, CRC, ADCT, AA, DYN, KSU, SSP, COMS, PENN, LEH, WM).
-   - *Mức 2 (Băng giá & đối chiếu liên thị trường)*: Ca lỗi in giá SABR ($0.50), nến rác Markel ($26.10), xung đột mã LOW ($0.60).
+   - *Nguồn ghi nhận cần bổ sung bằng chứng truy được*: Ca lỗi in giá SABR ($0.50), nến rác Markel ($26.10), xung đột mã LOW ($0.60).
    - *Mức 3 (Quan sát thống kê)*: Hiện tượng gián đoạn thanh khoản CPTH trong kỳ đình chỉ giao dịch.
 
 ---

@@ -2,10 +2,10 @@
 
 > **Dự án**: Predict Daily Return Rankings — Russell 1000 PIT (2000–2026)  
 > **Giai đoạn**: Phase 2 — EDA Task 1  
-> **Script**: [`scripts/05_eda/eda_01_return_distribution.py`](../../scripts/05_eda/eda_01_return_distribution.py)  
+> **Script**: [`scripts/05_eda/eda_01_return_distribution.py`](../../../scripts/archive/05_eda/eda_01_return_distribution.py)  
 > **Ngày thực hiện**: 03/10/2026  
 > **Dữ liệu**: `data/processed/in_sample/returns.parquet` — 6,021 ngày × 2,852 tickers (2000–2023)  
-> **Biểu đồ**: [`docs/Data report/eda_figures/eda_01_return_distribution.png`](eda_figures/eda_01_return_distribution.png)
+> **Biểu đồ**: [`docs/Data report/eda_figures/eda_01_return_distribution.png`](figures/eda_01_return_distribution.png)
 
 ---
 

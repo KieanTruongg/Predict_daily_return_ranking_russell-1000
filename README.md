@@ -27,7 +27,7 @@ Dự án nghiên cứu ứng dụng học máy để dự đoán thứ hạng l�
 
 ## 2. Trạng thái hiện tại
 
-Mốc bàn giao ngày 2026-11-05: [phạm vi, kiểm thử và giới hạn v1](docs/reports/handoff_v1_2026-11-05.md). Nhóm có thể bắt đầu triển khai features theo đặc tả; pilot là bước tiếp theo.
+Mốc bàn giao ngày 2026-11-05: [phạm vi, kiểm thử và giới hạn v1](docs/reports/handoff/handoff_v1_2026-11-05.md). Nhóm có thể bắt đầu triển khai features theo đặc tả; pilot là bước tiếp theo.
 
 - **Đã triển khai:**
   - Thu thập và xử lý danh sách thành viên Russell 1000 giai đoạn 2000–2026 từ các nguồn lưu trữ lịch sử.
@@ -39,7 +39,7 @@ Mốc bàn giao ngày 2026-11-05: [phạm vi, kiểm thử và giới hạn v1](
   - Tái cấu trúc thư viện nền tảng (`src/`) theo hướng vector hóa trên ma trận 2D.
 - **Đã kiểm thử:**
   - Chạy bộ kiểm thử tự động với lệnh `python -m pytest -q`.
-  - Kết quả tại phiên bản hiện tại: **32/32 tests passed** (bao gồm kiểm thử nạp ma trận, phân vùng thời gian, tính toàn vẹn đường dẫn, tra cứu PIT không fallback, bảo toàn warm-up và công thức uniform rank).
+  - Kết quả tại mốc bàn giao `281c410`: **32/32 tests passed** (bao gồm kiểm thử nạp ma trận, phân vùng thời gian, tính toàn vẹn đường dẫn, tra cứu PIT không fallback, bảo toàn warm-up và công thức uniform rank).
 - **Còn giới hạn:**
   - Các ca nối mã bằng heuristic (khoảng cách ngày) vẫn cần tiếp tục kiểm chứng thêm với hồ sơ niêm yết.
   - Một số phiên có biến động giá cực đoan hoặc gián đoạn spin-off chưa có chuỗi giá độc lập hiện đang được cách ly tạm thời dưới dạng `NaN`.
@@ -56,7 +56,7 @@ Mốc bàn giao ngày 2026-11-05: [phạm vi, kiểm thử và giới hạn v1](
 ### 3.1. Universe theo năm
 - **Nguồn gốc:** Tổng hợp từ tài liệu lưu trữ của nhà cung cấp chỉ số (Frank Russell / FTSE Russell), báo cáo danh mục ETF iShares Russell 1000 (IWB) và các bản lưu trữ web lịch sử qua Wayback Machine.
 - **Quy ước niên độ:** Danh sách năm $Y$ được áp dụng cho chu kỳ từ **01/07/Y đến 30/06/Y+1**.
-- **Tính chất xấp xỉ:** Đây là xấp xỉ thường niên dựa trên snapshot; quy ước này không tái hiện được toàn bộ các đợt thêm/bớt đột xuất trong năm (*intra-year additions/deletions*) hoặc ngày hiệu lực chính thức của từng năm. Bốn năm có snapshot thiếu ngày chính xác được chấp nhận theo giả định nghiên cứu (chi tiết xem tại [`docs/reports/data_lineage_report.md`](docs/reports/data_lineage_report.md)).
+- **Tính chất xấp xỉ:** Đây là xấp xỉ thường niên dựa trên snapshot; quy ước này không tái hiện được toàn bộ các đợt thêm/bớt đột xuất trong năm (*intra-year additions/deletions*) hoặc ngày hiệu lực chính thức của từng năm. Ngày snapshot chưa rõ được ghi như giả định nghiên cứu; không gán nhầm 2001–2004 là thiếu ngày. Nguồn 2026 có dấu ngày tháng 9 cần đối chiếu với khoảng dùng từ tháng 7 (chi tiết xem tại [`docs/reports/data_pipeline/data_lineage_report.md`](docs/reports/data_pipeline/data_lineage_report.md)).
 - **Ticker vs. Chứng khoán:** 2.884 ticker duy nhất trong lịch sử snapshot không đồng nghĩa với 2.884 chứng khoán duy nhất, do hiện tượng một công ty đổi ticker hoặc cùng một ticker được tái cấp cho công ty khác ở các thời kỳ khác nhau.
 
 ### 3.2. Dữ liệu thị trường
@@ -174,7 +174,7 @@ Dữ liệu thô của dự án được lưu trữ tại liên kết Google Dri
 
 Đây là bản dữ liệu thô do người thực hiện cung cấp. Trước khi giải nén, người sử dụng cần đối chiếu cấu trúc thư mục mục tiêu trong [`configs/base_config.yaml`](configs/base_config.yaml) và [`docs/data_dictionary.md`](docs/data_dictionary.md) để đặt đúng các tệp vào `data/raw/` và `data/processed/`.
 
-Các ZIP và Parquet không đi kèm Git clone. Các bài test nạp dữ liệu cần matrices/mapping cục bộ; clone code đơn thuần chưa đủ để chạy toàn bộ 32 tests. Link Drive hiện là bản raw do chủ dự án cung cấp, chưa xác nhận chứa matrices đã xử lý. Xem DAG để tái tạo nếu chưa được chia sẻ matrices riêng.
+Các ZIP và Parquet không đi kèm Git clone. Các bài test nạp dữ liệu cần matrices/mapping cục bộ; clone code đơn thuần chưa đủ để chạy các tests cần dữ liệu cục bộ. Link Drive hiện là bản raw do chủ dự án cung cấp, chưa xác nhận chứa matrices đã xử lý. Xem DAG để tái tạo nếu chưa được chia sẻ matrices riêng.
 
 File tài liệu `docs/Teacher Resource/quant overview.pdf` (~77 MB) và audit sinh tự động `2t_stitching_conflict_audit.csv` (~63 MB) được giữ cục bộ, không đưa vào commit bàn giao. Audit có thể tái tạo bằng script 06 sau khi chuẩn bị input theo DAG; tài liệu giảng dạy được nhận riêng từ người phụ trách.
 
@@ -229,7 +229,7 @@ Nếu đã có sẵn kho ma trận tại `data/processed/matrices/`, thành viê
   - Không điền tiến (*forward-fill*) chuỗi giá qua các giai đoạn gián đoạn định danh hoặc sự kiện doanh nghiệp chưa rõ nguyên nhân.
   - Mọi thao tác chuẩn hóa (*standardization*), điền khuyết (*imputation*) hoặc lựa chọn biến đều phải được fit riêng trên tập huấn luyện của từng fold, không fit trên toàn bộ dữ liệu.
 
-Chi tiết về cấu trúc và ý nghĩa kinh tế từng cột xem tại [`docs/data_dictionary.md`](docs/data_dictionary.md) và [`docs/reports/step4_matrices_masks_report.md`](docs/reports/step4_matrices_masks_report.md).
+Chi tiết về cấu trúc và ý nghĩa kinh tế từng cột xem tại [`docs/data_dictionary.md`](docs/data_dictionary.md) và [`docs/reports/data_pipeline/step4_matrices_masks_report.md`](docs/reports/data_pipeline/step4_matrices_masks_report.md).
 
 ---
 
@@ -242,7 +242,7 @@ python -m pytest -q
 
 Các nhóm kiểm thử chính đang vận hành:
 - **Nạp ma trận và phân vùng (`tests/test_matrix_loader.py`):** Kiểm tra kích thước ma trận ($7.252 \times 3.711$), trích xuất phân vùng Development (5.911 phiên) và kiểm tra cơ chế chặn truy cập OOS.
-- **Tính toàn vẹn pipeline (`tests/test_pipeline_integrity.py`):** Biên dịch cú pháp toàn bộ 13 script chính thức, kiểm tra không còn đường dẫn ổ đĩa tuyệt đối, đối chiếu đường dẫn đầu ra bước 03 và đầu vào bước 04, và phân lập bảng kiểm toán giữa bước 04b và bước 05.
+- **Tính toàn vẹn pipeline (`tests/test_pipeline_integrity.py`):** Biên dịch cú pháp các script pipeline hiện có, kiểm tra không còn đường dẫn ổ đĩa tuyệt đối, đối chiếu đường dẫn đầu ra bước 03 và đầu vào bước 04, và phân lập bảng kiểm toán giữa bước 04b và bước 05.
 - **Kiểm thử hồi quy các trường hợp biên (`tests/test_library_fixes.py`):**
   - Tra cứu SID theo ngày không tự ý fallback sang toàn bộ lịch sử.
   - Truy vấn thành viên năm 2020 không phát sinh cảnh báo OOS giả.
@@ -257,8 +257,8 @@ Các nhóm kiểm thử chính đang vận hành:
 
 ## 9. Giới hạn hiện tại
 
-1. **Giả định xấp xỉ danh sách thành viên:** Quy ước 01/07 – 30/06 dựa trên snapshot thường niên bỏ qua các thay đổi phát sinh đột xuất giữa hai kỳ tái cơ cấu. Chi tiết tại [`docs/reports/data_lineage_report.md`](docs/reports/data_lineage_report.md).
-2. **Các ca mapping heuristic:** 752 trường hợp mã tạm ` 2T` được nối định danh vào SID chính dựa trên khoảng cách ngày dương lịch ($\le 10$ ngày lịch: 456 nối phía sau, 296 nối phía trước). Các trường hợp này được gắn nhãn giả định và cách ly riêng trong báo cáo kiểm toán [`docs/reports/step3_corporate_actions_report.md`](docs/reports/step3_corporate_actions_report.md) để đánh giá độ nhạy khi cần thiết.
+1. **Giả định xấp xỉ danh sách thành viên:** Quy ước 01/07 – 30/06 dựa trên snapshot thường niên bỏ qua các thay đổi phát sinh đột xuất giữa hai kỳ tái cơ cấu. Chi tiết tại [`docs/reports/data_pipeline/data_lineage_report.md`](docs/reports/data_pipeline/data_lineage_report.md).
+2. **Các ca mapping heuristic:** 752 trường hợp mã tạm ` 2T` được nối định danh vào SID chính dựa trên khoảng cách ngày dương lịch ($\le 10$ ngày lịch: 456 nối phía sau, 296 nối phía trước). Các trường hợp này được gắn nhãn giả định và cách ly riêng trong báo cáo kiểm toán [`docs/reports/data_pipeline/step3_corporate_actions_report.md`](docs/reports/data_pipeline/step3_corporate_actions_report.md) để đánh giá độ nhạy khi cần thiết.
 3. **Cổ phiếu penny, OTC và hủy niêm yết:** Một số thực thể giao dịch trên thị trường phi tập trung hoặc giải thể trong quá khứ không có chuỗi giá đầy đủ trên các nhà cung cấp dữ liệu thương mại.
 4. **Sự kiện spin-off chưa xử lý toàn diện:** Các trường hợp công ty mẹ tách công ty con quy mô lớn (ví dụ: KSU năm 2000) hiện được cách ly bằng cờ gián đoạn (`is_spinoff_discontinuity = True`, lợi suất gán `NaN`) do chưa có chuỗi giá độc lập của tài sản được chia tách để tái hiện giá trị tổng lợi nhuận (*Total Return*).
 5. **Mức độ chứng cứ trong bảng điều chỉnh:** 13 trường hợp điều chỉnh bổ sung trong [`market_data_corrections_and_exceptions.csv`](docs/Data%20report/market_data_audit/tables/market_data_corrections_and_exceptions.csv) có mức độ chứng cứ khác nhau (từ hồ sơ SEC Form 8-K, thông cáo FDIC đến quan sát bất thường thống kê).
@@ -268,24 +268,30 @@ Các nhóm kiểm thử chính đang vận hành:
 
 ## 10. Tài liệu nên đọc tiếp
 
+Muốn hiểu từ đầu như người mới: đọc [hướng dẫn theo 9 chặng](docs/learning/README.md), rồi mở báo cáo được dẫn ở cuối từng chặng.
+
+Trong mỗi chặng, mục **Từ vấn đề đến phương pháp** giải thích vì sao chọn kỹ thuật, dấu hiệu/bằng chứng, cách kiểm chứng và giới hạn, để hiểu từng bước của bài đang làm. Ví dụ giả lập và kết quả thực nghiệm được phân biệt.
+
+Xem [mục lục docs](docs/README.md) để tìm tài liệu hiện hành, báo cáo theo chủ đề và tài liệu lịch sử. [Quy ước theo dõi pilot](docs/reports/feature_pilot/README.md) nêu cách lưu kết quả; báo cáo chi tiết đang được rà soát riêng, chưa gộp vào commit docs.
+
 Tùy theo nhu cầu nghiên cứu, người đọc có thể tham khảo các tài liệu chuyên biệt sau:
 
 - **Dành cho thành viên mới bắt đầu:**
-  - [`docs/reports/data_lineage_report.md`](docs/reports/data_lineage_report.md): Hành trình dữ liệu từ tệp snapshot thô, cấu trúc SID đến ma trận 2D.
-  - [`docs/reports/code_review_report.md`](docs/reports/code_review_report.md): Rà soát chi tiết mã nguồn từng script trong pipeline.
+  - [`docs/reports/data_pipeline/data_lineage_report.md`](docs/reports/data_pipeline/data_lineage_report.md): Hành trình dữ liệu từ tệp snapshot thô, cấu trúc SID đến ma trận 2D.
+  - [`docs/reports/migration/code_review_report.md`](docs/reports/migration/code_review_report.md): Rà soát chi tiết mã nguồn từng script trong pipeline.
 - **Dành cho thành viên xây dựng Features và Mô hình:**
   - [`docs/data_dictionary.md`](docs/data_dictionary.md): Bảng tra cứu định nghĩa, kiểu dữ liệu, đơn vị và ý nghĩa kinh tế của toàn bộ các trường dữ liệu và 17 ma trận.
-  - [`docs/reports/step4_matrices_masks_report.md`](docs/reports/step4_matrices_masks_report.md): Chi tiết kiến trúc 3 lớp mặt nạ và kết quả kiểm định ma trận.
+  - [`docs/reports/data_pipeline/step4_matrices_masks_report.md`](docs/reports/data_pipeline/step4_matrices_masks_report.md): Chi tiết kiến trúc 3 lớp mặt nạ và kết quả kiểm định ma trận.
   - [Đặc tả 16 features v1](docs/specifications/features_v1.md): Công thức, input, lookback, NaN và kế hoạch pilot.
   - [Đặc tả target/timing v1](docs/specifications/target_and_timing_v1.md): Nhãn, tập đối tượng, ranh giới và giới hạn khớp lệnh.
   - [Context bàn giao](docs/pipeline_migration_and_feature_readiness_context.md): Quyết định và lộ trình hiện hành.
 - **Dành cho thành viên vận hành và tái tạo dữ liệu:**
   - [`docs/pipeline_dag.md`](docs/pipeline_dag.md): Đồ thị phụ thuộc, thứ tự thực thi và hướng dẫn chạy các script Local / Cloud.
-  - [`docs/reports/phase2_pipeline_verification_log.md`](docs/reports/phase2_pipeline_verification_log.md): Nhật ký chạy kiểm định end-to-end của pipeline.
+  - [`docs/reports/migration/phase2_pipeline_verification_log.md`](docs/reports/migration/phase2_pipeline_verification_log.md): Nhật ký chạy kiểm định end-to-end của pipeline.
 - **Dành cho kiểm toán chất lượng và pháp y dữ liệu:**
-  - [`docs/reports/step3_corporate_actions_report.md`](docs/reports/step3_corporate_actions_report.md): Báo cáo chuẩn hóa định danh và bảng 13 trường hợp điều chỉnh bổ sung.
-  - [`docs/reports/step6_eda_report.md`](docs/reports/step6_eda_report.md): Báo cáo thống kê mô tả (Kurtosis, Volatility) và điều tra pháp y 34 ca ngoại lai.
-  - [`docs/reports/library_edge_cases_and_fixes_report.md`](docs/reports/library_edge_cases_and_fixes_report.md): Báo cáo chi tiết về việc khắc phục các ca biên trong thư viện nền tảng.
+  - [`docs/reports/data_pipeline/step3_corporate_actions_report.md`](docs/reports/data_pipeline/step3_corporate_actions_report.md): Báo cáo chuẩn hóa định danh và bảng 13 trường hợp điều chỉnh bổ sung.
+  - [`docs/reports/data_pipeline/step6_eda_report.md`](docs/reports/data_pipeline/step6_eda_report.md): Báo cáo thống kê mô tả (Kurtosis, Volatility) và điều tra pháp y 34 ca ngoại lai.
+  - [`docs/reports/library/library_edge_cases_and_fixes_report.md`](docs/reports/library/library_edge_cases_and_fixes_report.md): Báo cáo chi tiết về việc khắc phục các ca biên trong thư viện nền tảng.
   - [`docs/Data report/project_report.html`](docs/Data%20report/project_report.html): Báo cáo trực quan tổng thể dự án.
 - **Dành cho việc tra cứu lịch sử:**
   - [`docs/archive/README.md`](docs/archive/README.md), [`scripts/archive/README.md`](scripts/archive/README.md), [`src/archive_v1/README.md`](src/archive_v1/README.md): Giải trình lý do lưu trữ các mã nguồn và báo cáo cũ.

@@ -1,9 +1,9 @@
 # 📊 BÁO CÁO T5: ALPHA BENCHMARK EVALUATION — REVERSAL 5D & FEATURE IC
 
-> **Script**: [`scripts/07_alpha_eval/eval_benchmark_alpha.py`](../../scripts/07_alpha_eval/eval_benchmark_alpha.py)  
+> **Script**: [`scripts/07_alpha_eval/eval_benchmark_alpha.py`](../../../scripts/archive/07_alpha_eval/eval_benchmark_alpha.py)  
 > **Ngày thực hiện**: 03/10/2026 | **Thời gian chạy**: 247.6 giây  
 > **Dữ liệu**: `in_sample/` (2000–2023) — 6,021 ngày × 2,263 tickers  
-> **Biểu đồ**: [`docs/Data report/eda_figures/t5_alpha_benchmark_ic.png`](eda_figures/t5_alpha_benchmark_ic.png)
+> **Biểu đồ**: [`docs/Data report/eda_figures/t5_alpha_benchmark_ic.png`](figures/t5_alpha_benchmark_ic.png)
 
 ---
 

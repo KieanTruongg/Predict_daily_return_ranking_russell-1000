@@ -1,7 +1,7 @@
 # 📊 BÁO CÁO T4: BUILD FEATURE STORE
 
-> **Script**: [`scripts/06_features/build_feature_store.py`](../../scripts/06_features/build_feature_store.py)  
-> **Module**: [`src/features/feature_engineer.py`](../../src/features/feature_engineer.py) (v4 — rewritten)  
+> **Script**: [`scripts/06_features/build_feature_store.py`](../../../scripts/archive/06_features/build_feature_store.py)  
+> **Module**: [`src/features/feature_engineer.py`](../../../src/archive_v1/features/feature_engineer.py) (v4 — rewritten)  
 > **Ngày thực hiện**: 03/10/2026  
 > **Input**: `data/processed/in_sample/` (close, high, low, volume, forward_returns)  
 > **Output**: `data/processed/features/` — 31 wide parquets + 1 long-format (1,103 MB)

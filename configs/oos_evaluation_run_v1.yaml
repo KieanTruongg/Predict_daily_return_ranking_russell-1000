@@ -1,0 +1,240 @@
+evaluation_name: oos_formal_evaluation_v1
+timestamp: '2026-11-07 23:38:03'
+provenance_membership:
+  watermark_date: 09/15/2026
+  finding: Dấu ngày 2026-09-15 là snapshot danh mục nắm giữ thực tế quý 3 của quỹ
+    iShares Russell 1000 ETF, được xuất vào ngày 15/09/2026. Không có văn bản công
+    bố chính thức độc lập từ FTSE Russell (đơn vị quản lý chỉ số) chứng minh rằng
+    danh sách này đã có hiệu lực chính xác và không có bất kỳ thay đổi nào (M&A, IPO
+    bổ sung quý 3, hủy niêm yết) từ ngày 01/07/2026. Việc áp dụng snapshot tháng 9
+    ngược về tháng 7 tiềm ẩn nguy cơ look-ahead bias và survivorship bias nhẹ trong
+    giai đoạn 01/07 - 15/09/2026.
+  decision: 'QUYẾT ĐỊNH PHÂN TÁCH PHẠM VI:
+
+    1. Phạm vi OOS Chính (Primary OOS Benchmark): Giai đoạn 2024-01-02 đến 2026-06-30.
+    Toàn bộ membership 2024 và 2025 đã được kiểm chứng độc lập hoàn toàn. Chỉ chấm
+    các phiên T có nhãn T+1 <= 2026-06-30.
+
+    2. Phạm vi Mở rộng (Extended / Exploratory OOS): Giai đoạn 2026-07-01 đến 2026-10-30.
+    Chấm điểm và báo cáo riêng biệt dưới giả định membership của 2026.xls, ghi rõ
+    giới hạn look-ahead potential.'
+date_ranges:
+  total_oos:
+    start: '2024-01-02'
+    end: '2026-10-30'
+    n_sessions: 711
+  primary_oos:
+    start: '2024-01-02'
+    end: '2026-06-30'
+    condition: t1_date <= 2026-06-30
+    n_sessions_evaluated: 624
+  extended_oos:
+    start: '2026-07-01'
+    end: '2026-10-30'
+    n_sessions_evaluated: 85
+models:
+  ridge:
+    file: ridge_refit_dev_alpha1.0.joblib
+    alpha: 1.0
+    pipeline: StandardScaler -> Ridge
+  gbdt:
+    file: gbdt_refit_dev_leaf7.joblib
+    algorithm: HistGradientBoostingRegressor
+    max_leaf_nodes: 7
+    learning_rate: 0.05
+    max_iter: 100
+    min_samples_leaf: 100
+artifacts:
+  predictions_parquet: D:\A_Learning\HK1_2026-2027\CO3101 - Đồ án tổng hợp - ttnt\Predict_daily_return_rankings\data\processed\oos_predictions_2024_2026.parquet
+  daily_ic_csv: D:\A_Learning\HK1_2026-2027\CO3101 - Đồ án tổng hợp - ttnt\Predict_daily_return_rankings\outputs\reports\oos_daily_ic_2024_2026.csv
+  report_markdown: D:\A_Learning\HK1_2026-2027\CO3101 - Đồ án tổng hợp - ttnt\Predict_daily_return_rankings\docs\reports\baseline\oos_evaluation_report.md
+statistics:
+- scope_name: Primary_OOS_Strict_T1 (2024-01-02 -> 2026-06-30, T+1 <= 2026-06-30)
+  total_sessions: 624
+  evaluated_sessions: 624
+  un_evaluated_sessions: 0
+  avg_predicted_stocks_t: 975.8
+  avg_evaluable_stocks_t1: 975.7
+  ridge_mean_ic: 0.023049684520838585
+  ridge_ir: 2.2759158794712864
+  ridge_pct_pos: 56.41025641025641
+  ridge_t_stat: 3.5813620759647997
+  ridge_p_val: 0.000368454683264025
+  gbdt_mean_ic: 0.02040251337710777
+  gbdt_ir: 2.1766535925722055
+  gbdt_pct_pos: 56.25
+  gbdt_t_stat: 3.425163776598618
+  gbdt_p_val: 0.0006548031350553687
+  bench_ret20d_mean_ic: -0.004393206056265335
+  bench_ret20d_ir: -0.4071290549987494
+  bench_ret20d_pct_pos: 48.717948717948715
+  mean_diff_gbdt_vs_ridge: -0.002647171143730819
+  gbdt_win_rate_pct: 50.480769230769226
+- scope_name: Primary_OOS_All_T (2024-01-02 -> 2026-06-30, All T <= 2026-06-30)
+  total_sessions: 625
+  evaluated_sessions: 625
+  un_evaluated_sessions: 0
+  avg_predicted_stocks_t: 975.8
+  avg_evaluable_stocks_t1: 975.7
+  ridge_mean_ic: 0.02281929570802791
+  ridge_ir: 2.2535269634506747
+  ridge_pct_pos: 56.32
+  ridge_t_stat: 3.5489713798029925
+  ridge_p_val: 0.0004158051031989808
+  gbdt_mean_ic: 0.02026000480010106
+  gbdt_ir: 2.162563208986271
+  gbdt_pct_pos: 56.16
+  gbdt_t_stat: 3.4057169318068294
+  gbdt_p_val: 0.0007022681397518213
+  bench_ret20d_mean_ic: -0.004720582453719494
+  bench_ret20d_ir: -0.43731909607923786
+  bench_ret20d_pct_pos: 48.64
+  mean_diff_gbdt_vs_ridge: -0.0025592909079268527
+  gbdt_win_rate_pct: 50.56
+- scope_name: Extended_OOS (2026-07-01 -> 2026-10-30, Subject to Membership Caveat)
+  total_sessions: 86
+  evaluated_sessions: 85
+  un_evaluated_sessions: 1
+  avg_predicted_stocks_t: 975.7
+  avg_evaluable_stocks_t1: 964.3
+  ridge_mean_ic: 0.03395337968673895
+  ridge_ir: 2.9670564985570307
+  ridge_pct_pos: 61.1764705882353
+  ridge_t_stat: 1.723197312696994
+  ridge_p_val: 0.08853219902455012
+  gbdt_mean_ic: 0.02711137152989131
+  gbdt_ir: 2.643348070759297
+  gbdt_pct_pos: 68.23529411764706
+  gbdt_t_stat: 1.5351949968834249
+  gbdt_p_val: 0.128494111189852
+  bench_ret20d_mean_ic: -0.026052187808486848
+  bench_ret20d_ir: -2.159013711100991
+  bench_ret20d_pct_pos: 42.35294117647059
+  mean_diff_gbdt_vs_ridge: -0.0068420081568476305
+  gbdt_win_rate_pct: 49.411764705882355
+- scope_name: Full_OOS (2024-01-02 -> 2026-10-30, All 711 Sessions)
+  total_sessions: 711
+  evaluated_sessions: 710
+  un_evaluated_sessions: 1
+  avg_predicted_stocks_t: 975.8
+  avg_evaluable_stocks_t1: 974.4
+  ridge_mean_ic: 0.024152249423789088
+  ridge_ir: 2.347973029722843
+  ridge_pct_pos: 56.901408450704224
+  ridge_t_stat: 3.9411413207228927
+  ridge_p_val: 8.912799371528234e-05
+  gbdt_mean_ic: 0.021080238845216797
+  gbdt_ir: 2.2253994004203426
+  gbdt_pct_pos: 57.605633802816904
+  gbdt_t_stat: 3.7353979032475744
+  gbdt_p_val: 0.0002024779453280966
+  bench_ret20d_mean_ic: -0.007274366193374742
+  bench_ret20d_ir: -0.6640814558585906
+  bench_ret20d_pct_pos: 47.88732394366197
+  mean_diff_gbdt_vs_ridge: -0.0030720105785722977
+  gbdt_win_rate_pct: 50.42253521126761
+- scope_name: Year_2024 (2024-01-02 -> 2024-12-31)
+  total_sessions: 252
+  evaluated_sessions: 252
+  un_evaluated_sessions: 0
+  avg_predicted_stocks_t: 976.6
+  avg_evaluable_stocks_t1: 976.5
+  ridge_mean_ic: 0.033430701454793765
+  ridge_ir: 3.7292064507471996
+  ridge_pct_pos: 60.317460317460316
+  ridge_t_stat: 3.7292064507471996
+  ridge_p_val: 0.00023747728569367517
+  gbdt_mean_ic: 0.033544498320410246
+  gbdt_ir: 3.9957718116739476
+  gbdt_pct_pos: 60.317460317460316
+  gbdt_t_stat: 3.995771811673948
+  gbdt_p_val: 8.479333721096642e-05
+  bench_ret20d_mean_ic: -0.006511538804691238
+  bench_ret20d_ir: -0.6818082132517346
+  bench_ret20d_pct_pos: 50.39682539682539
+  mean_diff_gbdt_vs_ridge: 0.0001137968656164761
+  gbdt_win_rate_pct: 51.19047619047619
+- scope_name: Year_2025 (2025-01-02 -> 2025-12-31)
+  total_sessions: 250
+  evaluated_sessions: 250
+  un_evaluated_sessions: 0
+  avg_predicted_stocks_t: 976.3
+  avg_evaluable_stocks_t1: 976.2
+  ridge_mean_ic: 0.01823702721676998
+  ridge_ir: 1.6497544364223633
+  ridge_pct_pos: 56.39999999999999
+  ridge_t_stat: 1.643194750656956
+  ridge_p_val: 0.10160475111663426
+  gbdt_mean_ic: 0.0141609586816335
+  gbdt_ir: 1.3593886204318673
+  gbdt_pct_pos: 53.2
+  gbdt_t_stat: 1.3539834752864834
+  gbdt_p_val: 0.17696923139202553
+  bench_ret20d_mean_ic: -0.008010315719746494
+  bench_ret20d_ir: -0.703651948426398
+  bench_ret20d_pct_pos: 46.800000000000004
+  mean_diff_gbdt_vs_ridge: -0.004076068535136486
+  gbdt_win_rate_pct: 48.8
+- scope_name: Year_2026_Total (Incomplete Year, 2026-01-02 -> 2026-10-30)
+  total_sessions: 209
+  evaluated_sessions: 208
+  un_evaluated_sessions: 1
+  avg_predicted_stocks_t: 974.2
+  avg_evaluable_stocks_t1: 969.5
+  ridge_mean_ic: 0.0200206900004314
+  ridge_ir: 1.848362243836185
+  ridge_pct_pos: 53.36538461538461
+  ridge_t_stat: 1.6792620979184039
+  ridge_p_val: 0.09460971258056564
+  gbdt_mean_ic: 0.014295751600731578
+  gbdt_ir: 1.505405347533012
+  gbdt_pct_pos: 59.61538461538461
+  gbdt_t_stat: 1.3676811190804201
+  gbdt_p_val: 0.17289494149942697
+  bench_ret20d_mean_ic: -0.0073140061950829425
+  bench_ret20d_ir: -0.608462784632221
+  bench_ret20d_pct_pos: 46.15384615384615
+  mean_diff_gbdt_vs_ridge: -0.0057249383996998155
+  gbdt_win_rate_pct: 51.442307692307686
+- scope_name: Year_2026_Primary_H1 (2026-01-02 -> 2026-06-30, T+1 <= 2026-06-30)
+  total_sessions: 122
+  evaluated_sessions: 122
+  un_evaluated_sessions: 0
+  avg_predicted_stocks_t: 973.2
+  avg_evaluable_stocks_t1: 973.1
+  ridge_mean_ic: 0.011468930903301247
+  ridge_ir: 1.1019913257025258
+  ridge_pct_pos: 48.36065573770492
+  ridge_t_stat: 0.7667571261195302
+  ridge_p_val: 0.44471935439151283
+  gbdt_mean_ic: 0.0060468450833073
+  gbdt_ir: 0.6748351379858415
+  gbdt_pct_pos: 54.09836065573771
+  gbdt_t_stat: 0.4695451215794578
+  gbdt_p_val: 0.6395250866257405
+  bench_ret20d_mean_ic: 0.007394476472206928
+  bench_ret20d_ir: 0.6185124754382757
+  bench_ret20d_pct_pos: 49.18032786885246
+  mean_diff_gbdt_vs_ridge: -0.005422085819993947
+  gbdt_win_rate_pct: 52.459016393442624
+- scope_name: Year_2026_Extended_Q3Q4 (2026-07-01 -> 2026-10-30)
+  total_sessions: 86
+  evaluated_sessions: 85
+  un_evaluated_sessions: 1
+  avg_predicted_stocks_t: 975.7
+  avg_evaluable_stocks_t1: 964.3
+  ridge_mean_ic: 0.03395337968673895
+  ridge_ir: 2.9670564985570307
+  ridge_pct_pos: 61.1764705882353
+  ridge_t_stat: 1.723197312696994
+  ridge_p_val: 0.08853219902455012
+  gbdt_mean_ic: 0.02711137152989131
+  gbdt_ir: 2.643348070759297
+  gbdt_pct_pos: 68.23529411764706
+  gbdt_t_stat: 1.5351949968834249
+  gbdt_p_val: 0.128494111189852
+  bench_ret20d_mean_ic: -0.026052187808486848
+  bench_ret20d_ir: -2.159013711100991
+  bench_ret20d_pct_pos: 42.35294117647059
+  mean_diff_gbdt_vs_ridge: -0.0068420081568476305
+  gbdt_win_rate_pct: 49.411764705882355

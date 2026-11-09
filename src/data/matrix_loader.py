@@ -12,7 +12,7 @@ from typing import Dict, Iterable, List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from src.quality.quality_window import check_oos_access, filter_dev_window
+from src.quality.quality_window import check_oos_access, filter_dev_window, OOSFreezeViolationError
 from src.utils.config import Config, load_config
 
 
@@ -63,6 +63,7 @@ def load_matrix(
     allow_oos: bool = False,
     matrices_dir: Optional[Path] = None,
     config: Optional[Config] = None,
+    dates: Optional[Iterable[Union[pd.Timestamp, str]]] = None,
 ) -> Union[pd.DataFrame, np.ndarray]:
     """
     Loads a 2D matrix from parquet storage.
@@ -83,7 +84,124 @@ def load_matrix(
     cfg = config or load_config()
     target_path = get_matrix_path(matrix_name, matrices_dir or cfg.get_matrices_dir())
 
-    df = pd.read_parquet(target_path)
+    if dates is not None:
+        # Normalize and validate requested dates before reading from disk
+        dates_list = [pd.Timestamp(d) for d in dates]
+        if not dates_list:
+            raise ValueError("dates parameter was provided but is empty.")
+
+        dev_start = pd.Timestamp(cfg.dev_start_date)
+        dev_end = pd.Timestamp(cfg.dev_end_date)
+        warmup_start = pd.Timestamp(cfg.start_date)
+        effective_start = warmup_start if include_warmup else dev_start
+
+        for d in dates_list:
+            if d > dev_end:
+                if cfg.oos_strictly_frozen and not allow_oos:
+                    raise OOSFreezeViolationError(
+                        f"OOS Freeze Violation: Requested date '{d.strftime('%Y-%m-%d')}' "
+                        f"is in Out-of-Sample window (> {dev_end.strftime('%Y-%m-%d')}). "
+                        f"Access strictly blocked."
+                    )
+                raise ValueError(
+                    f"Requested date '{d.strftime('%Y-%m-%d')}' exceeds dev_end_date "
+                    f"'{dev_end.strftime('%Y-%m-%d')}'."
+                )
+            if d < effective_start:
+                raise ValueError(
+                    f"Requested date '{d.strftime('%Y-%m-%d')}' precedes valid start date "
+                    f"'{effective_start.strftime('%Y-%m-%d')}' (include_warmup={include_warmup})."
+                )
+
+        import pyarrow.parquet as pq
+        parquet_file = pq.ParquetFile(target_path)
+        arrow_schema = parquet_file.schema_arrow
+        index_col = None
+        if arrow_schema.pandas_metadata:
+            idx_cols = arrow_schema.pandas_metadata.get("index_columns", [])
+            if idx_cols and isinstance(idx_cols[0], str) and idx_cols[0] in arrow_schema.names:
+                index_col = idx_cols[0]
+            elif idx_cols and isinstance(idx_cols[0], dict) and "field_name" in idx_cols[0] and idx_cols[0]["field_name"] in arrow_schema.names:
+                index_col = idx_cols[0]["field_name"]
+
+        if index_col is None:
+            if "date" in arrow_schema.names:
+                index_col = "date"
+            elif "__index_level_0__" in arrow_schema.names:
+                index_col = "__index_level_0__"
+
+        if index_col is None:
+            raise RuntimeError(
+                f"Cannot determine date index column in Parquet file '{target_path.name}' "
+                f"to apply pushdown filter for dates mode. Schema names: {arrow_schema.names}"
+            )
+
+        filters = [(index_col, "in", dates_list)]
+        try:
+            df = pd.read_parquet(target_path, filters=filters)
+        except Exception as e:
+            raise RuntimeError(
+                f"Predicate pushdown failed for dates read on '{target_path.name}': {e}. "
+                f"Unbounded fallback read is strictly blocked to prevent OOS leakage."
+            ) from e
+
+        if not isinstance(df.index, pd.DatetimeIndex):
+            df.index = pd.to_datetime(df.index)
+
+        missing = [d for d in dates_list if d not in df.index]
+        if missing:
+            raise KeyError(
+                f"Matrix '{target_path.name}' is missing requested dates: "
+                f"{[m.strftime('%Y-%m-%d') for m in missing]}."
+            )
+        df = df.loc[dates_list]
+
+    elif dev_only:
+        # Predicate pushdown: filter by date index at parquet scan level
+        # to ensure OOS rows (> dev_end_date) are never loaded into memory.
+        import pyarrow.parquet as pq
+        parquet_file = pq.ParquetFile(target_path)
+        arrow_schema = parquet_file.schema_arrow
+        index_col = None
+        if arrow_schema.pandas_metadata:
+            idx_cols = arrow_schema.pandas_metadata.get("index_columns", [])
+            if idx_cols and isinstance(idx_cols[0], str) and idx_cols[0] in arrow_schema.names:
+                index_col = idx_cols[0]
+            elif idx_cols and isinstance(idx_cols[0], dict) and "field_name" in idx_cols[0] and idx_cols[0]["field_name"] in arrow_schema.names:
+                index_col = idx_cols[0]["field_name"]
+
+        if index_col is None:
+            if "date" in arrow_schema.names:
+                index_col = "date"
+            elif "__index_level_0__" in arrow_schema.names:
+                index_col = "__index_level_0__"
+
+        if index_col is None:
+            raise RuntimeError(
+                f"Cannot determine date index column in Parquet file '{target_path.name}' "
+                f"to apply pushdown filter for dev_only mode. Schema names: {arrow_schema.names}"
+            )
+
+        filters = []
+        if not include_warmup:
+            filters.append((index_col, ">=", pd.Timestamp(cfg.dev_start_date)))
+        filters.append((index_col, "<=", pd.Timestamp(cfg.dev_end_date)))
+
+        try:
+            df = pd.read_parquet(target_path, filters=filters)
+        except Exception as e:
+            raise RuntimeError(
+                f"Predicate pushdown failed for dev_only read on '{target_path.name}': {e}. "
+                f"Unbounded fallback read is strictly blocked to prevent OOS leakage."
+            ) from e
+    else:
+        if cfg.oos_strictly_frozen and not allow_oos:
+            raise OOSFreezeViolationError(
+                f"OOS Freeze Violation: Cannot read full matrix '{matrix_name}' "
+                f"from disk while oos_strictly_frozen=True and allow_oos=False. "
+                f"Use dev_only=True to read only Development/warmup data."
+            )
+        df = pd.read_parquet(target_path)
 
     # Ensure index is DatetimeIndex
     if not isinstance(df.index, pd.DatetimeIndex):
@@ -94,13 +212,6 @@ def load_matrix(
         df.columns = pd.Index(df.columns.astype(str), name="canonical_sid")
     elif df.columns.name != "canonical_sid":
         df.columns.name = "canonical_sid"
-
-    if dev_only:
-        df = filter_dev_window(df, include_warmup=include_warmup, config=cfg)
-    else:
-        # Check OOS access if oos_strictly_frozen is enabled
-        if cfg.oos_strictly_frozen and not allow_oos:
-            check_oos_access(df.index, oos_start=cfg.oos_start_date, allow_oos=allow_oos)
 
     if as_numpy:
         return df.values
@@ -115,6 +226,7 @@ def load_matrices(
     allow_oos: bool = False,
     matrices_dir: Optional[Path] = None,
     config: Optional[Config] = None,
+    dates: Optional[Iterable[Union[pd.Timestamp, str]]] = None,
 ) -> Dict[str, pd.DataFrame]:
     """
     Loads multiple 2D matrices into a dictionary keyed by matrix name.
@@ -136,6 +248,7 @@ def load_matrices(
             allow_oos=allow_oos,
             matrices_dir=matrices_dir,
             config=cfg,
+            dates=dates,
         )
         if first_idx is None:
             first_idx = df.index
@@ -157,6 +270,7 @@ def load_bar_quality_mask(
     allow_oos: bool = False,
     matrices_dir: Optional[Path] = None,
     config: Optional[Config] = None,
+    field: Optional[str] = None,
 ) -> pd.DataFrame:
     """
     Constructs the independent Bar Quality Mask:
@@ -168,6 +282,9 @@ def load_bar_quality_mask(
     It preserves legitimate historical pre-membership trading bars so that multi-day
     rolling features (e.g. 20d momentum, 252d volatility) have sufficient warmup history
     and can evaluate immediately upon index entry.
+
+    If `field` is specified (e.g. 'open', 'low', 'adj_open', 'adj_low'), applies field-level
+    quarantine exceptions (e.g. CORR_014 for GMT on 2007-01-25) without invalidating unaffected fields.
     """
     cfg = config or load_config()
     adj_close = load_matrix("adj_close", dev_only=dev_only, include_warmup=include_warmup, allow_oos=allow_oos, matrices_dir=matrices_dir, config=cfg)
@@ -177,7 +294,35 @@ def load_bar_quality_mask(
     # Valid bar: has positive price and is not flagged as bad tick or spinoff discontinuity
     has_bar = adj_close.notna() & (adj_close > 0.0)
     clean_bar = has_bar & (~is_bad.fillna(False).astype(bool)) & (~is_spinoff.fillna(False).astype(bool))
+
+    if field is not None:
+        from src.data.corrections import get_field_quarantine_mask
+        field_mask = get_field_quarantine_mask(field, clean_bar.index, clean_bar.columns)
+        return clean_bar & field_mask
+
     return clean_bar
+
+
+def load_field_quality_mask(
+    field: str,
+    dev_only: bool = False,
+    include_warmup: bool = False,
+    allow_oos: bool = False,
+    matrices_dir: Optional[Path] = None,
+    config: Optional[Config] = None,
+) -> pd.DataFrame:
+    """
+    Convenience loader for field-specific quality masks.
+    Enforces field-level quarantine rules while preserving backward compatibility.
+    """
+    return load_bar_quality_mask(
+        dev_only=dev_only,
+        include_warmup=include_warmup,
+        allow_oos=allow_oos,
+        matrices_dir=matrices_dir,
+        config=config,
+        field=field,
+    )
 
 
 def load_masked_matrix(

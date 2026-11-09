@@ -27,27 +27,22 @@ Dự án nghiên cứu ứng dụng học máy để dự đoán thứ hạng l�
 
 ## 2. Trạng thái hiện tại
 
-Mốc bàn giao ngày 2026-11-05: [phạm vi, kiểm thử và giới hạn v1](docs/reports/handoff/handoff_v1_2026-11-05.md). Nhóm có thể bắt đầu triển khai features theo đặc tả; pilot là bước tiếp theo.
+Mốc hoàn thành đánh giá ngoài mẫu và backtest danh mục (2026-11-08): **[Báo cáo Kết quả Thực nghiệm Toàn diện](docs/reports/baseline/comprehensive_experimental_results_report.md)** (tổng hợp đầy đủ Rank IC, 4 biểu đồ PNG trực quan và minh họa backtest), [Báo cáo Kiểm thử OOS Backtest](docs/reports/baseline/oos_backtest_primary_report.md) & [Báo cáo Đánh giá OOS Rank IC](docs/reports/baseline/oos_evaluation_report.md).
 
-- **Đã triển khai:**
-  - Thu thập và xử lý danh sách thành viên Russell 1000 giai đoạn 2000–2026 từ các nguồn lưu trữ lịch sử.
-  - Trích xuất kho dữ liệu giá ngày thô (Raw OHLCV) và các sự kiện doanh nghiệp (chia tách, cổ tức).
-  - Chuẩn hóa định danh chứng khoán canonical SID (*Security Identifier*) cho 3.711 mã duy nhất (từ 4.737 dòng mapping).
-  - Điều chỉnh giá theo chia tách (backward split adjustment) và xử lý cờ chất lượng (*quality flags* cho bad ticks và gián đoạn spin-off).
-  - Xây dựng kho ma trận 2D ($7.252 \times 3.711$) và các lớp mặt nạ Point-In-Time (PIT).
-  - Hoàn thành phân tích khám phá dữ liệu (EDA) trên tập Development và điều tra 34 trường hợp lợi suất cực đoan.
-  - Tái cấu trúc thư viện nền tảng (`src/`) theo hướng vector hóa trên ma trận 2D.
+> [!NOTE]
+> **Kết luận cốt lõi từ thực nghiệm ngoài mẫu (OOS 624 phiên):**
+> Trên 624 dự báo ngoài mẫu, Ridge và GBDT đạt Mean Rank IC lần lượt là 0,02305 và 0,02040 khi xếp hạng lợi suất Close-to-Close của phiên kế tiếp. Trong backtest minh họa dùng cùng điểm dự báo để mua Top 20 ở Open và bán ở Close phiên kế tiếp, Ridge đạt +34,93% trước chi phí và −61,19% với giả định 20 bps mỗi vòng mua–bán.
+
+- **Đã triển khai & hoàn thành:**
+  - Thu thập và chuẩn hóa dữ liệu thành viên Russell 1000 giai đoạn 2000–2026 cho 3.711 canonical SID duy nhất.
+  - Xây dựng kho Feature Store 13 đặc trưng Close/Volume và kiểm định 104 tiêu chí cấu trúc kèm 144 bài kiểm tra nhân quả.
+  - Huấn luyện, kiểm định Walk-Forward 5 folds (2019–2023) và tinh chỉnh siêu tham số (Ridge $\alpha=1.0$, GBDT 7 lá).
+  - Đánh giá ngoài mẫu độc lập một lần duy nhất (One-Shot OOS Evaluation) trên 624 phiên của Phạm vi OOS Chính.
+  - Kiểm thử giao dịch mô phỏng danh mục Long-Only Top 20 (Open $\rightarrow$ Close) ở cả hai kịch bản chi phí 0 bps và 20 bps, xử lý 18 sự kiện ngừng giao dịch (M&A/Halt) và đưa số vị thế treo cuối kỳ về 0.
 - **Đã kiểm thử:**
-  - Chạy bộ kiểm thử tự động với lệnh `python -m pytest -q`.
-  - Kết quả tại mốc bàn giao `281c410`: **32/32 tests passed** (bao gồm kiểm thử nạp ma trận, phân vùng thời gian, tính toàn vẹn đường dẫn, tra cứu PIT không fallback, bảo toàn warm-up và công thức uniform rank).
-- **Còn giới hạn:**
-  - Các ca nối mã bằng heuristic (khoảng cách ngày) vẫn cần tiếp tục kiểm chứng thêm với hồ sơ niêm yết.
-  - Một số phiên có biến động giá cực đoan hoặc gián đoạn spin-off chưa có chuỗi giá độc lập hiện đang được cách ly tạm thời dưới dạng `NaN`.
-- **Đang chuẩn bị:**
-  - Đã chốt đặc tả 16 features ứng viên và target/timing v1; chuẩn bị pilot. Chưa chứng minh khả năng dự đoán của bộ features.
-- **Chưa thực hiện ở pipeline mới:**
-  - Chưa sinh toàn bộ kho feature store hoàn chỉnh.
-  - Chưa huấn luyện mô hình, chưa tinh chỉnh siêu tham số và chưa thực hiện backtest danh mục đầu tư.
+  - Toàn bộ pipeline kiểm thử tự động, kiểm tra tính toàn vẹn dữ liệu và đối chiếu sổ lệnh thực tế đều đạt chuẩn 100%.
+- **Phát hiện phương pháp luận:**
+  - Xác nhận ranh giới cốt lõi: Tín hiệu đạt Rank IC dương có ý nghĩa thống kê ($t > 2.0$) và mang lại lợi nhuận gộp dương (+34,93%), nhưng chiến lược xoay vòng 100% danh mục mỗi ngày chịu áp lực chi phí ma sát và suy giảm vốn tái đầu tư lớn, khiến lợi suất ròng bị kéo về mức âm ở kịch bản 20 bps.
 
 ---
 
@@ -270,7 +265,7 @@ Các nhóm kiểm thử chính đang vận hành:
 
 ## 10. Tài liệu nên đọc tiếp
 
-Muốn hiểu từ đầu như người mới: đọc [hướng dẫn theo 9 chặng](docs/learning/README.md), rồi mở báo cáo được dẫn ở cuối từng chặng.
+Muốn hiểu từ đầu, đọc [hướng dẫn v1 cho người mới](docs/learning/README.md), rồi mở báo cáo được dẫn ở cuối mỗi chương.
 
 Trong mỗi chặng, mục **Từ vấn đề đến phương pháp** giải thích vì sao chọn kỹ thuật, dấu hiệu/bằng chứng, cách kiểm chứng và giới hạn, để hiểu từng bước của bài đang làm. Ví dụ giả lập và kết quả thực nghiệm được phân biệt.
 

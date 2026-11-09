@@ -71,3 +71,77 @@ def test_development_membership_query_uses_safe_slice(tiny_store):
     assert get_active_constituents("2023-12-29", config=config) == ["SYNTHETIC_SID"]
     with pytest.raises(OOSFreezeViolationError):
         get_active_constituents("2024-01-02", config=config)
+
+
+
+def test_pushdown_passes_filters_to_read_parquet(tiny_store, monkeypatch):
+    """Verify load_matrix passes date filters to pd.read_parquet when dev_only=True."""
+    config, prices, _ = tiny_store
+
+    recorded_calls = []
+    orig_read_parquet = pd.read_parquet
+
+    def spy_read_parquet(*args, **kwargs):
+        recorded_calls.append({"args": args, "kwargs": kwargs})
+        return orig_read_parquet(*args, **kwargs)
+
+    monkeypatch.setattr(pd, "read_parquet", spy_read_parquet)
+
+    # Call with dev_only=True, include_warmup=False
+    load_matrix("adj_close", dev_only=True, include_warmup=False, config=config)
+
+    assert len(recorded_calls) >= 1
+    call_kwargs = recorded_calls[0]["kwargs"]
+    assert "filters" in call_kwargs, "filters keyword argument must be passed to read_parquet"
+    filters = call_kwargs["filters"]
+    assert filters is not None
+    # Check that upper bound 2023-12-29 is in filters
+    upper_bounds = [f[2] for f in filters if f[1] == "<="]
+    assert pd.Timestamp("2023-12-29") in upper_bounds
+    # Check that lower bound 2000-07-01 is in filters
+    lower_bounds = [f[2] for f in filters if f[1] == ">="]
+    assert pd.Timestamp("2000-07-01") in lower_bounds
+
+
+def test_pushdown_failure_raises_explicit_runtime_error_without_fallback(tiny_store, monkeypatch):
+    """
+    CRITICAL OOS DEFENSE:
+    When predicate pushdown fails, load_matrix must raise an explicit RuntimeError.
+    It must NEVER silently fall back to an unbounded full read.
+    """
+    config, prices, _ = tiny_store
+
+    full_read_attempted = []
+
+    def mock_read_parquet(*args, **kwargs):
+        filters = kwargs.get("filters")
+        if filters is not None:
+            raise ValueError("Simulated PyArrow pushdown scanner failure")
+        else:
+            full_read_attempted.append(True)
+            return prices
+
+    monkeypatch.setattr(pd, "read_parquet", mock_read_parquet)
+
+    with pytest.raises(RuntimeError) as exc_info:
+        load_matrix("adj_close", dev_only=True, config=config)
+
+    assert "Predicate pushdown failed for dev_only read" in str(exc_info.value)
+    assert "Unbounded fallback read is strictly blocked" in str(exc_info.value)
+    assert len(full_read_attempted) == 0, "Security violation: load_matrix attempted silent unbounded fallback read!"
+
+
+def test_pushdown_missing_date_column_raises_explicit_error(tmp_path):
+    """Verify load_matrix raises RuntimeError if date index column cannot be determined."""
+    raw = deepcopy(load_config().raw)
+    raw["data"]["matrices_dir"] = str(tmp_path)
+    config = Config(raw, tmp_path / "config.yaml")
+
+    # Create parquet without datetime index or 'date' column
+    df_nodate = pd.DataFrame({"col_A": [1, 2, 3], "col_B": [4, 5, 6]})
+    df_nodate.to_parquet(tmp_path / "no_date_matrix.parquet", index=False)
+
+    with pytest.raises(RuntimeError) as exc_info:
+        load_matrix("no_date_matrix", dev_only=True, config=config)
+
+    assert "Cannot determine date index column in Parquet file" in str(exc_info.value)

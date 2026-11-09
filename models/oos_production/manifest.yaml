@@ -1,0 +1,102 @@
+manifest_version: '1.0'
+created_at: '2026-11-07 22:05:54'
+total_elapsed_sec: 28.83346176147461
+data_source:
+  file_path: data/processed/baseline_dataset_v1.parquet
+  total_rows: 5514324
+  date_range:
+    start_date: '2000-07-03'
+    end_date: '2023-12-28'
+  purged_final_session: '2023-12-29'
+  purge_reason: Avoid T+1 label leakage into OOS (2024-01-02)
+target:
+  name: target_rank
+  domain: '[0.0, 1.0]'
+  type: Cross-sectional uniform rank normalized on valid label universe at T
+features:
+  count: 13
+  order:
+  - ret_1d
+  - ret_5d
+  - ret_20d
+  - ret_60d
+  - mom_12m_skip_1m
+  - vol_realized_20d
+  - vol_realized_60d
+  - downside_deviation_20d
+  - amihud_illiq_20d
+  - volume_ratio_5_20
+  - log_dollar_volume_20d
+  - rsi_14d
+  - bollinger_pct_b_20d
+models:
+  ridge_alpha1_0:
+    file_path: models/oos_production/ridge_refit_dev_alpha1.0.joblib
+    model_type: Pipeline(StandardScaler, Ridge)
+    hyperparameters:
+      alpha: 1.0
+      fit_intercept: true
+    fit_time_sec: 2.6262669563293457
+    intercept: 0.5001037120819092
+    coefficients:
+      ret_1d: -0.0018293778412044048
+      ret_5d: -0.0031560182105749846
+      ret_20d: -0.002354315249249339
+      ret_60d: -8.681340113980696e-05
+      mom_12m_skip_1m: 0.0021353524643927813
+      vol_realized_20d: 0.0024147527292370796
+      vol_realized_60d: -0.00214470736682415
+      downside_deviation_20d: -0.003958426881581545
+      amihud_illiq_20d: -0.00020899230730719864
+      volume_ratio_5_20: 0.00042034240323118865
+      log_dollar_volume_20d: -0.0008200049051083624
+      rsi_14d: -0.0005066068843007088
+      bollinger_pct_b_20d: 0.0017813508166000247
+    scaler_means:
+      ret_1d: 0.00038895162198363274
+      ret_5d: 0.001894670022523246
+      ret_20d: 0.007125135583004509
+      ret_60d: 0.020321652576699257
+      mom_12m_skip_1m: 0.10092597822593237
+      vol_realized_20d: 0.021068550492401954
+      vol_realized_60d: 0.021890496374074843
+      downside_deviation_20d: 0.014036840946530429
+      amihud_illiq_20d: 0.00109919804875994
+      volume_ratio_5_20: 1.0046902278371
+      log_dollar_volume_20d: 17.92042507652602
+      rsi_14d: 51.57959778574857
+      bollinger_pct_b_20d: 0.531830915024702
+    scaler_scales:
+      ret_1d: 0.026325462126575796
+      ret_5d: 0.058071861396573714
+      ret_20d: 0.1118717513232311
+      ret_60d: 0.19092499246918088
+      mom_12m_skip_1m: 0.4636701561554743
+      vol_realized_20d: 0.015844163598389575
+      vol_realized_60d: 0.015041044200658021
+      downside_deviation_20d: 0.011633507626128662
+      amihud_illiq_20d: 0.04167022994253007
+      volume_ratio_5_20: 0.28796004187860647
+      log_dollar_volume_20d: 1.2941196004279594
+      rsi_14d: 12.162765149655764
+      bollinger_pct_b_20d: 0.33321598763190424
+  gbdt_leaf7:
+    file_path: models/oos_production/gbdt_refit_dev_leaf7.joblib
+    model_type: HistGradientBoostingRegressor
+    hyperparameters:
+      loss: squared_error
+      max_iter: 100
+      learning_rate: 0.05
+      max_leaf_nodes: 7
+      min_samples_leaf: 100
+      early_stopping: false
+      random_state: 42
+    actual_iterations: 100
+    fit_time_sec: 22.4291672706604
+oos_contract:
+  status: STRICTLY_FROZEN
+  date_range:
+    start_date: '2024-01-02'
+    end_date: '2026-10-30'
+  total_sessions: 711
+  policy: One-shot blind evaluation for reporting; no hyperparameter tuning allowed

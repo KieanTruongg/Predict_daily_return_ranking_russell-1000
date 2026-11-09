@@ -27,6 +27,11 @@ from src.features.transforms import (
     cross_sectional_zscore,
     cross_sectional_winsorize,
 )
+from src.features.nan_classifier import (
+    classify_cell_nan,
+    classify_feature_nans,
+    FEATURE_WINDOW_SPECS,
+)
 
 __all__ = [
     "FeatureBase",
@@ -47,4 +52,7 @@ __all__ = [
     "cross_sectional_demean",
     "cross_sectional_zscore",
     "cross_sectional_winsorize",
+    "classify_cell_nan",
+    "classify_feature_nans",
+    "FEATURE_WINDOW_SPECS",
 ]

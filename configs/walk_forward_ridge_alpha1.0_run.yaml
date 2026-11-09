@@ -1,0 +1,247 @@
+evaluation_name: walk_forward_ridge_alpha1.0
+timestamp: '2026-11-07 17:05:03'
+total_elapsed_sec: 40.506367444992065
+alpha: 1.0
+fit_intercept: true
+number_of_folds: 5
+overall_summary:
+  total_validation_rows: 1202259
+  total_trading_sessions: 1253
+  ridge_overall_metrics:
+    total_days: 1253
+    evaluable_days: 1253
+    undefined_days: 0
+    mean_ic: 0.01649668309415142
+    median_ic: 0.023392191622987165
+    std_ic: 0.2183582481343169
+    positive_ic_ratio: 0.5411013567438149
+    ic_ir_daily: 0.07554870601454887
+    ic_ir_annualized: 1.199298527923356
+    t_statistic: 2.6742534559260336
+  bench_overall_metrics:
+    total_days: 1253
+    evaluable_days: 1253
+    undefined_days: 0
+    mean_ic: -0.004446852284056237
+    median_ic: 0.008345104300270198
+    std_ic: 0.2109385921625868
+    positive_ic_ratio: 0.5131683958499601
+    ic_ir_daily: -0.021081264639467686
+    ic_ir_annualized: -0.33465470135262737
+    t_statistic: -0.7462291254403611
+per_year_breakdown:
+- fold_id: 1
+  val_year: 2019
+  train_sessions: 4652
+  train_rows: 4307308
+  val_sessions: 251
+  val_rows: 235052
+  intercept: 0.5001026473328535
+  coefficients:
+    ret_1d: -0.0022988184972640067
+    ret_5d: -0.002603884441082613
+    ret_20d: -0.0022035344062553124
+    ret_60d: 0.0004390601281815673
+    mom_12m_skip_1m: 0.002181299249929617
+    vol_realized_20d: 0.0022408813291578283
+    vol_realized_60d: -0.0029485871620027588
+    downside_deviation_20d: -0.003148639930320685
+    amihud_illiq_20d: -0.0005094690690818507
+    volume_ratio_5_20: 0.0005690668448357283
+    log_dollar_volume_20d: -0.0013812051830466583
+    rsi_14d: -0.0015669943561876579
+    bollinger_pct_b_20d: 0.002420155152229282
+  ridge_ic_metrics:
+    total_days: 251
+    evaluable_days: 251
+    undefined_days: 0
+    mean_ic: 0.009422226692515497
+    median_ic: 0.023144354671564712
+    std_ic: 0.1854150648930701
+    positive_ic_ratio: 0.549800796812749
+    ic_ir_daily: 0.05081694250652905
+    ic_ir_annualized: 0.806693953565659
+    t_statistic: 0.8050917792858661
+  bench_ic_metrics:
+    total_days: 251
+    evaluable_days: 251
+    undefined_days: 0
+    mean_ic: -0.022645117411094238
+    median_ic: -0.028994551958165225
+    std_ic: 0.17852423859915045
+    positive_ic_ratio: 0.4541832669322709
+    ic_ir_daily: -0.1268461783609142
+    ic_ir_annualized: -2.01362065621153
+    t_statistic: -2.009621405677443
+- fold_id: 2
+  val_year: 2020
+  train_sessions: 4904
+  train_rows: 4543280
+  val_sessions: 252
+  val_rows: 240034
+  intercept: 0.5001026840802458
+  coefficients:
+    ret_1d: -0.0023189110690441266
+    ret_5d: -0.0023315929241392113
+    ret_20d: -0.0023206491488800994
+    ret_60d: 0.000326469848356324
+    mom_12m_skip_1m: 0.002225809974504281
+    vol_realized_20d: 0.0023040838494021152
+    vol_realized_60d: -0.0027237919972521473
+    downside_deviation_20d: -0.003341487774283854
+    amihud_illiq_20d: -0.0004926276661262555
+    volume_ratio_5_20: 0.0006037424615206765
+    log_dollar_volume_20d: -0.001267889323531693
+    rsi_14d: -0.0016162702283922632
+    bollinger_pct_b_20d: 0.002270221624825204
+  ridge_ic_metrics:
+    total_days: 252
+    evaluable_days: 252
+    undefined_days: 0
+    mean_ic: 0.020615293161859432
+    median_ic: 0.021644873677532657
+    std_ic: 0.2499720523020286
+    positive_ic_ratio: 0.5119047619047619
+    ic_ir_daily: 0.08247039207787522
+    ic_ir_annualized: 1.3091768877842953
+    t_statistic: 1.3091768877842953
+  bench_ic_metrics:
+    total_days: 252
+    evaluable_days: 252
+    undefined_days: 0
+    mean_ic: 0.004123032486418451
+    median_ic: 0.01101444163049961
+    std_ic: 0.2494144061686764
+    positive_ic_ratio: 0.5238095238095238
+    ic_ir_daily: 0.0165308514041089
+    ic_ir_annualized: 0.2624191306526103
+    t_statistic: 0.2624191306526103
+- fold_id: 3
+  val_year: 2021
+  train_sessions: 5157
+  train_rows: 4784259
+  val_sessions: 251
+  val_rows: 239721
+  intercept: 0.5000946174787093
+  coefficients:
+    ret_1d: -0.00174945846591692
+    ret_5d: -0.0031025325491584902
+    ret_20d: -0.0020398903348884173
+    ret_60d: -6.364186541448082e-05
+    mom_12m_skip_1m: 0.002486602145972056
+    vol_realized_20d: 0.0022536233458668414
+    vol_realized_60d: -0.002040292392128523
+    downside_deviation_20d: -0.0037115681349438804
+    amihud_illiq_20d: -0.0004797495019306117
+    volume_ratio_5_20: 0.000427216165191279
+    log_dollar_volume_20d: -0.001050273299064388
+    rsi_14d: -0.0011810472255604555
+    bollinger_pct_b_20d: 0.0020387086744360744
+  ridge_ic_metrics:
+    total_days: 251
+    evaluable_days: 251
+    undefined_days: 0
+    mean_ic: 0.015802766997553022
+    median_ic: 0.008820594856475699
+    std_ic: 0.21076017365225685
+    positive_ic_ratio: 0.5298804780876494
+    ic_ir_daily: 0.07497985375371133
+    ic_ir_annualized: 1.190268278233878
+    t_statistic: 1.1879042872643033
+  bench_ic_metrics:
+    total_days: 251
+    evaluable_days: 251
+    undefined_days: 0
+    mean_ic: -0.0033846616519562214
+    median_ic: 0.025862492184726592
+    std_ic: 0.22110261942874337
+    positive_ic_ratio: 0.5537848605577689
+    ic_ir_daily: -0.01530810291031864
+    ic_ir_annualized: -0.24300860006932332
+    t_statistic: -0.24252596086386177
+- fold_id: 4
+  val_year: 2022
+  train_sessions: 5409
+  train_rows: 5024938
+  val_sessions: 250
+  val_rows: 243971
+  intercept: 0.5001070874393876
+  coefficients:
+    ret_1d: -0.0019559178747849742
+    ret_5d: -0.003036978275361987
+    ret_20d: -0.002242110033317816
+    ret_60d: 9.003686760177782e-05
+    mom_12m_skip_1m: 0.002044098448882545
+    vol_realized_20d: 0.0021961001980856224
+    vol_realized_60d: -0.0021541926566070752
+    downside_deviation_20d: -0.0036932714627480492
+    amihud_illiq_20d: -0.0004627443106431445
+    volume_ratio_5_20: 0.00042713619921717514
+    log_dollar_volume_20d: -0.0010121364159935327
+    rsi_14d: -0.0010289164296079273
+    bollinger_pct_b_20d: 0.002057674667845084
+  ridge_ic_metrics:
+    total_days: 250
+    evaluable_days: 250
+    undefined_days: 0
+    mean_ic: 0.033095146588181135
+    median_ic: 0.05087404326088297
+    std_ic: 0.24015154134755262
+    positive_ic_ratio: 0.588
+    ic_ir_daily: 0.13780942817387587
+    ic_ir_annualized: 2.187656851608562
+    t_statistic: 2.178958380374133
+  bench_ic_metrics:
+    total_days: 250
+    evaluable_days: 250
+    undefined_days: 0
+    mean_ic: -0.0005509552514366867
+    median_ic: 0.018544409994787212
+    std_ic: 0.21855404389097438
+    positive_ic_ratio: 0.524
+    ic_ir_daily: -0.0025209108082737217
+    ic_ir_annualized: -0.04001821845640258
+    t_statistic: -0.03985909966140501
+- fold_id: 5
+  val_year: 2023
+  train_sessions: 5660
+  train_rows: 5269864
+  val_sessions: 249
+  val_rows: 243481
+  intercept: 0.5001071120695832
+  coefficients:
+    ret_1d: -0.0017578634924967308
+    ret_5d: -0.003223127413336833
+    ret_20d: -0.002365694657155862
+    ret_60d: -1.6510502690328992e-05
+    mom_12m_skip_1m: 0.00214601690845178
+    vol_realized_20d: 0.0022318820279184043
+    vol_realized_60d: -0.0023075904613573507
+    downside_deviation_20d: -0.003749312816875665
+    amihud_illiq_20d: -0.00013469135611133472
+    volume_ratio_5_20: 0.00043224543822462943
+    log_dollar_volume_20d: -0.000962282428785133
+    rsi_14d: -0.0006891321130303013
+    bollinger_pct_b_20d: 0.0019759709228253115
+  ridge_ic_metrics:
+    total_days: 249
+    evaluable_days: 249
+    undefined_days: 0
+    mean_ic: 0.003494096292894252
+    median_ic: 0.014599726565930317
+    std_ic: 0.19902660084764082
+    positive_ic_ratio: 0.5261044176706827
+    ic_ir_daily: 0.017555926082308257
+    ic_ir_annualized: 0.2786916866953207
+    t_statistic: 0.27702784085947096
+  bench_ic_metrics:
+    total_days: 249
+    evaluable_days: 249
+    undefined_days: 0
+    mean_ic: 0.00024218176379486888
+    median_ic: 0.011345287855286863
+    std_ic: 0.17847419010945526
+    positive_ic_ratio: 0.5100401606425703
+    ic_ir_daily: 0.0013569567882411615
+    ic_ir_annualized: 0.021541021209282293
+    t_statistic: 0.021412416948193597

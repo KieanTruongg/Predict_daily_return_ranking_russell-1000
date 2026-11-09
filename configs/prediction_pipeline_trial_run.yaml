@@ -1,0 +1,119 @@
+pipeline_name: oos_prediction_pipeline_trial
+timestamp: '2026-11-07 22:40:24'
+total_elapsed_sec: 55.3468759059906
+trial_sessions:
+- '2023-12-27'
+- '2023-12-28'
+- '2023-12-29'
+lookback_sessions: 500
+models_used:
+  ridge: ridge_refit_dev_alpha1.0.joblib
+  gbdt: gbdt_refit_dev_leaf7.joblib
+features_verified:
+- ret_1d
+- ret_5d
+- ret_20d
+- ret_60d
+- mom_12m_skip_1m
+- vol_realized_20d
+- vol_realized_60d
+- downside_deviation_20d
+- amihud_illiq_20d
+- volume_ratio_5_20
+- log_dollar_volume_20d
+- rsi_14d
+- bollinger_pct_b_20d
+feature_parity_check:
+- feature: ret_1d
+  max_abs_diff: 0.0
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: ret_5d
+  max_abs_diff: 0.0
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: ret_20d
+  max_abs_diff: 0.0
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: ret_60d
+  max_abs_diff: 0.0
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: mom_12m_skip_1m
+  max_abs_diff: 0.0
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: vol_realized_20d
+  max_abs_diff: 1.2889902686885613e-10
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: vol_realized_60d
+  max_abs_diff: 3.671176557196176e-11
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: downside_deviation_20d
+  max_abs_diff: 2.2963402013242984e-16
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: amihud_illiq_20d
+  max_abs_diff: 1.0842048829909356e-14
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: volume_ratio_5_20
+  max_abs_diff: 7.327471962526033e-15
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: log_dollar_volume_20d
+  max_abs_diff: 3.552713678800501e-15
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: rsi_14d
+  max_abs_diff: 2.6290081223123707e-13
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+- feature: bollinger_pct_b_20d
+  max_abs_diff: 1.2228132950653503e-09
+  nan_mismatch_cells: 0
+  status: PASSED_PARITY
+inference_eligibility_summary:
+- date: '2023-12-27'
+  n_eligible_at_t: 978
+- date: '2023-12-28'
+  n_eligible_at_t: 978
+- date: '2023-12-29'
+  n_eligible_at_t: 978
+daily_evaluation_summary:
+- date: '2023-12-27'
+  n_predicted_at_t: 978
+  n_evaluable_at_t1: 978
+  ic_ridge: 0.011114786674840246
+  ic_gbdt: -0.0364503924426064
+  ic_ret_20d: -0.15785051669457326
+  diff_gbdt_vs_ridge: -0.04756517911744665
+  has_valid_label: true
+  status: EVALUATED_SUCCESS
+- date: '2023-12-28'
+  n_predicted_at_t: 978
+  n_evaluable_at_t1: 978
+  ic_ridge: 0.36237701520248117
+  ic_gbdt: 0.26093084604249994
+  ic_ret_20d: -0.46179945792379895
+  diff_gbdt_vs_ridge: -0.10144616915998123
+  has_valid_label: true
+  status: EVALUATED_SUCCESS
+- date: '2023-12-29'
+  n_predicted_at_t: 978
+  n_evaluable_at_t1: 0
+  ic_ridge: .nan
+  ic_gbdt: .nan
+  ic_ret_20d: .nan
+  diff_gbdt_vs_ridge: .nan
+  has_valid_label: false
+  status: INSUFFICIENT_STOCKS (<2)
+decoupling_verification:
+  session_2023_12_29_inference_rows: 978
+  session_2023_12_29_has_insample_label: false
+  status: 'Decoupling verified: 2023-12-29 predicted at T without requiring in-sample
+    label at T+1'
+oos_status: STRICTLY_FROZEN

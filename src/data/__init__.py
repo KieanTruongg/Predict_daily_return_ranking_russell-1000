@@ -27,6 +27,12 @@ from src.data.universe import (
     get_active_constituents,
     get_reconstitution_year,
 )
+from src.data.corrections import (
+    CorrectionEntry,
+    load_market_corrections,
+    apply_corrections_to_dataframe,
+    get_field_quarantine_mask,
+)
 
 __all__ = [
     "load_matrix",
@@ -46,4 +52,8 @@ __all__ = [
     "canonical_sid_to_ticker",
     "get_active_constituents",
     "get_reconstitution_year",
+    "CorrectionEntry",
+    "load_market_corrections",
+    "apply_corrections_to_dataframe",
+    "get_field_quarantine_mask",
 ]

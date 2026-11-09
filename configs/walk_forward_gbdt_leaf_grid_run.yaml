@@ -1,0 +1,229 @@
+experiment_name: gbdt_max_leaf_nodes_grid_search
+timestamp: '2026-11-07 20:18:28'
+total_elapsed_sec: 313.31472516059875
+model_type: HistGradientBoostingRegressor
+leaf_grid:
+- 7
+- 15
+- 31
+baseline_leaf: 15
+fixed_hyperparameters:
+  loss: squared_error
+  max_iter: 100
+  learning_rate: 0.05
+  min_samples_leaf: 100
+  early_stopping: false
+  random_state: 42
+input_features:
+- ret_1d
+- ret_5d
+- ret_20d
+- ret_60d
+- mom_12m_skip_1m
+- vol_realized_20d
+- vol_realized_60d
+- downside_deviation_20d
+- amihud_illiq_20d
+- volume_ratio_5_20
+- log_dollar_volume_20d
+- rsi_14d
+- bollinger_pct_b_20d
+oos_status: STRICTLY_FROZEN (2024-2026)
+parity_check:
+  expected_mean_ic_leaf15: 0.019158
+  actual_mean_ic_leaf15: 0.01915763108918966
+  expected_mean_ic_ridge: 0.016497
+  actual_mean_ic_ridge: 0.01649668309415142
+  parity_passed: true
+fold_timings:
+- fold_id: 1
+  val_year: 2019
+  train_rows: 4307308
+  val_rows: 235052
+  leaf_models:
+    15:
+      fit_time_sec: 0.0
+      predict_time_sec: 0.783226490020752
+    7:
+      fit_time_sec: 18.865099906921387
+      predict_time_sec: 0.5412163734436035
+    31:
+      fit_time_sec: 38.460474252700806
+      predict_time_sec: 1.1470611095428467
+- fold_id: 2
+  val_year: 2020
+  train_rows: 4543280
+  val_rows: 240034
+  leaf_models:
+    15:
+      fit_time_sec: 0.0
+      predict_time_sec: 0.8084745407104492
+    7:
+      fit_time_sec: 21.006484508514404
+      predict_time_sec: 0.5657954216003418
+    31:
+      fit_time_sec: 30.79669690132141
+      predict_time_sec: 0.9253301620483398
+- fold_id: 3
+  val_year: 2021
+  train_rows: 4784259
+  val_rows: 239721
+  leaf_models:
+    15:
+      fit_time_sec: 0.0
+      predict_time_sec: 0.8884811401367188
+    7:
+      fit_time_sec: 19.86567735671997
+      predict_time_sec: 0.5785417556762695
+    31:
+      fit_time_sec: 33.47121000289917
+      predict_time_sec: 1.1749098300933838
+- fold_id: 4
+  val_year: 2022
+  train_rows: 5024938
+  val_rows: 243971
+  leaf_models:
+    15:
+      fit_time_sec: 0.0
+      predict_time_sec: 0.969402551651001
+    7:
+      fit_time_sec: 22.053697109222412
+      predict_time_sec: 0.5693972110748291
+    31:
+      fit_time_sec: 32.46663570404053
+      predict_time_sec: 0.926243782043457
+- fold_id: 5
+  val_year: 2023
+  train_rows: 5269864
+  val_rows: 243481
+  leaf_models:
+    15:
+      fit_time_sec: 0.0
+      predict_time_sec: 0.771458625793457
+    7:
+      fit_time_sec: 20.94683074951172
+      predict_time_sec: 0.5718286037445068
+    31:
+      fit_time_sec: 33.11122465133667
+      predict_time_sec: 0.9171323776245117
+summary_table:
+- period: '2019'
+  evaluable_days: 251
+  leaf_7_mean_ic: 0.014161907662672795
+  leaf_7_pos_ratio: 0.5418326693227091
+  leaf_7_annual_ir: 1.2037742405741023
+  diff_leaf7_vs_15: 0.0007377575028243065
+  win_rate_leaf7_vs_15: 0.5418326693227091
+  leaf_15_mean_ic: 0.013424150159848493
+  leaf_15_pos_ratio: 0.5418326693227091
+  leaf_15_annual_ir: 1.2183224053308548
+  leaf_31_mean_ic: 0.013507145661361
+  leaf_31_pos_ratio: 0.5418326693227091
+  leaf_31_annual_ir: 1.340873748654581
+  diff_leaf31_vs_15: 8.299550151250985e-05
+  win_rate_leaf31_vs_15: 0.49800796812749004
+  ridge_mean_ic: 0.009422226692515497
+  ridge_pos_ratio: 0.549800796812749
+  ridge_annual_ir: 0.806693953565659
+  diff_leaf15_vs_ridge: 0.004001923467332997
+  ret_20d_mean_ic: -0.022645117411094238
+- period: '2020'
+  evaluable_days: 252
+  leaf_7_mean_ic: 0.03328668686967547
+  leaf_7_pos_ratio: 0.5595238095238095
+  leaf_7_annual_ir: 2.6512346026882545
+  diff_leaf7_vs_15: 0.0014027414160550308
+  win_rate_leaf7_vs_15: 0.4722222222222222
+  leaf_15_mean_ic: 0.031883945453620444
+  leaf_15_pos_ratio: 0.5634920634920635
+  leaf_15_annual_ir: 2.7354251900555404
+  leaf_31_mean_ic: 0.03089889534422164
+  leaf_31_pos_ratio: 0.5674603174603174
+  leaf_31_annual_ir: 2.7477198822273903
+  diff_leaf31_vs_15: -0.000985050109398809
+  win_rate_leaf31_vs_15: 0.4801587301587302
+  ridge_mean_ic: 0.020615293161859432
+  ridge_pos_ratio: 0.5119047619047619
+  ridge_annual_ir: 1.3091768877842953
+  diff_leaf15_vs_ridge: 0.011268652291761007
+  ret_20d_mean_ic: 0.004123032486418451
+- period: '2021'
+  evaluable_days: 251
+  leaf_7_mean_ic: 0.014320930637371134
+  leaf_7_pos_ratio: 0.545816733067729
+  leaf_7_annual_ir: 1.3866660999586526
+  diff_leaf7_vs_15: 0.002693467506176805
+  win_rate_leaf7_vs_15: 0.5059760956175299
+  leaf_15_mean_ic: 0.011627463131194329
+  leaf_15_pos_ratio: 0.5219123505976095
+  leaf_15_annual_ir: 1.1653231954039858
+  leaf_31_mean_ic: 0.010299303838696285
+  leaf_31_pos_ratio: 0.4900398406374502
+  leaf_31_annual_ir: 1.0548045166291704
+  diff_leaf31_vs_15: -0.001328159292498045
+  win_rate_leaf31_vs_15: 0.44621513944223107
+  ridge_mean_ic: 0.015802766997553022
+  ridge_pos_ratio: 0.5298804780876494
+  ridge_annual_ir: 1.190268278233878
+  diff_leaf15_vs_ridge: -0.004175303866358685
+  ret_20d_mean_ic: -0.0033846616519562214
+- period: '2022'
+  evaluable_days: 250
+  leaf_7_mean_ic: 0.028585476243796322
+  leaf_7_pos_ratio: 0.572
+  leaf_7_annual_ir: 2.055140419860317
+  diff_leaf7_vs_15: 0.004417630046651739
+  win_rate_leaf7_vs_15: 0.528
+  leaf_15_mean_ic: 0.024167846197144578
+  leaf_15_pos_ratio: 0.592
+  leaf_15_annual_ir: 1.934574323263605
+  leaf_31_mean_ic: 0.023743250858250013
+  leaf_31_pos_ratio: 0.604
+  leaf_31_annual_ir: 2.086867194104339
+  diff_leaf31_vs_15: -0.00042459533889457
+  win_rate_leaf31_vs_15: 0.484
+  ridge_mean_ic: 0.033095146588181135
+  ridge_pos_ratio: 0.588
+  ridge_annual_ir: 2.187656851608562
+  diff_leaf15_vs_ridge: -0.008927300391036563
+  ret_20d_mean_ic: -0.0005509552514366867
+- period: '2023'
+  evaluable_days: 249
+  leaf_7_mean_ic: 0.014408853090743756
+  leaf_7_pos_ratio: 0.5461847389558233
+  leaf_7_annual_ir: 1.3068176846878568
+  diff_leaf7_vs_15: -0.000208982311281943
+  win_rate_leaf7_vs_15: 0.5341365461847389
+  leaf_15_mean_ic: 0.014617835402025705
+  leaf_15_pos_ratio: 0.5381526104417671
+  leaf_15_annual_ir: 1.4122685217491289
+  leaf_31_mean_ic: 0.014905980955757996
+  leaf_31_pos_ratio: 0.5381526104417671
+  leaf_31_annual_ir: 1.5571279905387476
+  diff_leaf31_vs_15: 0.00028814555373229034
+  win_rate_leaf31_vs_15: 0.4939759036144578
+  ridge_mean_ic: 0.003494096292894252
+  ridge_pos_ratio: 0.5261044176706827
+  ridge_annual_ir: 0.2786916866953207
+  diff_leaf15_vs_ridge: 0.01112373910913145
+  ret_20d_mean_ic: 0.00024218176379486888
+- period: "T\u1ED4NG 5 N\u0102M"
+  evaluable_days: 1253
+  leaf_7_mean_ic: 0.020966968064655644
+  leaf_7_pos_ratio: 0.553072625698324
+  leaf_7_annual_ir: 1.7510941010319927
+  diff_leaf7_vs_15: 0.0018093369754659837
+  win_rate_leaf7_vs_15: 0.5163607342378292
+  leaf_15_mean_ic: 0.01915763108918966
+  leaf_15_pos_ratio: 0.5514764565043895
+  leaf_15_annual_ir: 1.7213995558007742
+  leaf_31_mean_ic: 0.01868263561357101
+  leaf_31_pos_ratio: 0.5482841181165203
+  leaf_31_annual_ir: 1.7913146654588792
+  diff_leaf31_vs_15: -0.00047499547561865246
+  win_rate_leaf31_vs_15: 0.48044692737430167
+  ridge_mean_ic: 0.01649668309415142
+  ridge_pos_ratio: 0.5411013567438149
+  ridge_annual_ir: 1.199298527923356
+  diff_leaf15_vs_ridge: 0.00266094799503824
+  ret_20d_mean_ic: -0.004446852284056237

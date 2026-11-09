@@ -1,0 +1,105 @@
+feature,check_category,check_name,expected,actual,status,details
+ret_1d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+ret_1d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+ret_1d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+ret_1d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+ret_1d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+ret_1d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Giá trị hữu hạn trong miền hợp lệ,PASSED,Giá trị hữu hạn trong miền hợp lệ
+ret_5d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+ret_5d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+ret_5d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+ret_5d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+ret_5d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+ret_5d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Giá trị hữu hạn trong miền hợp lệ,PASSED,Giá trị hữu hạn trong miền hợp lệ
+ret_20d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+ret_20d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+ret_20d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+ret_20d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+ret_20d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+ret_20d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Giá trị hữu hạn trong miền hợp lệ,PASSED,Giá trị hữu hạn trong miền hợp lệ
+ret_60d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+ret_60d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+ret_60d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+ret_60d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+ret_60d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+ret_60d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Giá trị hữu hạn trong miền hợp lệ,PASSED,Giá trị hữu hạn trong miền hợp lệ
+mom_12m_skip_1m,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+mom_12m_skip_1m,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+mom_12m_skip_1m,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+mom_12m_skip_1m,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+mom_12m_skip_1m,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+mom_12m_skip_1m,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Giá trị hữu hạn trong miền hợp lệ,PASSED,Giá trị hữu hạn trong miền hợp lệ
+vol_realized_20d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+vol_realized_20d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+vol_realized_20d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+vol_realized_20d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+vol_realized_20d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+vol_realized_20d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Biến động không âm: Min=0.000000 >= 0,PASSED,Biến động không âm: Min=0.000000 >= 0
+vol_realized_60d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+vol_realized_60d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+vol_realized_60d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+vol_realized_60d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+vol_realized_60d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+vol_realized_60d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Biến động không âm: Min=0.000000 >= 0,PASSED,Biến động không âm: Min=0.000000 >= 0
+vol_parkinson_20d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+vol_parkinson_20d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+vol_parkinson_20d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+vol_parkinson_20d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+vol_parkinson_20d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+vol_parkinson_20d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Biến động không âm: Min=0.000000 >= 0,PASSED,Biến động không âm: Min=0.000000 >= 0
+downside_deviation_20d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+downside_deviation_20d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+downside_deviation_20d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+downside_deviation_20d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+downside_deviation_20d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+downside_deviation_20d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Biến động không âm: Min=0.000000 >= 0,PASSED,Biến động không âm: Min=0.000000 >= 0
+amihud_illiq_20d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+amihud_illiq_20d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+amihud_illiq_20d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+amihud_illiq_20d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+amihud_illiq_20d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+amihud_illiq_20d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Amihud ratio không âm: Min=0.000000 >= 0,PASSED,Amihud ratio không âm: Min=0.000000 >= 0
+volume_ratio_5_20,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+volume_ratio_5_20,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+volume_ratio_5_20,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+volume_ratio_5_20,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+volume_ratio_5_20,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+volume_ratio_5_20,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Tỷ số volume không âm: Min=0.008488 >= 0,PASSED,Tỷ số volume không âm: Min=0.008488 >= 0
+log_dollar_volume_20d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+log_dollar_volume_20d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+log_dollar_volume_20d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+log_dollar_volume_20d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+log_dollar_volume_20d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+log_dollar_volume_20d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Log dollar volume không âm: Min=9.638340 >= 0,PASSED,Log dollar volume không âm: Min=9.638340 >= 0
+ret_intraday,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+ret_intraday,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+ret_intraday,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+ret_intraday,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+ret_intraday,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+ret_intraday,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Giá trị hữu hạn trong miền hợp lệ,PASSED,Giá trị hữu hạn trong miền hợp lệ
+ret_overnight,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+ret_overnight,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+ret_overnight,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+ret_overnight,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+ret_overnight,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+ret_overnight,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Giá trị hữu hạn trong miền hợp lệ,PASSED,Giá trị hữu hạn trong miền hợp lệ
+rsi_14d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+rsi_14d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+rsi_14d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+rsi_14d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+rsi_14d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+rsi_14d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,"Miền giá trị: [3.2958, 100.0000] trong [0, 100]",PASSED,"Miền giá trị: [3.2958, 100.0000] trong [0, 100]"
+bollinger_pct_b_20d,SHAPE_AND_AXES,shape_parity,"(5911, 3711)","(5911, 3711)",PASSED,Khớp chính xác số phiên và số cổ phiếu
+bollinger_pct_b_20d,SHAPE_AND_AXES,dates_index_alignment,Monotonic increasing & Unique,"Monotonic=True, Unique=True",PASSED,Trục ngày từ 2000-07-03 đến 2023-12-29
+bollinger_pct_b_20d,SHAPE_AND_AXES,sids_columns_alignment,Exact match with canonical SIDs list,"Count=3711, Unique=True",PASSED,Khớp danh sách 3.711 Canonical SIDs
+bollinger_pct_b_20d,VALUE_INTEGRITY,no_infinite_values,0 Inf values,0 Inf values,PASSED,Không chứa giá trị vô hạn (+Inf / -Inf)
+bollinger_pct_b_20d,MEMBERSHIP_ENFORCEMENT,outside_membership_is_nan,0 non-NaN outside membership,0 non-NaN values,PASSED,Tuyệt đối không rò rỉ dữ liệu ngoài rổ Russell 1000
+bollinger_pct_b_20d,DOMAIN_BOUNDS,specification_domain_check,Within theoretical bounds,Giá trị hữu hạn trong miền hợp lệ,PASSED,Giá trị hữu hạn trong miền hợp lệ
+ret_20d,PILOT_PARITY,pilot_cell_A_2000-07-03,-0.0453779333592635,-0.045377933359263545,PASSED,Ô pilot khớp hoàn hảo với Feature Store (Case: CASE_E01_AGILENT_ENTRY_WARMUP_SUCCESS)
+ret_20d,PILOT_PARITY,pilot_cell_BF_2000-07-03,nan,nan,PASSED,Ô pilot khớp hoàn hảo với Feature Store (Case: CASE_E02_BF_INSUFFICIENT_WARMUP_NAN)
+ret_20d,PILOT_PARITY,pilot_cell_KSU_2000-07-13,nan,nan,PASSED,Ô pilot khớp hoàn hảo với Feature Store (Case: CASE_E03_KSU_SPINOFF_NAN_PROPAGATION)
+ret_20d,PILOT_PARITY,pilot_cell_CPTH_2001-02-05,nan,nan,PASSED,Ô pilot khớp hoàn hảo với Feature Store (Case: CASE_E05_CPTH_BAD_DATA_PERIOD_NAN)
+mom_12m_skip_1m,PILOT_PARITY,pilot_cell_A_2000-07-03,nan,nan,PASSED,Ô pilot khớp hoàn hảo với Feature Store (Case: CASE_E07_AGILENT_MOM12M_DEFICIT_AND_RECOVERY)
+ret_1d,PILOT_PARITY,pilot_cell_MSFT_2000-07-05,-0.0203902927195396,-0.020390292719539627,PASSED,Ô pilot khớp hoàn hảo với Feature Store (Case: CASE_E08_INTRADAY_OVERNIGHT_DECOMPOSITION_IDENTITY)
+vol_parkinson_20d,PILOT_PARITY,pilot_cell_MSFT_2000-07-05,0.0272414121414246,0.027241412141424615,PASSED,Ô pilot khớp hoàn hảo với Feature Store (Case: CASE_E09_MSFT_PARKINSON_VOL_NUMERICAL_PARITY)
+ret_20d,CAUSAL_INTEGRITY,anti_lookahead_future_corruption_test,0.0 discrepancy,Max diff = 0.00e+00,PASSED,Làm nhiễu tương lai sau ngày 2005-06-15 hoàn toàn không ảnh hưởng feature tại T

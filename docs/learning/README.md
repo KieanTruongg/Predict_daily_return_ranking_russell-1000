@@ -1,5 +1,16 @@
 # Học pipeline từ đầu, theo từng chặng
 
+## Đọc v1 từ đầu
+
+Nếu cậu mới bắt đầu với định dạng file, Python hoặc học máy, mở [V1 từ đầu — Từng file và từng công cụ làm gì?](v1_files_and_tools.md) trước. Tài liệu đi từ nguồn thô đến báo cáo, giải thích từng công cụ và dẫn sang các chương chi tiết bên dưới.
+
+1. [Dữ liệu và cách kiểm tra](v1_data.md). Tìm hiểu vì sao cần danh sách Russell 1000 theo thời điểm, cách nhận diện đúng cổ phiếu, điều chỉnh giá và kiểm tra dữ liệu trước khi học.
+2. [Đặc trưng, nhãn và mô hình](v1_features_models.md). Theo dõi một dòng dữ liệu từ lịch sử giá đến điểm dự báo. Xem cách nhóm thử từng cấu hình trên quá khứ và chốt mô hình.
+3. [Đánh giá ngoài mẫu và mô phỏng danh mục](v1_evaluation.md). Tự tính thử tương quan thứ hạng, đọc kết quả 624 phiên và đối chiếu lợi suất trước và sau chi phí.
+4. [Biên bản rà soát v1](v1_review.md). Xem phép kiểm nào đã được đối chiếu, giới hạn nào còn lại và tài liệu nào đã được dọn.
+
+[Báo cáo thực nghiệm v1](../reports/baseline/comprehensive_course_project_report.md) là bản tổng hợp số liệu và hình. Ba chương trên là bản giải thích dành cho người học. Phần chín chặng bên dưới là hướng dẫn có từ trước khi hoàn tất huấn luyện và mô phỏng danh mục, hữu ích khi muốn đào sâu dữ liệu và lịch sử sửa lỗi.
+
 Cập nhật: 2026-11-05. Dành cho người biết ML cơ bản nhưng mới làm dữ liệu chứng khoán. Đọc lần lượt; mỗi chặng có câu hỏi tự kiểm tra và phần giải thích theo mạch vấn đề → bằng chứng → kỹ thuật → kiểm chứng → quyết định/giới hạn. Các ví dụ ghi **giả lập** để giải thích, không phải bằng chứng kiểm thử đã chạy.
 
 ## Chọn chặng cần đọc

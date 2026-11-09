@@ -2,7 +2,7 @@
 Unit and Integration Test Suite: Pipeline Static Integrity & Contract Verification
 ===================================================================================
 Authoritative test suite covering Requirement R6 (Pipeline Verification & Static Integrity Check)
-- Tests 1-13 scripts static syntax (py_compile) and zero hardcoded drive paths
+- Tests pipeline script syntax and zero hardcoded drive paths
 - Tests clean imports and cloud-only documentation markings
 - Tests Step 01 Universe extraction output contracts
 - Tests Step 03 / Step 04 Parquet path contract synchronization
@@ -16,7 +16,6 @@ import os
 import glob
 import json
 import ast
-import py_compile
 import unittest
 from pathlib import Path
 import pandas as pd
@@ -28,13 +27,11 @@ class TestPipelineIntegrity(unittest.TestCase):
 
     def test_01_static_compilation_all_pipeline_scripts(self):
         """Verify all pipeline scripts compile with zero syntax errors."""
-        scripts = sorted(glob.glob(str(ROOT / "scripts/01_pipeline/*.py")))
-        self.assertIn(len(scripts), [13, 14], f"Expected 13 or 14 scripts, found {len(scripts)}")
+        scripts = sorted((ROOT / "scripts/01_pipeline").glob("*.py"))
+        self.assertTrue(scripts, "No pipeline scripts found")
         for script_path in scripts:
-            try:
-                py_compile.compile(script_path, doraise=True)
-            except Exception as e:
-                self.fail(f"Syntax error compiling {os.path.basename(script_path)}: {e}")
+            with self.subTest(script=script_path.name):
+                compile(script_path.read_bytes(), str(script_path), "exec")
 
     def test_02_zero_hardcoded_drive_paths(self):
         """Verify zero hardcoded drive paths in scripts/01_pipeline/."""

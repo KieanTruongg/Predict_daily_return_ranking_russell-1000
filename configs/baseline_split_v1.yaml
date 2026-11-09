@@ -1,0 +1,33 @@
+dataset_source: data/processed/baseline_dataset_v1.parquet
+split_method: purged_time_split
+created_at: '2026-11-07 15:04:38'
+train:
+  period_label: 2000-2018
+  nominal_start_date: '2000-07-01'
+  nominal_end_date: '2018-12-31'
+  actual_start_date: '2000-07-03'
+  actual_end_date: '2018-12-28'
+  total_trading_sessions: 4652
+  rows_before_purge: 4308228
+  rows_after_purge: 4307308
+  purged_rows: 920
+  purged_sessions:
+  - '2018-12-31'
+  purge_reason: Label R_{T+1} touches Validation session 2019-01-02
+validation:
+  period_label: 2019-2023
+  nominal_start_date: '2019-01-01'
+  nominal_end_date: '2023-12-29'
+  actual_start_date: '2019-01-02'
+  actual_end_date: '2023-12-28'
+  total_trading_sessions: 1257
+  rows: 1206096
+  final_session_purge: 2023-12-29 already purged in baseline_dataset_v1 (0 rows)
+integrity_summary:
+  total_raw_rows: 5514324
+  total_retained_rows: 5513404
+  total_purged_rows: 920
+  common_dates_count: 0
+  is_disjoint: true
+  num_columns: 17
+elapsed_time_sec: 16.546899557113647

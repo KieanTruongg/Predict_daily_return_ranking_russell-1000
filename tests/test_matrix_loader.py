@@ -20,6 +20,7 @@ import os
 from pathlib import Path
 import numpy as np
 import pandas as pd
+import pytest
 
 # Reconfigure stdout for utf-8 if needed
 if sys.stdout.encoding != "utf-8":
@@ -213,6 +214,26 @@ def test_feature_computation_on_real_matrix():
     print("  [PASS] test_feature_computation_on_real_matrix: MOM_005 correctly preserves NaNs outside universe")
 
 
+
+@pytest.mark.integration
+def test_oos_zero_memory_leakage_via_pushdown():
+    """Verify that predicate pushdown filters prevent loading any OOS row into memory."""
+    df_dev = load_matrix("adj_close", dev_only=True, include_warmup=False)
+    assert df_dev.index.max() <= pd.Timestamp("2023-12-29")
+    assert (df_dev.index >= pd.Timestamp("2024-01-01")).sum() == 0
+
+    df_warm = load_matrix("adj_close", dev_only=True, include_warmup=True)
+    assert df_warm.index.max() <= pd.Timestamp("2023-12-29")
+    assert (df_warm.index >= pd.Timestamp("2024-01-01")).sum() == 0
+
+    try:
+        load_matrix("adj_close", dev_only=False, allow_oos=False)
+        assert False, "Should raise OOSFreezeViolationError"
+    except OOSFreezeViolationError:
+        pass
+    print("  [PASS] test_oos_zero_memory_leakage_via_pushdown: zero OOS rows loaded into RAM")
+
+
 if __name__ == "__main__":
     print("=" * 70)
     print("RUNNING MATRIX LOADER AND STEP 7 FOUNDATION TESTS")
@@ -229,6 +250,7 @@ if __name__ == "__main__":
     test_universe_mapping()
     test_cross_sectional_ranking_respects_mask()
     test_feature_computation_on_real_matrix()
+    test_oos_zero_memory_leakage_via_pushdown()
 
     print("=" * 70)
     print("ALL 11 TESTS PASSED SUCCESSFULLY!")

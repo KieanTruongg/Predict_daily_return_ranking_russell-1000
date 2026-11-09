@@ -1,0 +1,137 @@
+model_name: ridge_baseline_v1
+timestamp: '2026-11-07 16:42:58'
+total_elapsed_sec: 14.36666226387024
+pipeline:
+  steps:
+  - StandardScaler
+  - Ridge
+  scaler_params:
+    with_mean: true
+    with_std: true
+  ridge_params:
+    alpha: 1.0
+    fit_intercept: true
+  intercept: 0.5001026473328535
+  feature_coefficients:
+    ret_1d: -0.0022988184972640067
+    ret_5d: -0.002603884441082613
+    ret_20d: -0.0022035344062553124
+    ret_60d: 0.0004390601281815673
+    mom_12m_skip_1m: 0.002181299249929617
+    vol_realized_20d: 0.0022408813291578283
+    vol_realized_60d: -0.0029485871620027588
+    downside_deviation_20d: -0.003148639930320685
+    amihud_illiq_20d: -0.0005094690690818507
+    volume_ratio_5_20: 0.0005690668448357283
+    log_dollar_volume_20d: -0.0013812051830466583
+    rsi_14d: -0.0015669943561876579
+    bollinger_pct_b_20d: 0.002420155152229282
+datasets:
+  train_source: data/processed/train_baseline_v1.parquet
+  val_source: data/processed/val_baseline_v1.parquet
+  train_rows: 4307308
+  val_rows: 1206096
+  feature_columns:
+  - ret_1d
+  - ret_5d
+  - ret_20d
+  - ret_60d
+  - mom_12m_skip_1m
+  - vol_realized_20d
+  - vol_realized_60d
+  - downside_deviation_20d
+  - amihud_illiq_20d
+  - volume_ratio_5_20
+  - log_dollar_volume_20d
+  - rsi_14d
+  - bollinger_pct_b_20d
+  target_col: target_rank
+  evaluation_col: target_return
+  benchmark_col: ret_20d
+evaluation_metrics:
+  ic_ridge:
+    method_name: Ridge (13 features)
+    total_trading_days: 1257
+    evaluable_days: 1257
+    undefined_days: 0
+    mean_ic: 0.017351527072244296
+    median_ic: 0.02315001420326016
+    std_ic: 0.21534317246244805
+    positive_ic_ratio: 0.543357199681782
+    ic_ir_daily: 0.08057616535425607
+    ic_ir_annualized: 1.2791069707594815
+    t_statistic: 2.856763143482129
+  ic_ret_20d:
+    method_name: Benchmark (ret_20d)
+    total_trading_days: 1257
+    evaluable_days: 1257
+    undefined_days: 0
+    mean_ic: -0.004451612233574101
+    median_ic: 0.008345104300270198
+    std_ic: 0.21067350693555392
+    positive_ic_ratio: 0.513126491646778
+    ic_ir_daily: -0.021130384633203412
+    ic_ir_annualized: -0.335434457079582
+    t_statistic: -0.7491607941671323
+example_verification_date:
+  example_date: '2019-01-02'
+  n_stocks: 920
+  ridge_ic_spearman: 0.26380454028549505
+  ridge_p_value: 4.1110148742878202e-16
+  ridge_pearson_on_ranks: 0.26380454028549505
+  ret20d_ic_spearman: -0.026388556898443324
+  ret20d_p_value: 0.4240262871574173
+  ret20d_pearson_on_ranks: -0.02638855689844332
+  verification_exact_match: true
+  top_5_samples:
+  - canonical_sid: LOPE U7T3QGL72B8L
+    ridge_score: 0.507583913478897
+    target_return: 0.0023539482131394508
+    target_rank: 0.8025751072961373
+    ret_20d: -0.2361882968290291
+  - canonical_sid: ATR R735QTJ8XC9X
+    ridge_score: 0.5074240394458382
+    target_return: -0.012086937236637871
+    target_rank: 0.5836909871244635
+    ret_20d: -0.13330129745314745
+  - canonical_sid: IEI R735QTJ8XC9X
+    ridge_score: 0.5061094749324155
+    target_return: -0.00013904338153511005
+    target_rank: 0.7628755364806867
+    ret_20d: 0.0015318200807687976
+  - canonical_sid: ERIE R735QTJ8XC9X
+    ridge_score: 0.5057550500847323
+    target_return: 0.018586789554531614
+    target_rank: 0.9667381974248928
+    ret_20d: -0.04859335038363177
+  - canonical_sid: ARD WIVGEEITFLNP
+    ridge_score: 0.5052943084656834
+    target_return: -0.03487276154571152
+    target_rank: 0.1684549356223176
+    ret_20d: -0.18447348193697155
+  bottom_5_samples:
+  - canonical_sid: NBR R735QTJ8XC9X
+    ridge_score: 0.47952200571204295
+    target_return: 0.0684931506849315
+    target_rank: 0.9978540772532188
+    ret_20d: -0.32198142414860687
+  - canonical_sid: GE R735QTJ8XC9X
+    ridge_score: 0.4792742285964767
+    target_return: 0.0012422360248446572
+    target_rank: 0.7821888412017167
+    ret_20d: 0.07333333333333347
+  - canonical_sid: CHK R735QTJ8XC9X
+    ridge_score: 0.4784013224703363
+    target_return: -0.0273972602739726
+    target_rank: 0.2757510729613734
+    ret_20d: -0.2525597269624573
+  - canonical_sid: EVI R735QTJ8XC9X
+    ridge_score: 0.4778150788577396
+    target_return: 0.0
+    target_rank: 0.7650214592274678
+    ret_20d: -0.3157894736842104
+  - canonical_sid: EQT R735QTJ8XC9X
+    ridge_score: 0.47533403820494985
+    target_return: -0.029145728643215997
+    target_rank: 0.2478540772532189
+    ret_20d: 0.06360235168359152

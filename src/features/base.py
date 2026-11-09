@@ -64,6 +64,7 @@ class FeatureBase(ABC):
         membership_mask: Optional[pd.DataFrame] = None,
         valid_data_mask: Optional[pd.DataFrame] = None,
         mask: Optional[pd.DataFrame] = None,
+        field_quality_masks: Optional[Dict[str, pd.DataFrame]] = None,
     ) -> pd.DataFrame:
         """
         Computes feature matrix with decoupled input bar-quality sanitation and output membership masking.
@@ -79,6 +80,8 @@ class FeatureBase(ABC):
             valid_data_mask: Deprecated/legacy alias for bar_quality_mask. If bar_quality_mask is
                              not provided, this parameter is used with a fallback warning.
             mask: Optional alias for membership_mask (output masking).
+            field_quality_masks: Optional dictionary of field-specific boolean DataFrames (e.g. {'open': mask, 'low': mask})
+                                 for field-level quarantine isolation.
 
         Returns:
             pd.DataFrame of shape (T, N) matching input coordinates.
@@ -100,12 +103,23 @@ class FeatureBase(ABC):
         q_mask = bar_quality_mask if bar_quality_mask is not None else valid_data_mask
         
         clean_data = {}
+        q_mask_aligned = None
         if q_mask is not None:
             q_mask_aligned = q_mask.reindex(index=ref_df.index, columns=ref_df.columns).fillna(False).astype(bool)
-            for k, df in data.items():
+
+        for k, df in data.items():
+            field_mask = None
+            if field_quality_masks and k in field_quality_masks:
+                field_mask = field_quality_masks[k].reindex(index=ref_df.index, columns=ref_df.columns).fillna(False).astype(bool)
+
+            if q_mask_aligned is not None and field_mask is not None:
+                clean_data[k] = df.where(q_mask_aligned & field_mask, other=np.nan)
+            elif q_mask_aligned is not None:
                 clean_data[k] = df.where(q_mask_aligned, other=np.nan)
-        else:
-            clean_data = data
+            elif field_mask is not None:
+                clean_data[k] = df.where(field_mask, other=np.nan)
+            else:
+                clean_data[k] = df
 
         # Step 2: Compute raw feature values from sanitized inputs (with historical warmup intact)
         feat_df = self._calculate(clean_data)

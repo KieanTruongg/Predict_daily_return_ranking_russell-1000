@@ -24,6 +24,7 @@ import numpy as np
 sys.stdout.reconfigure(encoding='utf-8')
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR))
 RAW_PARQUET = BASE_DIR / "data" / "processed" / "constituents_market_data" / "russell1000_constituents_daily_ohlcv_1998_2026.parquet"
 CANONICAL_PARQUET = BASE_DIR / "data" / "processed" / "constituents_market_data" / "russell1000_constituents_daily_ohlcv_canonical_1998_2026.parquet"
 CORP_DIR = BASE_DIR / "data" / "processed" / "constituents_market_data" / "corporate_actions"
@@ -290,58 +291,15 @@ def main():
     print(f" -> Phiên đầu tiên của chuỗi (NaN): {nan_count:,}")
 
     # -----------------------------------------------------------------------------------------
-    # 5B. ÁP DỤNG QUALITY FLAGS VÀ XỬ LÝ RIÊNG SPIN-OFFS TỪ BẢNG CORRECTIONS CÓ BẰNG CHỨNG
+    # 5B. ÁP DỤNG QUALITY FLAGS, FIELD QUARANTINE & SPIN-OFFS TỪ BẢNG CORRECTIONS CÓ BẰNG CHỨNG
     # -----------------------------------------------------------------------------------------
-    print("\n[5B/7] Áp dụng Quality Flags và xử lý riêng Spin-offs từ bảng corrections có bằng chứng...")
-    df_prices['is_bad_data_period'] = False
-    df_prices['is_spinoff_discontinuity'] = False
-    df_prices['quality_flag'] = 'CLEAN'
-
-    if CORRECTIONS_CSV.exists():
-        df_corr = pd.read_csv(CORRECTIONS_CSV)
-        
-        # 1. Spin-offs (KSU, SSP, COMS, PENN)
-        spinoff_corrs = df_corr[df_corr['correction_layer'] == 'SPECIAL_CORPORATE_SPINOFF']
-        for _, row in spinoff_corrs.iterrows():
-            c_sid = row['canonical_sid']
-            s_date = pd.to_datetime(row['start_date'])
-            mask = (df_prices['canonical_sid'] == c_sid) & (df_prices['date'] == s_date)
-            if mask.any():
-                df_prices.loc[mask, 'is_spinoff_discontinuity'] = True
-                df_prices.loc[mask, 'quality_flag'] = 'SPINOFF_DISCONTINUITY'
-                df_prices.loc[mask, 'daily_return'] = np.nan
-                df_prices.loc[mask, 'total_return'] = np.nan
-                df_prices.loc[mask, 'is_consecutive_session'] = False
-                print(f"  -> Đã cách ly Spin-off Discontinuity: {row['source_ticker']} tại {row['start_date']}")
-
-        # 2. Quality Flags (Bad Ticks / Ticker Collisions: MKL, SABR, LOW, CPTH)
-        quality_corrs = df_corr[df_corr['correction_layer'].isin(['QUALITY_FLAG_BAD_TICK', 'QUALITY_FLAG_COLLISION'])]
-        sid_grouped_indices = df_prices.groupby('canonical_sid').indices
-        for _, row in quality_corrs.iterrows():
-            c_sid = row['canonical_sid']
-            s_date = pd.to_datetime(row['start_date'])
-            e_date = pd.to_datetime(row['end_date'])
-            if c_sid in sid_grouped_indices:
-                sid_idx_arr = sid_grouped_indices[c_sid]
-                sid_sub_dates = df_prices.loc[sid_idx_arr, 'date'].values
-                in_win = (sid_sub_dates >= s_date) & (sid_sub_dates <= e_date)
-                win_indices = sid_idx_arr[in_win]
-                if len(win_indices) > 0:
-                    df_prices.loc[win_indices, 'is_bad_data_period'] = True
-                    df_prices.loc[win_indices, 'quality_flag'] = row['correction_layer']
-                    df_prices.loc[win_indices, 'daily_return'] = np.nan
-                    df_prices.loc[win_indices, 'total_return'] = np.nan
-                    df_prices.loc[win_indices, 'is_consecutive_session'] = False
-                    
-                    # Quarantining the immediate recovery session
-                    max_win_idx = win_indices[-1]
-                    loc_in_sid = np.where(sid_idx_arr == max_win_idx)[0][0]
-                    if loc_in_sid + 1 < len(sid_idx_arr):
-                        recov_idx = sid_idx_arr[loc_in_sid + 1]
-                        df_prices.loc[recov_idx, 'daily_return'] = np.nan
-                        df_prices.loc[recov_idx, 'total_return'] = np.nan
-                        df_prices.loc[recov_idx, 'is_consecutive_session'] = False
-                    print(f"  -> Đã cách ly Quality Flag Anomaly: {row['source_ticker']} từ {row['start_date']} đến {row['end_date']} (+ phiên hồi phục)")
+    print("\n[5B/7] Áp dụng Quality Flags, Field Quarantine & Spin-offs theo cơ chế thống nhất...")
+    from src.data.corrections import apply_corrections_to_dataframe, load_market_corrections
+    corrs = load_market_corrections(CORRECTIONS_CSV)
+    df_prices = apply_corrections_to_dataframe(df_prices, corrections=corrs)
+    print(f" -> Đã áp dụng thành công {len(corrs)} sự kiện corrections vào bảng giá Tier 2!")
+    print(f"    is_bad_data_period=True: {(df_prices['is_bad_data_period'] == True).sum():,} dòng")
+    print(f"    is_spinoff_discontinuity=True: {(df_prices['is_spinoff_discontinuity'] == True).sum():,} dòng")
 
     # -----------------------------------------------------------------------------------------
     # 6. KIỂM THỬ SANITY THEO CÔNG THỨC TOÁN HỌC & KIỂM THỬ REVERSE SPLIT

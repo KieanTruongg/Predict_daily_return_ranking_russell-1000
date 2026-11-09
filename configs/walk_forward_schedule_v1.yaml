@@ -1,0 +1,208 @@
+schedule_name: walk_forward_expanding_5folds_v1
+dataset_source: data/processed/baseline_dataset_v1.parquet
+created_at: '2026-11-07 16:57:35'
+method: expanding_window_walk_forward
+number_of_folds: 5
+input_features:
+- ret_1d
+- ret_5d
+- ret_20d
+- ret_60d
+- mom_12m_skip_1m
+- vol_realized_20d
+- vol_realized_60d
+- downside_deviation_20d
+- amihud_illiq_20d
+- volume_ratio_5_20
+- log_dollar_volume_20d
+- rsi_14d
+- bollinger_pct_b_20d
+target_train_col: target_rank
+target_eval_col: target_return
+benchmark_eval_col: ret_20d
+oos_frozen_period:
+  period_label: 2024-2026
+  status: STRICTLY_FROZEN
+  reason: Reserved exclusively for final unseen out-of-sample evaluation
+subsequent_execution_policy:
+  scaling_policy: Fit StandardScaler on Train of each fold independently, transform
+    Val
+  model_policy: Fit Ridge(alpha=1.0) on Train of each fold independently, predict
+    Val
+  evaluation_metric: Daily Spearman Rank IC between ridge_score and target_return
+  benchmark_metric: Daily Spearman Rank IC between ret_20d and target_return
+folds:
+- fold_id: 1
+  fold_label: Fold 1 (Train 2000-2018 -> Val 2019)
+  train:
+    period_label: 2000-2018
+    nominal_start: '2000-07-01'
+    nominal_end: '2018-12-31'
+    actual_start: '2000-07-03'
+    actual_end: '2018-12-28'
+    nominal_sessions: 4653
+    clean_sessions: 4652
+    nominal_rows: 4308228
+    purged_rows: 920
+    clean_rows: 4307308
+    purged_sessions:
+    - '2018-12-31'
+    purge_reason: Label T+1 >= 2019-01-01 (touches Validation)
+    query_filter: (date >= '2000-07-03') & (date <= '2018-12-28')
+  validation:
+    period_label: '2019'
+    nominal_start: '2019-01-01'
+    nominal_end: '2019-12-31'
+    actual_start: '2019-01-02'
+    actual_end: '2019-12-30'
+    nominal_sessions: 252
+    clean_sessions: 251
+    nominal_rows: 235997
+    purged_rows: 945
+    clean_rows: 235052
+    purged_sessions:
+    - '2019-12-31'
+    purge_reason: Label T+1 > 2019-12-31 (ends after validation year)
+    query_filter: (date >= '2019-01-02') & (date <= '2019-12-30')
+  integrity:
+    common_sessions: 0
+    is_disjoint: true
+- fold_id: 2
+  fold_label: Fold 2 (Train 2000-2019 -> Val 2020)
+  train:
+    period_label: 2000-2019
+    nominal_start: '2000-07-01'
+    nominal_end: '2019-12-31'
+    actual_start: '2000-07-03'
+    actual_end: '2019-12-30'
+    nominal_sessions: 4905
+    clean_sessions: 4904
+    nominal_rows: 4544225
+    purged_rows: 945
+    clean_rows: 4543280
+    purged_sessions:
+    - '2019-12-31'
+    purge_reason: Label T+1 >= 2020-01-01 (touches Validation)
+    query_filter: (date >= '2000-07-03') & (date <= '2019-12-30')
+  validation:
+    period_label: '2020'
+    nominal_start: '2020-01-01'
+    nominal_end: '2020-12-31'
+    actual_start: '2020-01-02'
+    actual_end: '2020-12-30'
+    nominal_sessions: 253
+    clean_sessions: 252
+    nominal_rows: 240992
+    purged_rows: 958
+    clean_rows: 240034
+    purged_sessions:
+    - '2020-12-31'
+    purge_reason: Label T+1 > 2020-12-31 (ends after validation year)
+    query_filter: (date >= '2020-01-02') & (date <= '2020-12-30')
+  integrity:
+    common_sessions: 0
+    is_disjoint: true
+- fold_id: 3
+  fold_label: Fold 3 (Train 2000-2020 -> Val 2021)
+  train:
+    period_label: 2000-2020
+    nominal_start: '2000-07-01'
+    nominal_end: '2020-12-31'
+    actual_start: '2000-07-03'
+    actual_end: '2020-12-30'
+    nominal_sessions: 5158
+    clean_sessions: 5157
+    nominal_rows: 4785217
+    purged_rows: 958
+    clean_rows: 4784259
+    purged_sessions:
+    - '2020-12-31'
+    purge_reason: Label T+1 >= 2021-01-01 (touches Validation)
+    query_filter: (date >= '2000-07-03') & (date <= '2020-12-30')
+  validation:
+    period_label: '2021'
+    nominal_start: '2021-01-01'
+    nominal_end: '2021-12-31'
+    actual_start: '2021-01-04'
+    actual_end: '2021-12-30'
+    nominal_sessions: 252
+    clean_sessions: 251
+    nominal_rows: 240676
+    purged_rows: 955
+    clean_rows: 239721
+    purged_sessions:
+    - '2021-12-31'
+    purge_reason: Label T+1 > 2021-12-31 (ends after validation year)
+    query_filter: (date >= '2021-01-04') & (date <= '2021-12-30')
+  integrity:
+    common_sessions: 0
+    is_disjoint: true
+- fold_id: 4
+  fold_label: Fold 4 (Train 2000-2021 -> Val 2022)
+  train:
+    period_label: 2000-2021
+    nominal_start: '2000-07-01'
+    nominal_end: '2021-12-31'
+    actual_start: '2000-07-03'
+    actual_end: '2021-12-30'
+    nominal_sessions: 5410
+    clean_sessions: 5409
+    nominal_rows: 5025893
+    purged_rows: 955
+    clean_rows: 5024938
+    purged_sessions:
+    - '2021-12-31'
+    purge_reason: Label T+1 >= 2022-01-01 (touches Validation)
+    query_filter: (date >= '2000-07-03') & (date <= '2021-12-30')
+  validation:
+    period_label: '2022'
+    nominal_start: '2022-01-01'
+    nominal_end: '2022-12-31'
+    actual_start: '2022-01-03'
+    actual_end: '2022-12-29'
+    nominal_sessions: 251
+    clean_sessions: 250
+    nominal_rows: 244950
+    purged_rows: 979
+    clean_rows: 243971
+    purged_sessions:
+    - '2022-12-30'
+    purge_reason: Label T+1 > 2022-12-31 (ends after validation year)
+    query_filter: (date >= '2022-01-03') & (date <= '2022-12-29')
+  integrity:
+    common_sessions: 0
+    is_disjoint: true
+- fold_id: 5
+  fold_label: Fold 5 (Train 2000-2022 -> Val 2023)
+  train:
+    period_label: 2000-2022
+    nominal_start: '2000-07-01'
+    nominal_end: '2022-12-31'
+    actual_start: '2000-07-03'
+    actual_end: '2022-12-29'
+    nominal_sessions: 5661
+    clean_sessions: 5660
+    nominal_rows: 5270843
+    purged_rows: 979
+    clean_rows: 5269864
+    purged_sessions:
+    - '2022-12-30'
+    purge_reason: Label T+1 >= 2023-01-01 (touches Validation)
+    query_filter: (date >= '2000-07-03') & (date <= '2022-12-29')
+  validation:
+    period_label: '2023'
+    nominal_start: '2023-01-01'
+    nominal_end: '2023-12-31'
+    actual_start: '2023-01-03'
+    actual_end: '2023-12-28'
+    nominal_sessions: 249
+    clean_sessions: 249
+    nominal_rows: 243481
+    purged_rows: 0
+    clean_rows: 243481
+    purged_sessions: []
+    purge_reason: Final dev session 2023-12-29 already purged at source
+    query_filter: (date >= '2023-01-03') & (date <= '2023-12-28')
+  integrity:
+    common_sessions: 0
+    is_disjoint: true

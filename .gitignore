@@ -56,3 +56,6 @@ Thumbs.db
 
 # Agent scratch and logs
 .agents/
+
+# Local interactive learning guides (kept outside Git)
+/docs/learning_guides/

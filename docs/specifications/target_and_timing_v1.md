@@ -19,9 +19,7 @@ Mỗi mẫu là một cặp `(date T, canonical_sid i)`. Mô hình nhận featur
 
 ## 3. Lợi suất mục tiêu chính
 
-```text
-next_price_return[i,T] = adj_close[i,T+1] / adj_close[i,T] - 1
-```
+$$\mathrm{ret}_{\text{next}}[i,T] = \frac{P^{\text{adj}}[i,T+1]}{P^{\text{adj}}[i,T]} - 1$$
 
 `adj_close` ở đây là giá điều chỉnh chia tách theo hợp đồng dữ liệu hiện hành. Target chính là lợi suất giá close-to-close, chưa gồm cổ tức tiền mặt. Không thay ngầm bằng total return hoặc open-to-close. Total return có thể được đánh giá như một mục tiêu bổ sung sau khi chốt đặc tả riêng.
 
@@ -47,11 +45,7 @@ Ngày không có phiên tiếp theo trong kho có nhãn `NaN`. Không thay nhãn
 
 Trên mỗi ngày T, lấy tập nhãn hợp lệ ở mục 4. Gọi số phần tử của tập đó là `N[T]`:
 
-```text
-rank = ascending_rank(next_price_return, method="average")
-target_next_rank = (rank - 1) / (N[T] - 1)  khi N[T] > 1
-target_next_rank = 0.5                    khi N[T] = 1
-```
+$$\mathrm{RankNorm}[i,T] = \begin{cases} \frac{\mathrm{Rank}_i - 1}{N[T] - 1} & \text{khi } N[T] > 1 \\ 0.5 & \text{khi } N[T] = 1 \end{cases}$$
 
 - Rank được tính riêng theo từng ngày, không gộp ngày hoặc tính riêng theo toàn bộ lịch sử một mã.
 - Lợi suất cao hơn nhận nhãn cao hơn; đồng hạng dùng thứ hạng trung bình.

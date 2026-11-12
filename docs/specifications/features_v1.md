@@ -46,9 +46,7 @@ Feature mô tả lợi suất đã xảy ra, không mặc định khẳng địn
 
 Với W thuộc {1, 5, 20, 60}:
 
-```text
-ret_Wd[i,T] = P[i,T] / P[i,T-W] - 1
-```
+$$\mathrm{ret}_{W\text{d}}[i,T] = \frac{P[i,T]}{P[i,T-W]} - 1$$
 
 - Đơn vị: lợi suất dạng số thập phân, ví dụ 0.05 = 5%.
 - Cần W+1 mức giá từ T−W đến T, tương ứng W khoảng lợi suất.
@@ -60,9 +58,7 @@ ret_Wd[i,T] = P[i,T] / P[i,T-W] - 1
 
 ### 3.3. `mom_12m_skip_1m`
 
-```text
-mom_12m_skip_1m[i,T] = P[i,T-21] / P[i,T-252] - 1
-```
+$$\mathrm{mom}_{12\text{m, skip 1m}}[i,T] = \frac{P[i,T-21]}{P[i,T-252]} - 1$$
 
 - Đo khoảng lợi suất từ T−252 đến T−21; bỏ đoạn gần nhất đến T.
 - Đây là quy ước 252/21 phiên, không phải tròn năm/tháng lịch.
@@ -96,9 +92,7 @@ Tên `realized` được giữ theo quy ước dự án; phép tính cụ thể 
 
 ### 4.2. `vol_parkinson_20d`
 
-```text
-vol_parkinson_20d = sqrt(mean_20(log(adj_high / adj_low)^2) / (4*log(2)))
-```
+$$\mathrm{vol}_{\text{parkinson}, 20\text{d}}[i,T] = \sqrt{\frac{1}{20} \sum_{t=0}^{19} \frac{\ln(P^{\text{high}}_{T-t} / P^{\text{low}}_{T-t})^2}{4 \ln(2)}}$$
 
 Dùng 20 cặp high/low, cùng hệ điều chỉnh. Yêu cầu mỗi phiên hữu hạn và high >= low > 0, qua quality policy. High=low hợp lệ và đóng góp 0. Cửa sổ thiếu hoặc lỗi là NaN; không annualize. Không trực tiếp đo overnight gap.
 

@@ -36,36 +36,36 @@ Trong các công thức bên dưới, P là Close điều chỉnh chia tách, r[
 
 **Momentum** là động lượng. Giả thuyết thường xét là xu hướng vừa quan sát có thể tiếp tục. **Reversal** là đảo chiều. Với một chân trời khác, lợi suất vừa tăng có thể bị kéo ngược. Dấu của lợi suất trong feature cho biết quá khứ, còn dấu quan hệ dự báo là câu hỏi thực nghiệm.
 
-- `ret_1d` = P[T]/P[T−1] − 1. Đo biến động giá một phiên, hữu ích khi xét phản ứng hoặc đảo chiều rất ngắn.
-- `ret_5d` = P[T]/P[T−5] − 1. Đo khoảng một tuần giao dịch. Nếu 100 lên 105 qua đoạn sạch, feature là 0,05.
-- `ret_20d` = P[T]/P[T−20] − 1. Đo khoảng một tháng giao dịch. V1 dùng giá trị dương trực tiếp làm điểm cho đối chứng động lượng 20 phiên.
-- `ret_60d` = P[T]/P[T−60] − 1. Đo khoảng một quý giao dịch. Nó có thể chung thông tin với lợi suất ngắn hơn vì các cửa sổ lồng nhau.
-- `mom_12m_skip_1m` = P[T−21]/P[T−252] − 1. Đo 231 khoảng lợi suất xa hơn, bỏ đoạn gần nhất để tách xu hướng dài khỏi tín hiệu tháng vừa qua. Cần truy cập tới T−252, còn 232 mức giá phải sạch nằm trong đoạn T−252…T−21. Ví dụ hai đầu đoạn là 100 và 130 thì feature bằng 0,30. Thay P[T] riêng lẻ không đổi tỷ số này.
+- **`ret_1d`** ($\mathrm{ret}_{1\text{d}} = \frac{P[T]}{P[T-1]} - 1$): Đo biến động giá một phiên, hữu ích khi xét phản ứng hoặc đảo chiều rất ngắn.
+- **`ret_5d`** ($\mathrm{ret}_{5\text{d}} = \frac{P[T]}{P[T-5]} - 1$): Đo khoảng một tuần giao dịch. Nếu 100 lên 105 qua đoạn sạch, feature là 0,05.
+- **`ret_20d`** ($\mathrm{ret}_{20\text{d}} = \frac{P[T]}{P[T-20]} - 1$): Đo khoảng một tháng giao dịch. V1 dùng giá trị dương trực tiếp làm điểm cho đối chứng động lượng 20 phiên.
+- **`ret_60d`** ($\mathrm{ret}_{60\text{d}} = \frac{P[T]}{P[T-60]} - 1$): Đo khoảng một quý giao dịch. Nó có thể chung thông tin với lợi suất ngắn hơn vì các cửa sổ lồng nhau.
+- **`mom_12m_skip_1m`** ($\mathrm{mom}_{12\text{m, skip 1m}} = \frac{P[T-21]}{P[T-252]} - 1$): Đo 231 khoảng lợi suất xa hơn, bỏ đoạn gần nhất để tách xu hướng dài khỏi tín hiệu tháng vừa qua. Cần truy cập tới T−252, còn 232 mức giá phải sạch nằm trong đoạn T−252…T−21. Ví dụ hai đầu đoạn là 100 và 130 thì feature bằng 0,30. Thay P[T] riêng lẻ không đổi tỷ số này.
 
 **Volatility** là độ biến động. **Độ lệch chuẩn** đo mức tản quanh giá trị trung bình. Hai chuỗi có cùng lợi suất trung bình vẫn có độ biến động khác nhau.
 
-- `vol_realized_20d` tính độ lệch chuẩn mẫu của 20 lợi suất giá một phiên đến T. Dùng mẫu số 19 trong phương sai, tức `ddof=1`. Giữ đơn vị biến động ngày.
-- `vol_realized_60d` dùng cùng phép tính trên 60 lợi suất. Cửa sổ dài phản ứng chậm hơn khi thị trường đột nhiên đổi mức dao động.
-- `downside_deviation_20d` lấy căn bậc hai của trung bình 20 giá trị min(r, 0)². **Downside** là phía giảm. Ngày tăng đóng góp 0, ngày giảm 4% đóng góp 0,0016 trước khi lấy trung bình. Mẫu số vẫn là 20, gồm cả ngày tăng. Đại lượng này tách độ lớn các phiên giảm khỏi độ dao động hai phía.
+- **`vol_realized_20d`** = $\sigma_{20}(r)$: Tính độ lệch chuẩn mẫu của 20 lợi suất giá một phiên đến T. Dùng mẫu số 19 trong phương sai, tức `ddof=1`. Giữ đơn vị biến động ngày.
+- **`vol_realized_60d`** = $\sigma_{60}(r)$: Dùng cùng phép tính trên 60 lợi suất. Cửa sổ dài phản ứng chậm hơn khi thị trường đột nhiên đổi mức dao động.
+- **`downside_deviation_20d`** = $\sqrt{\frac{1}{20} \sum \min(r, 0)^2}$: Lấy căn bậc hai của trung bình 20 giá trị min(r, 0)². **Downside** là phía giảm. Ngày tăng đóng góp 0, ngày giảm 4% đóng góp 0,0016 trước khi lấy trung bình. Mẫu số vẫn là 20, gồm cả ngày tăng. Đại lượng này tách độ lớn các phiên giảm khỏi độ dao động hai phía.
 
 **Liquidity** là thanh khoản, tức mức độ có thể giao dịch thuận lợi. **Dollar volume** là giá trị giao dịch quy ra tiền. Trong v1, DV = raw Close × raw Volume là một **proxy**, tức đại lượng đại diện dễ tính. Ví dụ đóng cửa 100 USD, khớp 10.000 cổ phiếu thì DV đại diện là 1 triệu USD. Phép nhân dùng một mức giá cho cả phiên nên chỉ xấp xỉ giá trị khớp thực.
 
-- `amihud_illiq_20d` = 10⁶ × trung bình 20 phiên của |r|/DV. **Illiquidity** là kém thanh khoản. Cùng mức đổi giá, DV nhỏ hơn cho tỷ số lớn hơn. Khi |r| = 1% và DV = 1 triệu USD, đóng góp sau đổi thang là 0,01. Đây là proxy theo ý tưởng Amihud. Công thức chỉ cho biết biến động quan sát trên mỗi đơn vị DV, chưa đo trực tiếp phí khớp lệnh.
-- `volume_ratio_5_20` = trung bình adjusted volume 5 phiên / trung bình adjusted volume 20 phiên. Giá trị 2 nghĩa là giao dịch gần đây sôi động gấp đôi mức nền. Riêng con số này chưa cho biết giá sẽ tăng hay giảm.
-- `log_dollar_volume_20d` = ln(1 + trung bình DV 20 phiên). **Logarithm** là logarit, phép biến đổi giúp nén khoảng cách giữa các mã giao dịch vài triệu và vài trăm triệu USD. Tính trung bình trước rồi lấy log.
+- **`amihud_illiq_20d`** = $10^6 \times \frac{1}{20} \sum_{t=0}^{19} \frac{|r_{T-t}|}{\text{DV}_{T-t}}$: **Illiquidity** là kém thanh khoản. Cùng mức đổi giá, DV nhỏ hơn cho tỷ số lớn hơn. Khi |r| = 1% và DV = 1 triệu USD, đóng góp sau đổi thang là 0,01. Đây là proxy theo ý tưởng Amihud. Công thức chỉ cho biết biến động quan sát trên mỗi đơn vị DV, chưa đo trực tiếp phí khớp lệnh.
+- **`volume_ratio_5_20`** = $\frac{\overline{\text{Vol}}_{5d}}{\overline{\text{Vol}}_{20d}}$: Giá trị 2 nghĩa là giao dịch gần đây sôi động gấp đôi mức nền. Riêng con số này chưa cho biết giá sẽ tăng hay giảm.
+- **`log_dollar_volume_20d`** = $\ln(1 + \overline{\text{DV}}_{20d})$: **Logarithm** là logarit, phép biến đổi giúp nén khoảng cách giữa các mã giao dịch vài triệu và vài trăm triệu USD. Tính trung bình trước rồi lấy log.
 
 **Technical indicator** là chỉ báo kỹ thuật, tức cách tóm tắt mẫu hình trong lịch sử giá hoặc khối lượng.
 
-- `rsi_14d` là **Relative Strength Index**, chỉ số sức mạnh tương đối của các bước tăng và giảm của cùng cổ phiếu. Với mỗi thay đổi giá, phần tăng là max(chênh lệch, 0) và phần giảm là max(−chênh lệch, 0). Lấy trung bình hai dãy này trên 14 thay đổi giá đầu tiên để khởi tạo. Sau đó dùng **Wilder smoothing**, phép làm mượt cho trung bình cũ trọng số 13/14 và quan sát mới trọng số 1/14. RSI = 100 − 100/(1 + trung bình tăng/trung bình giảm). Ví dụ tỷ số tăng/giảm = 3 thì RSI = 75. Nếu chuỗi phẳng thì quy ước RSI = 50. Gặp gián đoạn không hợp lệ thì khởi tạo lại, vì phép tính dùng trạng thái trước đó.
-- `bollinger_pct_b_20d` đo vị trí giá trong **Bollinger Bands**, dải quanh trung bình giá 20 phiên. Dải trên/dưới = trung bình ± hai độ lệch chuẩn của mức giá với `ddof=0`. %B = (giá − dải dưới)/(dải trên − dải dưới). Nếu dải là 90–110 và giá 115 thì %B = 1,25. Giá trị vượt 1 hợp lệ. Khi hai dải trùng nhau thì mẫu số bằng 0 và %B là NaN.
+- **`rsi_14d`** = $100 - \frac{100}{1 + \text{RS}}$: Là **Relative Strength Index**, chỉ số sức mạnh tương đối của các bước tăng và giảm của cùng cổ phiếu. Với mỗi thay đổi giá, phần tăng là max(chênh lệch, 0) và phần giảm là max(−chênh lệch, 0). Lấy trung bình hai dãy này trên 14 thay đổi giá đầu tiên để khởi tạo. Sau đó dùng **Wilder smoothing**, phép làm mượt cho trung bình cũ trọng số 13/14 và quan sát mới trọng số 1/14. RSI = 100 − 100/(1 + trung bình tăng/trung bình giảm). Ví dụ tỷ số tăng/giảm = 3 thì RSI = 75. Nếu chuỗi phẳng thì quy ước RSI = 50. Gặp gián đoạn không hợp lệ thì khởi tạo lại, vì phép tính dùng trạng thái trước đó.
+- **`bollinger_pct_b_20d`** = $\frac{P - \text{Lower}}{\text{Upper} - \text{Lower}}$: Đo vị trí giá trong **Bollinger Bands**, dải quanh trung bình giá 20 phiên. Dải trên/dưới = trung bình ± hai độ lệch chuẩn của mức giá với `ddof=0`. %B = (giá − dải dưới)/(dải trên − dải dưới). Nếu dải là 90–110 và giá 115 thì %B = 1,25. Giá trị vượt 1 hợp lệ. Khi hai dải trùng nhau thì mẫu số bằng 0 và %B là NaN.
 
 ### 2.2. Ba đặc trưng đã thiết kế và hoãn khỏi v1
 
 **OHLC** gồm Open, High, Low và Close, tức giá mở, cao nhất, thấp nhất và đóng cửa. Ba công thức dưới đây có kiểm tra triển khai trong đợt thử đặc trưng, nhưng bộ X v1 dùng 13 cột Close/Volume để tránh phụ thuộc vào các trường giá còn nghi vấn trong đợt rà OHLC.
 
-- `vol_parkinson_20d` dùng biên độ High/Low trong phiên. Công thức là căn của trung bình 20 giá trị ln(High/Low)² chia cho 4 ln(2). Hai phiên có cùng lợi suất đóng cửa nhưng khác biên độ trong ngày sẽ cho đóng góp khác nhau. Công thức dựa trên giả định về quá trình giá và phụ thuộc mạnh vào chất lượng High/Low.
-- `ret_intraday` = Close[T]/Open[T] − 1. **Intraday** là trong cùng phiên. Đặc trưng này dùng thông tin đã biết ở Close T. Backtest ở chặng sau giao dịch Open→Close T+1, một cửa sổ khác.
-- `ret_overnight` = Open[T]/Close[T−1] − 1. **Overnight** là đoạn giữa đóng cửa phiên trước và mở cửa phiên kế. Mức giá mở sai có thể làm cả hai feature dùng Open cực đoan cùng lúc.
+- **`vol_parkinson_20d`** = $\sqrt{\frac{1}{20} \sum \frac{\ln(H/L)^2}{4 \ln 2}}$: Dùng biên độ High/Low trong phiên. Hai phiên có cùng lợi suất đóng cửa nhưng khác biên độ trong ngày sẽ cho đóng góp khác nhau. Công thức dựa trên giả định về quá trình giá và phụ thuộc mạnh vào chất lượng High/Low.
+- **`ret_intraday`** = $\frac{\text{Close}[T]}{\text{Open}[T]} - 1$: **Intraday** là trong cùng phiên. Đặc trưng này dùng thông tin đã biết ở Close T. Backtest ở chặng sau giao dịch Open→Close T+1, một cửa sổ khác.
+- **`ret_overnight`** = $\frac{\text{Open}[T]}{\text{Close}[T-1]} - 1$: **Overnight** là đoạn giữa đóng cửa phiên trước và mở cửa phiên kế. Mức giá mở sai có thể làm cả hai feature dùng Open cực đoan cùng lúc.
 
 Việc hoãn ba cột là quyết định về độ tin cậy của đầu vào v1. Nó chưa đo được phần cải thiện dự báo nếu có nguồn Open/High/Low sạch hơn. [Công thức và nguồn tham khảo của đặc trưng](../specifications/features_v1.md) · [Code tính đặc trưng](../../src/features/base.py) · [Báo cáo rà OHLC](../reports/feature_eda_report.md#4-kiến-trúc-thống-nhất-corrections--rà-soát-ohlc-toàn-diện-19982023)
 
